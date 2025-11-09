@@ -16,6 +16,7 @@ export function useAuthParams() {
   const openModal = (mode: Search["authenticateMode"], modalRole?: Search["role"]) => {
     navigate({
       to: ".",
+      // @ts-expect-error - prev is not typed
       search: (prev) => ({
         ...prev,
         authenticateMode: mode,
@@ -27,6 +28,7 @@ export function useAuthParams() {
   const closeModal = () => {
     navigate({
       to: ".",
+      // @ts-expect-error - prev is not typed
       search: (prev) => ({
         ...prev,
         authenticateMode: undefined,

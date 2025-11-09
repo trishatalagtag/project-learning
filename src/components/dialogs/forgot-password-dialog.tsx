@@ -1,4 +1,4 @@
-import { ForgotPasswordForm } from "@/components/form/forgot-password-form"
+import { ForgotPasswordForm } from "@/components/form/auth-forgot-password-form"
 import {
   Modal,
   ModalBody,
@@ -20,7 +20,7 @@ export function ForgotPasswordDialog({
   defaultEmail,
 }: ForgotPasswordDialogProps) {
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal open={isOpen} onOpenChange={onOpenChange}>
       <ModalContent size="md">
         <ModalHeader>
           <ModalTitle>Reset Password</ModalTitle>

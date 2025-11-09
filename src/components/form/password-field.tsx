@@ -1,8 +1,8 @@
 "use client"
 
-import { FieldError, Label } from "@/components/ui/field"
+import { FieldError } from "@/components/ui/field"
+import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { TextField } from "@/components/ui/text-field"
 import { CheckIcon, EyeIcon, EyeOffIcon, XIcon } from "lucide-react"
 import { useId, useMemo, useState } from "react"
 import type { InputProps } from "react-aria-components"
@@ -68,7 +68,7 @@ export function PasswordField({
   }
 
   return (
-    <TextField isRequired={isRequired}>
+    <div>
       <Label>{label}</Label>
       <div className="relative">
         <Input
@@ -138,6 +138,6 @@ export function PasswordField({
           </ul>
         </>
       )}
-    </TextField>
+    </div>
   )
 }

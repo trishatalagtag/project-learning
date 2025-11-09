@@ -8,6 +8,8 @@ export type MenuItem = {
   label: string
   href: ValidRoute
   icon: IconComponent
+  isCurrent?: boolean
+  badge?: string
 }
 
 export type SidebarItem = {
@@ -19,8 +21,8 @@ export type SidebarItem = {
   isCurrent?: boolean
   children?: MenuItem[]
   childrenRenderAs?: "menu" | "nested"
-  menuLabel?: string 
-  defaultExpanded?: boolean 
+  menuLabel?: string
+  defaultExpanded?: boolean
 }
 
 export type SidebarSection = {

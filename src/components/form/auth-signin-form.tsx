@@ -116,7 +116,7 @@ export function AuthSignInForm({ role, onSuccess, onSwitchMode, open }: AuthSign
 
           <div className="flex items-center justify-end">
             <Button
-              intent="plain"
+              variant="outline"
               size="sm"
               onPress={() => setShowForgotPassword(true)}
               className="min-h-0 border-0 p-0 text-xs hover:underline"
@@ -134,7 +134,7 @@ export function AuthSignInForm({ role, onSuccess, onSwitchMode, open }: AuthSign
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-fg">Don't have an account? </span>
             <Button
-              intent="plain"
+              variant="outline"
               size="sm"
               onPress={() => onSwitchMode?.("signup")}
               className="min-h-0 border-0 p-0 font-medium text-fg hover:underline"

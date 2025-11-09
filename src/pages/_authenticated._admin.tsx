@@ -1,5 +1,3 @@
-import AppSidebar from "@/components/structure/sidebar"
-import AppSidebarNav from "@/components/structure/sidebar-admin-nav"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { ROLE } from "@/lib/auth"
 import { requireRole } from "@/lib/auth-guards"
@@ -16,9 +14,7 @@ export const Route = createFileRoute("/_authenticated/_admin")({
 function _RouteComponent() {
   return (
     <SidebarProvider>
-      <AppSidebar collapsible="dock" intent="inset" />
       <SidebarInset>
-        <AppSidebarNav />
         <Outlet />
       </SidebarInset>
     </SidebarProvider>

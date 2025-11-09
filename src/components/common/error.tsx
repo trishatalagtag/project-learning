@@ -27,10 +27,10 @@ export function _CustomErrorComponent({ error, reset }: ErrorComponentProps) {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button intent="danger">
+            <Button variant="destructive">
               <Link to="/">Go Home</Link>
             </Button>
-            <Button intent="outline" className="border-red-600 text-red-600 hover:bg-red-50">
+            <Button variant="outline" className="border-red-600 text-red-600 hover:bg-red-50">
               <Link to="/">Login</Link>
             </Button>
           </EmptyContent>
@@ -60,7 +60,7 @@ export function _CustomErrorComponent({ error, reset }: ErrorComponentProps) {
           <Button type="button" onClick={reset}>
             Try Again
           </Button>
-          <Button intent="outline">
+          <Button variant="outline">
             <Link to="/">Go Home</Link>
           </Button>
         </EmptyContent>

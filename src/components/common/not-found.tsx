@@ -24,7 +24,7 @@ export function NotFoundComponent() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button intent="outline">
+          <Button variant="outline">
             <Link to="/">Go Home</Link>
           </Button>
         </EmptyContent>

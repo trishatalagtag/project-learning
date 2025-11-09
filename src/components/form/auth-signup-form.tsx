@@ -19,7 +19,7 @@ import { useState } from "react"
 import { Form } from "react-aria-components"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { PasswordField } from "../password-field"
+import { PasswordField } from "./password-field"
 
 export type AuthSignUpValues = {
   name: string
@@ -61,7 +61,7 @@ export function AuthSignUpForm({
     },
   })
 
-  const name = watch("name") 
+  const name = watch("name")
 
   const handleAvatarSelect = async (files: FileList | null) => {
     if (files && files.length > 0) {
@@ -266,7 +266,7 @@ export function AuthSignUpForm({
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-fg">Already have an account? </span>
             <Button
-              intent="plain"
+              variant="outline"
               size="sm"
               onPress={() => onSwitchMode?.("signin")}
               className="min-h-0 border-0 p-0 font-medium text-fg hover:underline"

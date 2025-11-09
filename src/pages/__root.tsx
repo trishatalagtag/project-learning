@@ -1,7 +1,5 @@
 import { _CustomErrorComponent } from "@/components/common/error"
 import { NotFoundComponent } from "@/components/common/not-found"
-import { NavbarProvider } from "@/components/ui/navbar"
-import { Toast } from "@/components/ui/toast"
 import type { AuthSession } from "@/lib/auth"
 import { authenticateModes, platformRoles } from "@/models/schema"
 import { GlobalModalsProvider } from "@/providers/global-modals"
@@ -15,13 +13,10 @@ export const globalSearchSchema = z.object({
 })
 
 const RootLayout = () => (
-  <>
-    <NavbarProvider>
-      <Outlet />
-      <GlobalModalsProvider />
-      <Toast />
-    </NavbarProvider>
-  </>
+  <div className="isolate">
+    <Outlet />
+    <GlobalModalsProvider />
+  </div>
 )
 
 interface RootContext {

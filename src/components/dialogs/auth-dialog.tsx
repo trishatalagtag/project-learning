@@ -54,7 +54,7 @@ export function AuthDialog() {
   }
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={(open) => !open && closeModal()}>
+    <Modal open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <ModalContent>
         <ModalHeader>
           <ModalTitle>{getTitle(mode, snapshotRole)}</ModalTitle>
