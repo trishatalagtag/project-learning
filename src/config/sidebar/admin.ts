@@ -57,11 +57,6 @@ export const adminSidebarConfig: SidebarConfig = {
               href: "/a/courses/new",
               icon: PlusIcon,
             },
-            {
-              label: "Export",
-              href: "/a/courses/export",
-              icon: ArrowUpTrayIcon,
-            },
           ],
         },
         {
@@ -77,11 +72,6 @@ export const adminSidebarConfig: SidebarConfig = {
               label: "Add User",
               href: "/a/users/new",
               icon: UserPlusIcon,
-            },
-            {
-              label: "Export",
-              href: "/a/users/export",
-              icon: ArrowUpTrayIcon,
             },
           ],
         },
