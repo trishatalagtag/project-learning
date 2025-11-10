@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 export function useModuleEditor(
   moduleId: Id<"modules">,
-  initialContent?: string
+  initialMarkdown?: string
 ) {
   const { execute: updateModule, isPending: isSavingMutation } = useMutationWithToast(
     api.faculty.modules.updateModule,
@@ -16,29 +16,27 @@ export function useModuleEditor(
     }
   );
 
-  const [content, setContent] = useState(initialContent ?? "");
+  const [markdown, setMarkdown] = useState(initialMarkdown ?? "");
   const [isDirty, setIsDirty] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync content when module loads
   useEffect(() => {
-    if (initialContent !== undefined) {
-      setContent(initialContent);
+    if (initialMarkdown !== undefined) {
+      setMarkdown(initialMarkdown);
       setIsDirty(false);
     }
-  }, [initialContent]);
+  }, [initialMarkdown]);
 
-  // NEW: Debounced auto-save
-  const debouncedContent = useDebounce(content, 600);
+  const debouncedMarkdown = useDebounce(markdown, 600);
 
   useEffect(() => {
-    if (!debouncedContent || debouncedContent === initialContent || !isDirty) return;
+    if (!debouncedMarkdown || debouncedMarkdown === initialMarkdown || !isDirty) return;
 
     setIsSaving(true);
     updateModule({
       moduleId,
-      content: debouncedContent,
+      content: debouncedMarkdown,
       title: undefined,
       description: undefined,
     })
@@ -51,12 +49,12 @@ export function useModuleEditor(
       .finally(() => {
         setIsSaving(false);
       });
-  }, [debouncedContent, moduleId, initialContent, isDirty, updateModule]);
+  }, [debouncedMarkdown, moduleId, initialMarkdown, isDirty, updateModule]);
 
   const save = async () => {
     const result = await updateModule({
       moduleId,
-      content,
+      content: markdown,
       title: undefined,
       description: undefined,
     });
@@ -75,21 +73,20 @@ export function useModuleEditor(
       if (!confirmCancel) return;
     }
 
-    // Reset to initial content
-    if (initialContent !== undefined) {
-      setContent(initialContent);
+    if (initialMarkdown !== undefined) {
+      setMarkdown(initialMarkdown);
       setIsDirty(false);
     }
   };
 
-  const handleContentChange = (newContent: string) => {
-    setContent(newContent);
-    setIsDirty(newContent !== (initialContent ?? ""));
+  const handleMarkdownChange = (newMarkdown: string) => {
+    setMarkdown(newMarkdown);
+    setIsDirty(newMarkdown !== (initialMarkdown ?? ""));
   };
 
   return {
-    content,
-    setContent: handleContentChange,
+    markdown,
+    setMarkdown: handleMarkdownChange,
     save,
     cancel,
     isSaving: isSaving || isSavingMutation,

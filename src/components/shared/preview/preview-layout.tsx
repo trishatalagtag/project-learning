@@ -245,13 +245,6 @@ export function PreviewLayout({
 
                 {/* Main Layout */}
                 <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar */}
-                    <CourseSidebar
-                        courseId={courseId}
-                        courseTitle={courseTitle}
-                        modules={modules}
-                    />
-
                     {/* Content Area */}
                     <div className="flex-1 flex flex-col overflow-hidden">
                         {/* Fixed Header */}

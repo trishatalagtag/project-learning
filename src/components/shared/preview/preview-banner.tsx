@@ -9,23 +9,17 @@ interface PreviewBannerProps {
 
 export function PreviewBanner({ status, contentType: _contentType }: PreviewBannerProps) {
     return (
-        <div className="border-b border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-900 px-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-start gap-3">
-                    <EyeIcon className="h-5 w-5 text-yellow-700 dark:text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                        <div className="font-medium text-yellow-800 dark:text-yellow-200 text-sm mb-1">
-                            Preview Mode
-                        </div>
-                        <div className="text-xs text-yellow-700 dark:text-yellow-300">
-                            This content is not visible to learners
-                        </div>
-                    </div>
-                </div>
-                <div className="flex items-center justify-end">
-                    <StatusBadge status={status} showIcon className="capitalize" />
-                </div>
+        <div className="flex items-center justify-between gap-4 border-b border-yellow-200 bg-yellow-50 px-6 py-2 dark:border-yellow-900 dark:bg-yellow-950/20">
+            <div className="flex items-center gap-2">
+                <EyeIcon className="h-4 w-4 flex-shrink-0 text-yellow-700 dark:text-yellow-600" />
+                <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    Preview Mode
+                </span>
+                <span className="text-xs text-yellow-700 dark:text-yellow-300">
+                    · Not visible to learners
+                </span>
             </div>
+            <StatusBadge status={status} showIcon className="capitalize" />
         </div>
     );
 }

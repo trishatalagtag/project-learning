@@ -78,3 +78,26 @@ export function useActiveTocId(anchorIds: string[]): string | null {
   return activeId;
 }
 
+/**
+ * Extract headings from markdown content and generate TOC anchors
+ */
+export function useMarkdownToc(markdown: string): TocAnchor[] {
+  return useMemo(() => {
+    if (!markdown) return [];
+
+    const headingRegex = /^(#{1,6})\s+(.+)$/gm;
+    const anchors: TocAnchor[] = [];
+    let match;
+
+    while ((match = headingRegex.exec(markdown)) !== null) {
+      const level = match[1].length;
+      const text = match[2].trim();
+      const id = generateIdFromText(text);
+
+      anchors.push({ id, text, level });
+    }
+
+    return anchors;
+  }, [markdown]);
+}
+

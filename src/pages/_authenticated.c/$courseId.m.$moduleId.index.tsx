@@ -1,21 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { zodValidator } from "@tanstack/zod-adapter";
-import { useQuery } from "convex/react";
-import { formatDistanceToNow } from "date-fns";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { z } from "zod";
-
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-
 import { useDeleteModule } from "@/components/modules/hooks/use-module-mutations";
 import { ModuleHeader } from "@/components/modules/module-header";
 import { ModuleLessonList } from "@/components/modules/module-lesson-list";
 import { AccessDenied } from "@/components/shared/access-denied";
+import { EditModeHeader } from "@/components/shared/content/edit-mode-header";
+import { EditorToolbar } from "@/components/shared/content/editor-toolbar";
 import { useModuleEditor } from "@/components/shared/content/hooks/use-module-editor";
-import { TiptapEditor } from "@/components/shared/content/tiptap-editor";
-import { TiptapViewer } from "@/components/shared/content/tiptap-viewer";
+import { MarkdownEditor } from "@/components/shared/content/markdown-editor";
+import { MarkdownViewer } from "@/components/shared/content/markdown-viewer";
 import { EmptyContent } from "@/components/shared/empty/empty-content";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
 import { PreviewBanner } from "@/components/shared/preview/preview-banner";
@@ -31,6 +22,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
+import type { Editor } from "@tiptap/react";
+import { useQuery } from "convex/react";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { z } from "zod";
 
 import { CONTENT_STATUS } from "@/lib/constants/content-status";
 import { useCan } from "@/lib/hooks/use-can";
@@ -58,6 +58,7 @@ function ModulePage() {
   const { editMode } = Route.useSearch();
   const navigate = useNavigate();
   const userRole = useUserRole();
+  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
 
   const course = useQuery(api.faculty.courses.getCourseById, {
     courseId: courseId as Id<"courses">
@@ -140,12 +141,12 @@ function ModulePage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {isPreviewMode && (
         <PreviewBanner status={module.status} contentType="module" />
       )}
 
-      <div className="border-b bg-background px-8 py-6 shrink-0">
+      <div className="shrink-0 border-b bg-background px-8 py-6">
         <div className="flex items-start justify-between gap-4">
           <ModuleHeader
             module={module}
@@ -154,7 +155,7 @@ function ModulePage() {
             onDelete={canDelete ? () => setShowDeleteDialog(true) : undefined}
           />
           {canEdit && editMode && (
-            <div className="flex gap-2 shrink-0">
+            <div className="flex shrink-0 gap-2">
               <Button
                 onClick={handleCancel}
                 variant="outline"
@@ -183,7 +184,7 @@ function ModulePage() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-8 py-8">
+        <div className="mx-auto max-w-6xl px-8 py-8">
           <Tabs defaultValue="introduction" className="space-y-6">
             <TabsList>
               <TabsTrigger value="introduction">Introduction</TabsTrigger>
@@ -191,52 +192,28 @@ function ModulePage() {
             </TabsList>
 
             <TabsContent value="introduction" className="space-y-4">
-              {editMode && canEdit ? (
-                <>
-                  <div className="flex items-center gap-2 mb-4">
-                    {editor.isSaving && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Saving...
-                      </span>
-                    )}
-                    {!editor.isSaving && editor.lastSaved && (
-                      <span className="text-xs text-muted-foreground">
-                        Saved {formatDistanceToNow(editor.lastSaved, { addSuffix: true })}
-                      </span>
-                    )}
-                    <Button
-                      onClick={handleSave}
-                      disabled={!editor.isDirty || editor.isSaving}
-                      size="sm"
-                    >
-                      Save Now
-                    </Button>
-                  </div>
-                  <TiptapEditor
-                    content={editor.content}
-                    onChange={editor.setContent}
-                    disabled={editor.isSaving}
-                  />
-                </>
-              ) : module.content ? (
-                <div className="max-w-prose mx-auto pb-[30vh]">
-                  <TiptapViewer content={module.content} />
+              {!editMode ? (
+                <div className="mx-auto max-w-prose pb-[30vh]">
+                  <MarkdownViewer markdown={module.content || ""} />
                 </div>
               ) : (
-                <div className="text-center py-12 border border-dashed rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    No introduction content yet
-                  </p>
-                  {canEdit && (
-                    <Button
-                      onClick={handleEdit}
-                      variant="outline"
-                      className="mt-4"
-                    >
-                      Add Content
-                    </Button>
-                  )}
+                <div className="flex flex-col">
+                  <EditModeHeader
+                    isSaving={editor.isSaving}
+                    isDirty={editor.isDirty}
+                    lastSaved={editor.lastSaved}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                  />
+                  <EditorToolbar editor={editorInstance} />
+                  <div className="mx-auto max-w-prose py-6">
+                    <MarkdownEditor
+                      initialMarkdown={module.content || ""}
+                      onUpdate={editor.setMarkdown}
+                      onEditorReady={setEditorInstance}
+                      placeholder="Describe this module..."
+                    />
+                  </div>
                 </div>
               )}
             </TabsContent>

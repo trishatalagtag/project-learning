@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 export function useCourseEditor(
   courseId: Id<"courses">,
-  initialContent?: string
+  initialMarkdown?: string
 ) {
   const { execute: updateCourse, isPending: isSavingMutation } = useMutationWithToast(
     api.faculty.courses.updateCourse,
@@ -16,29 +16,27 @@ export function useCourseEditor(
     }
   );
 
-  const [content, setContent] = useState(initialContent ?? "");
+  const [markdown, setMarkdown] = useState(initialMarkdown ?? "");
   const [isDirty, setIsDirty] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync content when course loads
   useEffect(() => {
-    if (initialContent !== undefined) {
-      setContent(initialContent);
+    if (initialMarkdown !== undefined) {
+      setMarkdown(initialMarkdown);
       setIsDirty(false);
     }
-  }, [initialContent]);
+  }, [initialMarkdown]);
 
-  // NEW: Debounced auto-save
-  const debouncedContent = useDebounce(content, 600);
+  const debouncedMarkdown = useDebounce(markdown, 600);
 
   useEffect(() => {
-    if (!debouncedContent || debouncedContent === initialContent || !isDirty) return;
+    if (!debouncedMarkdown || debouncedMarkdown === initialMarkdown || !isDirty) return;
 
     setIsSaving(true);
     updateCourse({
       courseId,
-      content: debouncedContent,
+      content: debouncedMarkdown,
       title: undefined,
       description: undefined,
       categoryId: undefined,
@@ -54,12 +52,12 @@ export function useCourseEditor(
       .finally(() => {
         setIsSaving(false);
       });
-  }, [debouncedContent, courseId, initialContent, isDirty, updateCourse]);
+  }, [debouncedMarkdown, courseId, initialMarkdown, isDirty, updateCourse]);
 
   const save = async () => {
     const result = await updateCourse({
       courseId,
-      content,
+      content: markdown,
       title: undefined,
       description: undefined,
       categoryId: undefined,
@@ -81,21 +79,20 @@ export function useCourseEditor(
       if (!confirmCancel) return;
     }
 
-    // Reset to initial content
-    if (initialContent !== undefined) {
-      setContent(initialContent);
+    if (initialMarkdown !== undefined) {
+      setMarkdown(initialMarkdown);
       setIsDirty(false);
     }
   };
 
-  const handleContentChange = (newContent: string) => {
-    setContent(newContent);
-    setIsDirty(newContent !== (initialContent ?? ""));
+  const handleMarkdownChange = (newMarkdown: string) => {
+    setMarkdown(newMarkdown);
+    setIsDirty(newMarkdown !== (initialMarkdown ?? ""));
   };
 
   return {
-    content,
-    setContent: handleContentChange,
+    markdown,
+    setMarkdown: handleMarkdownChange,
     save,
     cancel,
     isSaving: isSaving || isSavingMutation,

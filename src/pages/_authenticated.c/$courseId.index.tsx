@@ -1,23 +1,24 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { zodValidator } from "@tanstack/zod-adapter";
-import { useQuery } from "convex/react";
-import { formatDistanceToNow } from "date-fns";
-import { z } from "zod";
-
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-
 import { AccessDenied } from "@/components/shared/access-denied";
 import { CourseHero } from "@/components/shared/content/course-hero";
+import { EditModeHeader } from "@/components/shared/content/edit-mode-header";
+import { EditorToolbar } from "@/components/shared/content/editor-toolbar";
 import { useCourseEditor } from "@/components/shared/content/hooks/use-course-editor";
-import { TiptapEditor } from "@/components/shared/content/tiptap-editor";
-import { TiptapViewer } from "@/components/shared/content/tiptap-viewer";
+import { MarkdownEditor } from "@/components/shared/content/markdown-editor";
+import { MarkdownViewer } from "@/components/shared/content/markdown-viewer";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
 import { PreviewBanner } from "@/components/shared/preview/preview-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
+import type { Editor } from "@tiptap/react";
+import { useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { z } from "zod";
 
 import type { ContentStatus } from "@/lib/constants/content-status";
 import { CONTENT_STATUS, STATUS_CONFIG } from "@/lib/constants/content-status";
@@ -41,6 +42,7 @@ function CourseOverviewPage() {
   const userRole = useUserRole();
   const userId = useUserId();
   const isLearner = userRole === ROLE.LEARNER;
+  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
 
   const course = useQuery(api.faculty.courses.getCourseById, {
     courseId: courseId as Id<"courses">
@@ -86,8 +88,8 @@ function CourseOverviewPage() {
   // STEP 2: Check if data is NOT FOUND
   if (!course) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-sm text-muted-foreground">Course not found</p>
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-muted-foreground text-sm">Course not found</p>
       </div>
     );
   }
@@ -139,7 +141,7 @@ function CourseOverviewPage() {
       <div className="border-b bg-background px-8 py-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-2">{course.title}</h1>
+            <h1 className="mb-2 font-bold text-4xl">{course.title}</h1>
             <p className="text-lg text-muted-foreground">{course.description}</p>
           </div>
           {canEdit && !editMode && (
@@ -177,9 +179,9 @@ function CourseOverviewPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-8 py-8">
+        <div className="mx-auto max-w-6xl px-8 py-8">
           {isLearner && !editMode ? (
-            <div className="max-w-3xl mx-auto">
+            <div className="mx-auto max-w-3xl">
               <CourseHero
                 courseId={courseId as Id<"courses">}
                 courseTitle={course.title}
@@ -199,52 +201,28 @@ function CourseOverviewPage() {
               </TabsList>
 
               <TabsContent value="overview">
-                {editMode && canEdit ? (
-                  <>
-                    <div className="flex items-center gap-2 mb-4">
-                      {editor.isSaving && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          Saving...
-                        </span>
-                      )}
-                      {!editor.isSaving && editor.lastSaved && (
-                        <span className="text-xs text-muted-foreground">
-                          Saved {formatDistanceToNow(editor.lastSaved, { addSuffix: true })}
-                        </span>
-                      )}
-                      <Button
-                        onClick={handleSave}
-                        disabled={!editor.isDirty || editor.isSaving}
-                        size="sm"
-                      >
-                        Save Now
-                      </Button>
-                    </div>
-                    <TiptapEditor
-                      content={editor.content}
-                      onChange={editor.setContent}
-                      disabled={editor.isSaving}
-                    />
-                  </>
-                ) : course.content ? (
-                  <div className="max-w-prose mx-auto pb-[30vh]">
-                    <TiptapViewer content={course.content} />
+                {!editMode ? (
+                  <div className="mx-auto max-w-prose pb-[30vh]">
+                    <MarkdownViewer markdown={course.content || ""} />
                   </div>
                 ) : (
-                  <div className="text-center py-12 border border-dashed rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      No course overview content yet
-                    </p>
-                    {canEdit && (
-                      <Button
-                        onClick={handleEdit}
-                        variant="outline"
-                        className="mt-4"
-                      >
-                        Add Content
-                      </Button>
-                    )}
+                  <div className="flex flex-col">
+                    <EditModeHeader
+                      isSaving={editor.isSaving}
+                      isDirty={editor.isDirty}
+                      lastSaved={editor.lastSaved}
+                      onSave={handleSave}
+                      onCancel={handleCancel}
+                    />
+                    <EditorToolbar editor={editorInstance} />
+                    <div className="mx-auto max-w-prose py-6">
+                      <MarkdownEditor
+                        initialMarkdown={course.content || ""}
+                        onUpdate={editor.setMarkdown}
+                        onEditorReady={setEditorInstance}
+                        placeholder="Describe your course..."
+                      />
+                    </div>
                   </div>
                 )}
               </TabsContent>
@@ -256,15 +234,15 @@ function CourseOverviewPage() {
                       key={module._id}
                       to="/c/$courseId/m/$moduleId"
                       params={{ courseId, moduleId: module._id }}
-                      className="block p-6 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="block rounded-lg border p-6 transition-colors hover:bg-accent/50"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold mb-2">{module.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-4">
+                          <h3 className="mb-2 font-semibold text-xl">{module.title}</h3>
+                          <p className="mb-4 text-muted-foreground text-sm">
                             {module.description}
                           </p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 text-muted-foreground text-sm">
                             <span>{module.lessonCount} lessons</span>
                           </div>
                         </div>
@@ -286,15 +264,15 @@ function CourseOverviewPage() {
                       key={module._id}
                       to="/c/$courseId/m/$moduleId"
                       params={{ courseId, moduleId: module._id }}
-                      className="block p-6 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="block rounded-lg border p-6 transition-colors hover:bg-accent/50"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold mb-2">{module.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-4">
+                          <h3 className="mb-2 font-semibold text-xl">{module.title}</h3>
+                          <p className="mb-4 text-muted-foreground text-sm">
                             {module.description}
                           </p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 text-muted-foreground text-sm">
                             <span>{module.lessonCount} lessons</span>
                           </div>
                         </div>

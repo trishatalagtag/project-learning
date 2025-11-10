@@ -6,36 +6,33 @@ import { useUpdateLesson } from "./use-lesson-mutations";
 
 export function useLessonEditor(
   lessonId: Id<"lessons">,
-  moduleId: string,
+  moduleId: Id<"modules">,
   courseId: Id<"courses">,
-  initialContent?: string
+  initialMarkdown?: string
 ) {
   const navigate = useNavigate();
   const { execute: updateLesson, isPending: isSavingMutation } = useUpdateLesson();
 
-  const [content, setContent] = useState(initialContent ?? "");
+  const [markdown, setMarkdown] = useState(initialMarkdown ?? "");
   const [isDirty, setIsDirty] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync content when lesson loads
   useEffect(() => {
-    if (initialContent && !content) {
-      setContent(initialContent);
+    if (initialMarkdown && !markdown) {
+      setMarkdown(initialMarkdown);
     }
-  }, [initialContent, content]);
+  }, [initialMarkdown, markdown]);
 
-  // NEW: Debounced auto-save
-  const debouncedContent = useDebounce(content, 600);
+  const debouncedMarkdown = useDebounce(markdown, 600);
 
   useEffect(() => {
-    // Don't auto-save if content hasn't changed or is empty
-    if (!debouncedContent || debouncedContent === initialContent || !isDirty) return;
+    if (!debouncedMarkdown || debouncedMarkdown === initialMarkdown || !isDirty) return;
 
     setIsSaving(true);
     updateLesson({
       lessonId,
-      content: debouncedContent,
+      content: debouncedMarkdown,
       title: undefined,
       description: undefined,
       order: undefined,
@@ -50,12 +47,12 @@ export function useLessonEditor(
       .finally(() => {
         setIsSaving(false);
       });
-  }, [debouncedContent, lessonId, initialContent, isDirty, updateLesson]);
+  }, [debouncedMarkdown, lessonId, initialMarkdown, isDirty, updateLesson]);
 
   const save = async () => {
     const result = await updateLesson({
       lessonId,
-      content,
+      content: markdown,
       title: undefined,
       description: undefined,
       order: undefined,
@@ -67,7 +64,7 @@ export function useLessonEditor(
       setLastSaved(new Date());
       navigate({
         to: "/c/$courseId/m/$moduleId/lessons/$lessonId",
-        params: { courseId, moduleId, lessonId },
+        params: { courseId, moduleId: moduleId as Id<"modules">, lessonId },
       });
     }
 
@@ -82,20 +79,20 @@ export function useLessonEditor(
 
     navigate({
       to: "/c/$courseId/m/$moduleId/lessons/$lessonId",
-      params: { courseId, moduleId, lessonId },
+      params: { courseId, moduleId: moduleId as Id<"modules">, lessonId },
     });
   };
 
-  const handleContentChange = (newContent: string) => {
-    setContent(newContent);
-    setIsDirty(newContent !== initialContent);
+  const handleMarkdownChange = (newMarkdown: string) => {
+    setMarkdown(newMarkdown);
+    setIsDirty(newMarkdown !== initialMarkdown);
   };
 
-  return { 
-    content, 
-    setContent: handleContentChange, 
-    save, 
-    cancel, 
+  return {
+    markdown,
+    setMarkdown: handleMarkdownChange,
+    save,
+    cancel,
     isSaving: isSaving || isSavingMutation,
     isDirty,
     lastSaved,

@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "convex/react";
-import { formatDistanceToNow } from "date-fns";
-import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 import { api } from "@/convex/_generated/api";
@@ -10,13 +8,16 @@ import type { Id } from "@/convex/_generated/dataModel";
 
 import { AccessDenied } from "@/components/shared/access-denied";
 import { useLessonEditor } from "@/components/shared/content/hooks/use-lesson-editor";
-import { LessonViewer } from "@/components/shared/content/lesson-viewer";
-import { TiptapEditor } from "@/components/shared/content/tiptap-editor";
+import { EditorToolbar } from "@/components/shared/content/editor-toolbar";
+import { MarkdownEditor } from "@/components/shared/content/markdown-editor";
+import { MarkdownViewer } from "@/components/shared/content/markdown-viewer";
+import { EditModeHeader } from "@/components/shared/content/edit-mode-header";
 import { EmptyContent } from "@/components/shared/empty/empty-content";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
 import { useCourseNavigation } from "@/components/shared/preview/hooks/use-course-navigation";
 import { PreviewLayout } from "@/components/shared/preview/preview-layout";
-import { Button } from "@/components/ui/button";
+import type { Editor } from "@tiptap/react";
+import { useState } from "react";
 
 import { useCan } from "@/lib/hooks/use-can";
 import { createIdParam } from "@/lib/hooks/use-route-params";
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/_authenticated/c/$courseId/m/$moduleId/le
 function LessonPage() {
   const { lessonId, moduleId, courseId } = Route.useParams();
   const { editMode } = Route.useSearch();
+  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
 
   const lesson = useQuery(api.faculty.lessons.getLessonById, {
     lessonId: lessonId as Id<"lessons">,
@@ -96,36 +98,29 @@ function LessonPage() {
       isSaving={editor.isSaving}
     >
       {editMode && canEdit ? (
-        <>
-          <div className="flex items-center gap-2 mb-4">
-            {editor.isSaving && (
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Saving...
-              </span>
-            )}
-            {!editor.isSaving && editor.lastSaved && (
-              <span className="text-xs text-muted-foreground">
-                Saved {formatDistanceToNow(editor.lastSaved, { addSuffix: true })}
-              </span>
-            )}
-            <Button
-              onClick={editor.save}
-              disabled={!editor.isDirty || editor.isSaving}
-              size="sm"
-            >
-              Save Now
-            </Button>
-          </div>
-          <TiptapEditor
-            content={editor.content}
-            onChange={editor.setContent}
-            disabled={editor.isSaving}
+        <div className="flex flex-col h-full">
+          <EditModeHeader
+            isSaving={editor.isSaving}
+            isDirty={editor.isDirty}
+            lastSaved={editor.lastSaved}
+            onSave={editor.save}
+            onCancel={editor.cancel}
           />
-        </>
+          <EditorToolbar editor={editorInstance} />
+          <div className="flex-1 overflow-auto">
+            <div className="max-w-prose mx-auto py-6">
+              <MarkdownEditor
+                initialMarkdown={lesson?.content || ""}
+                onUpdate={editor.setMarkdown}
+                onEditorReady={setEditorInstance}
+                placeholder="Start typing your lesson content..."
+              />
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="max-w-prose mx-auto pb-[30vh]">
-          <LessonViewer lessonId={lessonId as Id<"lessons">} />
+          <MarkdownViewer markdown={lesson?.content || ""} />
         </div>
       )}
     </PreviewLayout>
