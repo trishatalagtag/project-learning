@@ -1,22 +1,35 @@
-"use client";
+"use client"
 
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQuery } from "convex/react"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 
-import type { Course } from "./columns";
+import type { Course } from "./columns"
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -25,37 +38,37 @@ const formSchema = z.object({
   categoryId: z.string().min(1, "Category is required"),
   teacherId: z.string().optional(),
   isEnrollmentOpen: z.boolean(),
-});
+})
 
 type CourseFormProps =
   | {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    mode: "create";
-    course?: never;
-    onSuccess?: (courseId: Id<"courses">) => void;
-  }
+      open: boolean
+      onOpenChange: (open: boolean) => void
+      mode: "create"
+      course?: never
+      onSuccess?: (courseId: Id<"courses">) => void
+    }
   | {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    mode: "edit";
-    course: Course;
-    onSuccess?: () => void;
-  };
+      open: boolean
+      onOpenChange: (open: boolean) => void
+      mode: "edit"
+      course: Course
+      onSuccess?: () => void
+    }
 
 export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: CourseFormProps) {
-  const createCourse = useMutation(api.faculty.courses.createCourse);
-  const updateCourse = useMutation(api.faculty.courses.updateCourse);
-  const assignFaculty = useMutation(api.admin.courses.assignFaculty);
+  const createCourse = useMutation(api.faculty.courses.createCourse)
+  const updateCourse = useMutation(api.faculty.courses.updateCourse)
+  const assignFaculty = useMutation(api.admin.courses.assignFaculty)
   const getCourseById = useQuery(
     api.faculty.courses.getCourseById,
-    course && mode === "edit" ? { courseId: course._id } : "skip"
-  );
+    course && mode === "edit" ? { courseId: course._id } : "skip",
+  )
 
-  const categories = useQuery(api.shared.categories.listAllCategories);
-  const faculty = useQuery(api.admin.users.listUsersByRole, { role: "FACULTY" });
+  const categories = useQuery(api.shared.categories.listAllCategories)
+  const faculty = useQuery(api.admin.users.listUsersByRole, { role: "FACULTY" })
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,7 +80,7 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
       teacherId: course?.teacherId || "unassigned",
       isEnrollmentOpen: course?.isEnrollmentOpen ?? false,
     },
-  });
+  })
 
   // Reset form when course changes or when course details are loaded
   useEffect(() => {
@@ -81,7 +94,7 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
           categoryId: getCourseById.categoryId,
           teacherId: getCourseById.teacherId || "unassigned",
           isEnrollmentOpen: getCourseById.isEnrollmentOpen,
-        });
+        })
       } else {
         // Fallback to basic course data
         form.reset({
@@ -91,7 +104,7 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
           categoryId: course.categoryId,
           teacherId: course.teacherId || "unassigned",
           isEnrollmentOpen: course.isEnrollmentOpen,
-        });
+        })
       }
     } else if (mode === "create") {
       form.reset({
@@ -101,25 +114,26 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
         categoryId: "",
         teacherId: "unassigned",
         isEnrollmentOpen: false,
-      });
+      })
     }
-  }, [course, mode, form, getCourseById]);
+  }, [course, mode, form, getCourseById])
 
   // Flatten categories for dropdown
-  const flatCategories = categories?.flatMap(cat => [
-    { id: cat._id, name: cat.name, level: cat.level },
-    ...(cat.children || []).flatMap(child => [
-      { id: child._id, name: child.name, level: child.level },
-      ...(child.children || []).map(grandchild => ({
-        id: grandchild._id,
-        name: grandchild.name,
-        level: grandchild.level,
-      })),
-    ]),
-  ]) || [];
+  const flatCategories =
+    categories?.flatMap((cat) => [
+      { id: cat._id, name: cat.name, level: cat.level },
+      ...(cat.children || []).flatMap((child) => [
+        { id: child._id, name: child.name, level: child.level },
+        ...(child.children || []).map((grandchild) => ({
+          id: grandchild._id,
+          name: grandchild.name,
+          level: grandchild.level,
+        })),
+      ]),
+    ]) || []
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       if (mode === "create") {
         const courseId = await createCourse({
@@ -128,19 +142,19 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
           content: values.content,
           categoryId: values.categoryId as Id<"categories">,
           isEnrollmentOpen: values.isEnrollmentOpen,
-        });
+        })
 
         // Assign teacher if provided
         if (values.teacherId && values.teacherId !== "unassigned") {
           await assignFaculty({
             courseId,
             teacherId: values.teacherId,
-          });
+          })
         }
 
-        onOpenChange(false);
-        form.reset();
-        onSuccess?.(courseId);
+        onOpenChange(false)
+        form.reset()
+        onSuccess?.(courseId)
       } else if (mode === "edit" && course) {
         await updateCourse({
           courseId: course._id,
@@ -149,34 +163,34 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
           content: values.content,
           categoryId: values.categoryId as Id<"categories">,
           isEnrollmentOpen: values.isEnrollmentOpen,
-        });
+        })
 
         // Update teacher assignment if changed
-        const currentTeacherId = course.teacherId || "unassigned";
-        const newTeacherId = values.teacherId || "unassigned";
+        const currentTeacherId = course.teacherId || "unassigned"
+        const newTeacherId = values.teacherId || "unassigned"
 
         if (newTeacherId !== currentTeacherId) {
           if (newTeacherId !== "unassigned") {
             await assignFaculty({
               courseId: course._id,
               teacherId: newTeacherId,
-            });
+            })
           } else {
             // Unassign teacher - would need unassignFaculty mutation
             // For now, we'll skip this
           }
         }
 
-        onOpenChange(false);
-        form.reset();
-        onSuccess?.();
+        onOpenChange(false)
+        form.reset()
+        onSuccess?.()
       }
     } catch (error) {
-      console.error("Failed to save course:", error);
+      console.error("Failed to save course:", error)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -244,7 +258,8 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
                       <SelectContent>
                         {flatCategories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id}>
-                            {"  ".repeat(cat.level - 1)}{cat.name}
+                            {"  ".repeat(cat.level - 1)}
+                            {cat.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -293,10 +308,7 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
                     </div>
                   </div>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </FormItem>
               )}
@@ -314,6 +326,5 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
-

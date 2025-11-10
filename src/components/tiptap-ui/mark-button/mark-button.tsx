@@ -17,9 +17,7 @@ import type { ButtonProps } from "@/components/tiptap-ui-primitive/button"
 import { Button } from "@/components/tiptap-ui-primitive/button"
 import { Badge } from "@/components/tiptap-ui-primitive/badge"
 
-export interface MarkButtonProps
-  extends Omit<ButtonProps, "type">,
-    UseMarkConfig {
+export interface MarkButtonProps extends Omit<ButtonProps, "type">, UseMarkConfig {
   /**
    * Optional text to display alongside the icon.
    */
@@ -59,18 +57,10 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
       children,
       ...buttonProps
     },
-    ref
+    ref,
   ) => {
     const { editor } = useTiptapEditor(providedEditor)
-    const {
-      isVisible,
-      handleMark,
-      label,
-      canToggle,
-      isActive,
-      Icon,
-      shortcutKeys,
-    } = useMark({
+    const { isVisible, handleMark, label, canToggle, isActive, Icon, shortcutKeys } = useMark({
       editor,
       type,
       hideWhenUnavailable,
@@ -83,7 +73,7 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
         if (event.defaultPrevented) return
         handleMark()
       },
-      [handleMark, onClick]
+      [handleMark, onClick],
     )
 
     if (!isVisible) {
@@ -110,14 +100,12 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
           <>
             <Icon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
-            {showShortcut && (
-              <MarkShortcutBadge type={type} shortcutKeys={shortcutKeys} />
-            )}
+            {showShortcut && <MarkShortcutBadge type={type} shortcutKeys={shortcutKeys} />}
           </>
         )}
       </Button>
     )
-  }
+  },
 )
 
 MarkButton.displayName = "MarkButton"

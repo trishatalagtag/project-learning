@@ -1,26 +1,20 @@
-"use client";
+"use client"
 
 import {
   ArchiveBoxIcon,
   CheckCircleIcon,
   RocketLaunchIcon,
   XCircleIcon,
-} from "@heroicons/react/24/outline";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+} from "@heroicons/react/24/outline"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
 
-import { useCourseMutations } from "@/hooks/use-course-mutations";
-import { CONTENT_STATUS } from "@/lib/constants/content-status";
-import type { Course } from "@/lib/types/course";
+import { useCourseMutations } from "@/hooks/use-course-mutations"
+import { CONTENT_STATUS } from "@/lib/constants/content-status"
+import type { Course } from "@/lib/types/course"
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -28,32 +22,39 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "@/components/ui/item";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui/dialog"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from "@/components/ui/item"
+import { Textarea } from "@/components/ui/textarea"
 
 interface LifecycleCardProps {
-  course: Course;
+  course: Course
 }
 
 export function LifecycleCard({ course }: LifecycleCardProps) {
-  const mutations = useCourseMutations(course._id);
+  const mutations = useCourseMutations(course._id)
 
-  const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [isRejecting, setIsRejecting] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false)
+  const [rejectReason, setRejectReason] = useState("")
+  const [isRejecting, setIsRejecting] = useState(false)
 
   const handleReject = async () => {
-    if (!rejectReason.trim()) return;
+    if (!rejectReason.trim()) return
 
-    setIsRejecting(true);
-    const result = await mutations.reject(rejectReason);
+    setIsRejecting(true)
+    const result = await mutations.reject(rejectReason)
     if (result.success) {
-      setShowRejectDialog(false);
-      setRejectReason("");
+      setShowRejectDialog(false)
+      setRejectReason("")
     }
-    setIsRejecting(false);
-  };
+    setIsRejecting(false)
+  }
 
   return (
     <>
@@ -69,9 +70,7 @@ export function LifecycleCard({ course }: LifecycleCardProps) {
                 <Item variant="outline">
                   <ItemContent>
                     <ItemTitle>Approve Course</ItemTitle>
-                    <ItemDescription>
-                      Approve this course for publication
-                    </ItemDescription>
+                    <ItemDescription>Approve this course for publication</ItemDescription>
                   </ItemContent>
                   <ItemActions>
                     <Button onClick={mutations.approve} variant="default" size="sm">
@@ -83,9 +82,7 @@ export function LifecycleCard({ course }: LifecycleCardProps) {
                 <Item variant="outline">
                   <ItemContent>
                     <ItemTitle>Reject Course</ItemTitle>
-                    <ItemDescription>
-                      Reject this course and provide feedback
-                    </ItemDescription>
+                    <ItemDescription>Reject this course and provide feedback</ItemDescription>
                   </ItemContent>
                   <ItemActions>
                     <Button
@@ -105,9 +102,7 @@ export function LifecycleCard({ course }: LifecycleCardProps) {
               <Item variant="outline">
                 <ItemContent>
                   <ItemTitle>Publish Course</ItemTitle>
-                  <ItemDescription>
-                    Make this course available to students
-                  </ItemDescription>
+                  <ItemDescription>Make this course available to students</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   <Button onClick={mutations.publish} size="sm">
@@ -122,9 +117,7 @@ export function LifecycleCard({ course }: LifecycleCardProps) {
               <Item variant="outline">
                 <ItemContent>
                   <ItemTitle>Unpublish Course</ItemTitle>
-                  <ItemDescription>
-                    Hide this course from students
-                  </ItemDescription>
+                  <ItemDescription>Hide this course from students</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   <Button onClick={mutations.unpublish} variant="outline" size="sm">
@@ -143,8 +136,8 @@ export function LifecycleCard({ course }: LifecycleCardProps) {
           <DialogHeader>
             <DialogTitle>Reject Course</DialogTitle>
             <DialogDescription>
-              Please provide a reason for rejecting this course. This will be sent to
-              the course creator.
+              Please provide a reason for rejecting this course. This will be sent to the course
+              creator.
             </DialogDescription>
           </DialogHeader>
           <Textarea
@@ -179,6 +172,5 @@ export function LifecycleCard({ course }: LifecycleCardProps) {
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }
-

@@ -43,16 +43,9 @@ export interface UseBlockquoteConfig {
 /**
  * Checks if blockquote can be toggled in the current editor state
  */
-export function canToggleBlockquote(
-  editor: Editor | null,
-  turnInto: boolean = true
-): boolean {
+export function canToggleBlockquote(editor: Editor | null, turnInto: boolean = true): boolean {
   if (!editor || !editor.isEditable) return false
-  if (
-    !isNodeInSchema("blockquote", editor) ||
-    isNodeTypeSelected(editor, ["image"])
-  )
-    return false
+  if (!isNodeInSchema("blockquote", editor) || isNodeTypeSelected(editor, ["image"])) return false
 
   if (!turnInto) {
     return editor.can().toggleWrap("blockquote")
@@ -111,20 +104,14 @@ export function toggleBlockquote(editor: Editor | null): boolean {
       const firstChild = selection.node.firstChild?.firstChild
       const lastChild = selection.node.lastChild?.lastChild
 
-      const from = firstChild
-        ? selection.from + firstChild.nodeSize
-        : selection.from + 1
+      const from = firstChild ? selection.from + firstChild.nodeSize : selection.from + 1
 
-      const to = lastChild
-        ? selection.to - lastChild.nodeSize
-        : selection.to - 1
+      const to = lastChild ? selection.to - lastChild.nodeSize : selection.to - 1
 
       const resolvedFrom = state.doc.resolve(from)
       const resolvedTo = state.doc.resolve(to)
 
-      chain = chain
-        .setTextSelection(TextSelection.between(resolvedFrom, resolvedTo))
-        .clearNodes()
+      chain = chain.setTextSelection(TextSelection.between(resolvedFrom, resolvedTo)).clearNodes()
     }
 
     const toggle = editor.isActive("blockquote")
@@ -197,11 +184,7 @@ export function shouldShowButton(props: {
  * ```
  */
 export function useBlockquote(config?: UseBlockquoteConfig) {
-  const {
-    editor: providedEditor,
-    hideWhenUnavailable = false,
-    onToggled,
-  } = config || {}
+  const { editor: providedEditor, hideWhenUnavailable = false, onToggled } = config || {}
 
   const { editor } = useTiptapEditor(providedEditor)
   const [isVisible, setIsVisible] = useState<boolean>(true)

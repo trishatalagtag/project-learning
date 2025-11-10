@@ -1,9 +1,9 @@
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 import { Separator } from "@/components/tiptap-ui-primitive/separator"
 import "@/components/tiptap-ui-primitive/toolbar/toolbar.scss"
-import { cn } from "@/lib/tiptap-utils"
-import { useMenuNavigation } from "@/hooks/use-menu-navigation"
 import { useComposedRef } from "@/hooks/use-composed-ref"
+import { useMenuNavigation } from "@/hooks/use-menu-navigation"
+import { cn } from "@/lib/utils"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 
 type BaseProps = React.HTMLAttributes<HTMLDivElement>
 
@@ -11,17 +11,15 @@ interface ToolbarProps extends BaseProps {
   variant?: "floating" | "fixed"
 }
 
-const useToolbarNavigation = (
-  toolbarRef: React.RefObject<HTMLDivElement | null>
-) => {
+const useToolbarNavigation = (toolbarRef: React.RefObject<HTMLDivElement | null>) => {
   const [items, setItems] = useState<HTMLElement[]>([])
 
   const collectItems = useCallback(() => {
     if (!toolbarRef.current) return []
     return Array.from(
       toolbarRef.current.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [role="button"]:not([disabled]), [tabindex="0"]:not([disabled])'
-      )
+        'button:not([disabled]), [role="button"]:not([disabled]), [tabindex="0"]:not([disabled])',
+      ),
     )
   }, [toolbarRef])
 
@@ -52,8 +50,7 @@ const useToolbarNavigation = (
 
     const handleFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement
-      if (toolbar.contains(target))
-        target.setAttribute("data-focus-visible", "true")
+      if (toolbar.contains(target)) target.setAttribute("data-focus-visible", "true")
     }
 
     const handleBlur = (e: FocusEvent) => {
@@ -95,27 +92,20 @@ export const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
         {children}
       </div>
     )
-  }
+  },
 )
 Toolbar.displayName = "Toolbar"
 
 export const ToolbarGroup = forwardRef<HTMLDivElement, BaseProps>(
   ({ children, className, ...props }, ref) => (
-    <div
-      ref={ref}
-      role="group"
-      className={cn("tiptap-toolbar-group", className)}
-      {...props}
-    >
+    <div ref={ref} role="group" className={cn("tiptap-toolbar-group", className)} {...props}>
       {children}
     </div>
-  )
+  ),
 )
 ToolbarGroup.displayName = "ToolbarGroup"
 
-export const ToolbarSeparator = forwardRef<HTMLDivElement, BaseProps>(
-  ({ ...props }, ref) => (
-    <Separator ref={ref} orientation="vertical" decorative {...props} />
-  )
-)
+export const ToolbarSeparator = forwardRef<HTMLDivElement, BaseProps>(({ ...props }, ref) => (
+  <Separator ref={ref} orientation="vertical" decorative {...props} />
+))
 ToolbarSeparator.displayName = "ToolbarSeparator"

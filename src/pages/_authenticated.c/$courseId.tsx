@@ -1,14 +1,12 @@
-import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
-import { zodValidator } from "@tanstack/zod-adapter";
-import { useQuery } from "convex/react";
-
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-
 import { CourseSidebar } from "@/components/shared/learning/course-sidebar";
-import { CourseSidebarHeader } from "@/components/shared/learning/course-sidebar-header";
+import { CourseSidebarMobileTrigger } from "@/components/shared/learning/course-sidebar-primitives";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
+import { useQuery } from "convex/react";
 
 import { courseParams } from "@/lib/hooks/use-route-params";
 
@@ -19,7 +17,6 @@ export const Route = createFileRoute("/_authenticated/c/$courseId")({
 
 function CourseLayout() {
   const { courseId } = Route.useParams();
-  const matches = useMatches();
 
   // Fetch course and modules once at layout level
   const course = useQuery(api.faculty.courses.getCourseById, {
@@ -30,16 +27,6 @@ function CourseLayout() {
     course ? { courseId: courseId as Id<"courses"> } : "skip"
   );
 
-  // Extract current route data for header
-  const currentMatch = matches[matches.length - 1];
-  const { moduleId, lessonId } = (currentMatch?.params || {}) as {
-    moduleId?: string;
-    lessonId?: string;
-  };
-
-  // Find current module and lesson titles
-  const currentModule = modules?.find((m) => m._id === moduleId);
-  const currentLesson = currentModule?.lessons.find((l) => l._id === lessonId);
 
   if (course === undefined || modules === undefined) {
     return <LoadingPage message="Loading course..." />;
@@ -47,8 +34,8 @@ function CourseLayout() {
 
   if (!course) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-sm text-muted-foreground">Course not found</p>
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-muted-foreground text-sm">Course not found</p>
       </div>
     );
   }
@@ -60,15 +47,16 @@ function CourseLayout() {
         courseTitle={course.title}
         modules={modules}
       />
-
       <SidebarInset>
-        {/* Header moved to layout */}
-        <CourseSidebarHeader
-          courseTitle={course.title}
-          moduleTitle={currentModule?.title}
-          lessonTitle={currentLesson?.title}
-        />
+        {/* Mobile Header */}
+        <header className="sticky top-0 z-10 flex items-center gap-3 border-b bg-background px-4 py-3 md:hidden">
+          <CourseSidebarMobileTrigger />
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate font-semibold text-sm">{course.title}</h1>
+          </div>
+        </header>
 
+        {/* Main Content */}
         <Outlet />
       </SidebarInset>
     </SidebarProvider>

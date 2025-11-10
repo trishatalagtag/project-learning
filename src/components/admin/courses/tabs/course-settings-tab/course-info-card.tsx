@@ -1,28 +1,22 @@
-"use client";
+"use client"
 
-import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "convex/react";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useCourseMutations } from "@/hooks/use-course-mutations";
-import { CONTENT_STATUS } from "@/lib/constants/content-status";
-import type { Course } from "@/lib/types/course";
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { useCourseMutations } from "@/hooks/use-course-mutations"
+import { CONTENT_STATUS } from "@/lib/constants/content-status"
+import type { Course } from "@/lib/types/course"
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Form,
   FormControl,
@@ -30,154 +24,139 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemGroup,
-  ItemTitle
-} from "@/components/ui/item";
+  ItemTitle,
+} from "@/components/ui/item"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const titleSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
-});
+})
 
 const descriptionSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
-});
+})
 
 const categorySchema = z.object({
   categoryId: z.string().min(1, "Category is required"),
-});
+})
 
 interface CourseInfoCardProps {
-  course: Course;
+  course: Course
 }
 
 export function CourseInfoCard({ course }: CourseInfoCardProps) {
-  const mutations = useCourseMutations(course._id);
-  const categories = useQuery(api.admin.categories.listCategories);
+  const mutations = useCourseMutations(course._id)
+  const categories = useQuery(api.admin.categories.listCategories)
 
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const titleForm = useForm<z.infer<typeof titleSchema>>({
     resolver: zodResolver(titleSchema),
     defaultValues: { title: course.title },
-  });
+  })
 
   const descriptionForm = useForm<z.infer<typeof descriptionSchema>>({
     resolver: zodResolver(descriptionSchema),
     defaultValues: { description: course.description },
-  });
+  })
 
   const categoryForm = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
     defaultValues: { categoryId: course.categoryId },
-  });
+  })
 
   const handleSaveTitle = async (values: z.infer<typeof titleSchema>) => {
-    setIsSaving(true);
-    setError(null);
+    setIsSaving(true)
+    setError(null)
     const result = await mutations.updateCourse(
       values.title,
       course.description,
-      course.categoryId as Id<"categories">
-    );
+      course.categoryId as Id<"categories">,
+    )
     if (result.success) {
-      setEditingField(null);
+      setEditingField(null)
     } else {
-      setError(result.error || "Failed to save");
+      setError(result.error || "Failed to save")
     }
-    setIsSaving(false);
-  };
+    setIsSaving(false)
+  }
 
-  const handleSaveDescription = async (
-    values: z.infer<typeof descriptionSchema>
-  ) => {
-    setIsSaving(true);
-    setError(null);
+  const handleSaveDescription = async (values: z.infer<typeof descriptionSchema>) => {
+    setIsSaving(true)
+    setError(null)
     const result = await mutations.updateCourse(
       course.title,
       values.description,
-      course.categoryId as Id<"categories">
-    );
+      course.categoryId as Id<"categories">,
+    )
     if (result.success) {
-      setEditingField(null);
+      setEditingField(null)
     } else {
-      setError(result.error || "Failed to save");
+      setError(result.error || "Failed to save")
     }
-    setIsSaving(false);
-  };
+    setIsSaving(false)
+  }
 
   const handleSaveCategory = async (values: z.infer<typeof categorySchema>) => {
-    setIsSaving(true);
-    setError(null);
+    setIsSaving(true)
+    setError(null)
     const result = await mutations.updateCourse(
       course.title,
       course.description,
-      values.categoryId as Id<"categories">
-    );
+      values.categoryId as Id<"categories">,
+    )
     if (result.success) {
-      setEditingField(null);
+      setEditingField(null)
     } else {
-      setError(result.error || "Failed to save");
+      setError(result.error || "Failed to save")
     }
-    setIsSaving(false);
-  };
+    setIsSaving(false)
+  }
 
   const handleCancel = (field: string) => {
-    if (field === "title") titleForm.reset();
-    if (field === "description") descriptionForm.reset();
-    if (field === "category") categoryForm.reset();
-    setEditingField(null);
-    setError(null);
-  };
+    if (field === "title") titleForm.reset()
+    if (field === "description") descriptionForm.reset()
+    if (field === "category") categoryForm.reset()
+    setEditingField(null)
+    setError(null)
+  }
 
   const getCategoryIndentation = (level: number) => {
-    return "\u00A0".repeat((level - 1) * 4);
-  };
+    return "\u00A0".repeat((level - 1) * 4)
+  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Basic Information</CardTitle>
-        <CardDescription>
-          Manage core details about this course
-        </CardDescription>
+        <CardDescription>Manage core details about this course</CardDescription>
       </CardHeader>
       <CardContent>
         <ItemGroup className="space-y-2">
           {/* TITLE */}
-          <Item
-            variant="outline"
-            className={editingField === "title" ? "bg-accent/50" : ""}
-          >
+          <Item variant="outline" className={editingField === "title" ? "bg-accent/50" : ""}>
             {editingField === "title" ? (
               <div className="flex-1 space-y-3">
                 <Form {...titleForm}>
-                  <form
-                    onSubmit={titleForm.handleSubmit(handleSaveTitle)}
-                    className="space-y-3"
-                  >
+                  <form onSubmit={titleForm.handleSubmit(handleSaveTitle)} className="space-y-3">
                     <FormField
                       control={titleForm.control}
                       name="title"
@@ -208,12 +187,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              type="submit"
-                              size="sm"
-                              disabled={isSaving}
-                              className="gap-2"
-                            >
+                            <Button type="submit" size="sm" disabled={isSaving} className="gap-2">
                               {isSaving ? (
                                 <>
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -254,9 +228,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="text-sm font-medium">
-                    Course Title
-                  </ItemTitle>
+                  <ItemTitle className="text-sm font-medium">Course Title</ItemTitle>
                   <ItemDescription className="text-base font-semibold text-foreground mt-1">
                     {course.title}
                   </ItemDescription>
@@ -284,10 +256,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
           </Item>
 
           {/* DESCRIPTION */}
-          <Item
-            variant="outline"
-            className={editingField === "description" ? "bg-accent/50" : ""}
-          >
+          <Item variant="outline" className={editingField === "description" ? "bg-accent/50" : ""}>
             {editingField === "description" ? (
               <div className="flex-1 space-y-3">
                 <Form {...descriptionForm}>
@@ -326,12 +295,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              type="submit"
-                              size="sm"
-                              disabled={isSaving}
-                              className="gap-2"
-                            >
+                            <Button type="submit" size="sm" disabled={isSaving} className="gap-2">
                               {isSaving ? (
                                 <>
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -372,9 +336,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="text-sm font-medium">
-                    Description
-                  </ItemTitle>
+                  <ItemTitle className="text-sm font-medium">Description</ItemTitle>
                   <ItemDescription className="text-sm text-foreground/80 mt-1 whitespace-pre-wrap">
                     {course.description}
                   </ItemDescription>
@@ -402,10 +364,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
           </Item>
 
           {/* CATEGORY */}
-          <Item
-            variant="outline"
-            className={editingField === "category" ? "bg-accent/50" : ""}
-          >
+          <Item variant="outline" className={editingField === "category" ? "bg-accent/50" : ""}>
             {editingField === "category" ? (
               <div className="flex-1 space-y-3">
                 <Form {...categoryForm}>
@@ -439,11 +398,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                                 </div>
                               ) : (
                                 categories.map((cat) => (
-                                  <SelectItem
-                                    key={cat._id}
-                                    value={cat._id}
-                                    className="font-mono"
-                                  >
+                                  <SelectItem key={cat._id} value={cat._id} className="font-mono">
                                     {getCategoryIndentation(cat.level)}
                                     {cat.level > 1 && "└─ "}
                                     {cat.name}
@@ -465,12 +420,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              type="submit"
-                              size="sm"
-                              disabled={isSaving}
-                              className="gap-2"
-                            >
+                            <Button type="submit" size="sm" disabled={isSaving} className="gap-2">
                               {isSaving ? (
                                 <>
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -555,5 +505,5 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
         </ItemGroup>
       </CardContent>
     </Card>
-  );
+  )
 }

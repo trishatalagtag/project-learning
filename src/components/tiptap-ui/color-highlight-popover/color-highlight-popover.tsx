@@ -13,17 +13,9 @@ import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button"
 import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button"
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/tiptap-ui-primitive/popover"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/tiptap-ui-primitive/popover"
 import { Separator } from "@/components/tiptap-ui-primitive/separator"
-import {
-  Card,
-  CardBody,
-  CardItemGroup,
-} from "@/components/tiptap-ui-primitive/card"
+import { Card, CardBody, CardItemGroup } from "@/components/tiptap-ui-primitive/card"
 
 // --- Tiptap UI ---
 import type {
@@ -50,10 +42,7 @@ export interface ColorHighlightPopoverContentProps {
 
 export interface ColorHighlightPopoverProps
   extends Omit<ButtonProps, "type">,
-    Pick<
-      UseColorHighlightConfig,
-      "editor" | "hideWhenUnavailable" | "onApplied"
-    > {
+    Pick<UseColorHighlightConfig, "editor" | "hideWhenUnavailable" | "onApplied"> {
   /**
    * Optional colors to use in the highlight popover.
    * If not provided, defaults to a predefined set of colors.
@@ -61,25 +50,24 @@ export interface ColorHighlightPopoverProps
   colors?: HighlightColor[]
 }
 
-export const ColorHighlightPopoverButton = forwardRef<
-  HTMLButtonElement,
-  ButtonProps
->(({ className, children, ...props }, ref) => (
-  <Button
-    type="button"
-    className={className}
-    data-style="ghost"
-    data-appearance="default"
-    role="button"
-    tabIndex={-1}
-    aria-label="Highlight text"
-    tooltip="Highlight"
-    ref={ref}
-    {...props}
-  >
-    {children ?? <HighlighterIcon className="tiptap-button-icon" />}
-  </Button>
-))
+export const ColorHighlightPopoverButton = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, children, ...props }, ref) => (
+    <Button
+      type="button"
+      className={className}
+      data-style="ghost"
+      data-appearance="default"
+      role="button"
+      tabIndex={-1}
+      aria-label="Highlight text"
+      tooltip="Highlight"
+      ref={ref}
+      {...props}
+    >
+      {children ?? <HighlighterIcon className="tiptap-button-icon" />}
+    </Button>
+  ),
+)
 
 ColorHighlightPopoverButton.displayName = "ColorHighlightPopoverButton"
 
@@ -99,7 +87,7 @@ export function ColorHighlightPopoverContent({
 
   const menuItems = useMemo(
     () => [...colors, { label: "Remove highlight", value: "none" }],
-    [colors]
+    [colors],
   )
 
   const { selectedIndex } = useMenuNavigation({
@@ -109,7 +97,7 @@ export function ColorHighlightPopoverContent({
     onSelect: (item) => {
       if (!containerRef.current) return false
       const highlightedElement = containerRef.current.querySelector(
-        '[data-highlighted="true"]'
+        '[data-highlighted="true"]',
       ) as HTMLElement
       if (highlightedElement) highlightedElement.click()
       if (item.value === "none") handleRemoveHighlight()
@@ -119,11 +107,7 @@ export function ColorHighlightPopoverContent({
   })
 
   return (
-    <Card
-      ref={containerRef}
-      tabIndex={0}
-      style={isMobile ? { boxShadow: "none", border: 0 } : {}}
-    >
+    <Card ref={containerRef} tabIndex={0} style={isMobile ? { boxShadow: "none", border: 0 } : {}}>
       <CardBody style={isMobile ? { padding: 0 } : {}}>
         <CardItemGroup orientation="horizontal">
           <ButtonGroup orientation="horizontal">
@@ -175,12 +159,11 @@ export function ColorHighlightPopover({
 }: ColorHighlightPopoverProps) {
   const { editor } = useTiptapEditor(providedEditor)
   const [isOpen, setIsOpen] = useState(false)
-  const { isVisible, canColorHighlight, isActive, label, Icon } =
-    useColorHighlight({
-      editor,
-      hideWhenUnavailable,
-      onApplied,
-    })
+  const { isVisible, canColorHighlight, isActive, label, Icon } = useColorHighlight({
+    editor,
+    hideWhenUnavailable,
+    onApplied,
+  })
 
   if (!isVisible) return null
 

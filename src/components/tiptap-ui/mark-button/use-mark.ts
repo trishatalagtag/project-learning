@@ -16,14 +16,7 @@ import { SubscriptIcon } from "@/components/tiptap-icons/subscript-icon"
 import { SuperscriptIcon } from "@/components/tiptap-icons/superscript-icon"
 import { UnderlineIcon } from "@/components/tiptap-icons/underline-icon"
 
-export type Mark =
-  | "bold"
-  | "italic"
-  | "strike"
-  | "code"
-  | "underline"
-  | "superscript"
-  | "subscript"
+export type Mark = "bold" | "italic" | "strike" | "code" | "underline" | "superscript" | "subscript"
 
 /**
  * Configuration for the mark functionality
@@ -73,8 +66,7 @@ export const MARK_SHORTCUT_KEYS: Record<Mark, string> = {
  */
 export function canToggleMark(editor: Editor | null, type: Mark): boolean {
   if (!editor || !editor.isEditable) return false
-  if (!isMarkInSchema(type, editor) || isNodeTypeSelected(editor, ["image"]))
-    return false
+  if (!isMarkInSchema(type, editor) || isNodeTypeSelected(editor, ["image"])) return false
 
   return editor.can().toggleMark(type)
 }
@@ -162,12 +154,7 @@ export function getFormattedMarkName(type: Mark): string {
  * ```
  */
 export function useMark(config: UseMarkConfig) {
-  const {
-    editor: providedEditor,
-    type,
-    hideWhenUnavailable = false,
-    onToggled,
-  } = config
+  const { editor: providedEditor, type, hideWhenUnavailable = false, onToggled } = config
 
   const { editor } = useTiptapEditor(providedEditor)
   const [isVisible, setIsVisible] = useState<boolean>(true)

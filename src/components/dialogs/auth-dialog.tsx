@@ -67,11 +67,7 @@ export function AuthDialog() {
             open={isOpen}
           />
         ) : (
-          <AuthSignUpForm
-            role={snapshotRole}
-            onSuccess={handleSuccess}
-            onSwitchMode={switchMode}
-          />
+          <AuthSignUpForm role={snapshotRole} onSuccess={handleSuccess} onSwitchMode={switchMode} />
         )}
       </DialogContent>
     </Dialog>

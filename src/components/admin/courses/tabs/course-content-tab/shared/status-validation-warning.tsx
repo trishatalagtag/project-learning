@@ -1,9 +1,9 @@
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline"
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface StatusValidationWarningProps {
-  message: string;
+  message: string
 }
 
 export function StatusValidationWarning({ message }: StatusValidationWarningProps) {
@@ -12,6 +12,5 @@ export function StatusValidationWarning({ message }: StatusValidationWarningProp
       <ExclamationTriangleIcon className="h-4 w-4" />
       <AlertDescription className="text-xs ml-2">{message}</AlertDescription>
     </Alert>
-  );
+  )
 }
-

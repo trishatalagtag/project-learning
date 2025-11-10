@@ -70,11 +70,10 @@ export const LIST_SHORTCUT_KEYS: Record<ListType, string> = {
 export function canToggleList(
   editor: Editor | null,
   type: ListType,
-  turnInto: boolean = true
+  turnInto: boolean = true,
 ): boolean {
   if (!editor || !editor.isEditable) return false
-  if (!isNodeInSchema(type, editor) || isNodeTypeSelected(editor, ["image"]))
-    return false
+  if (!isNodeInSchema(type, editor) || isNodeTypeSelected(editor, ["image"])) return false
 
   if (!turnInto) {
     switch (type) {
@@ -111,10 +110,7 @@ export function canToggleList(
     case "orderedList":
       return editor.can().toggleOrderedList() || editor.can().clearNodes()
     case "taskList":
-      return (
-        editor.can().toggleList("taskList", "taskItem") ||
-        editor.can().clearNodes()
-      )
+      return editor.can().toggleList("taskList", "taskItem") || editor.can().clearNodes()
     default:
       return false
   }
@@ -172,30 +168,19 @@ export function toggleList(editor: Editor | null, type: ListType): boolean {
       const firstChild = selection.node.firstChild?.firstChild
       const lastChild = selection.node.lastChild?.lastChild
 
-      const from = firstChild
-        ? selection.from + firstChild.nodeSize
-        : selection.from + 1
+      const from = firstChild ? selection.from + firstChild.nodeSize : selection.from + 1
 
-      const to = lastChild
-        ? selection.to - lastChild.nodeSize
-        : selection.to - 1
+      const to = lastChild ? selection.to - lastChild.nodeSize : selection.to - 1
 
       const resolvedFrom = state.doc.resolve(from)
       const resolvedTo = state.doc.resolve(to)
 
-      chain = chain
-        .setTextSelection(TextSelection.between(resolvedFrom, resolvedTo))
-        .clearNodes()
+      chain = chain.setTextSelection(TextSelection.between(resolvedFrom, resolvedTo)).clearNodes()
     }
 
     if (editor.isActive(type)) {
       // Unwrap list
-      chain
-        .liftListItem("listItem")
-        .lift("bulletList")
-        .lift("orderedList")
-        .lift("taskList")
-        .run()
+      chain.liftListItem("listItem").lift("bulletList").lift("orderedList").lift("taskList").run()
     } else {
       // Wrap in specific list type
       const toggleMap: Record<ListType, () => typeof chain> = {
@@ -276,12 +261,7 @@ export function shouldShowButton(props: {
  * ```
  */
 export function useList(config: UseListConfig) {
-  const {
-    editor: providedEditor,
-    type,
-    hideWhenUnavailable = false,
-    onToggled,
-  } = config
+  const { editor: providedEditor, type, hideWhenUnavailable = false, onToggled } = config
 
   const { editor } = useTiptapEditor(providedEditor)
   const [isVisible, setIsVisible] = useState<boolean>(true)

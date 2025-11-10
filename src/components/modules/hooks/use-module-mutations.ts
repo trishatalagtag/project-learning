@@ -1,6 +1,6 @@
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useMutationWithToast } from "@/lib/hooks/use-mutation-with-toast";
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { useMutationWithToast } from "@/lib/hooks/use-mutation-with-toast"
 
 export function useDeleteModule() {
   return useMutationWithToast(api.faculty.modules.deleteModule, {
@@ -8,15 +8,14 @@ export function useDeleteModule() {
     errorMessage: "Failed to delete module",
     onSuccess: () => {
       // Navigate back to course
-      window.history.back();
+      window.history.back()
     },
-  });
+  })
 }
 
 export function useReorderModules(courseId: Id<"courses">) {
   return useMutationWithToast(api.faculty.modules.reorderModules, {
     successMessage: "Modules reordered",
     errorMessage: "Failed to reorder modules",
-  });
+  })
 }
-

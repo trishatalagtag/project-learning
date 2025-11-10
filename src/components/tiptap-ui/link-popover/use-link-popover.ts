@@ -8,11 +8,7 @@ import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
 
 // --- Lib ---
-import {
-  isMarkInSchema,
-  isNodeTypeSelected,
-  sanitizeUrl,
-} from "@/lib/tiptap-utils"
+import { isMarkInSchema, isNodeTypeSelected, sanitizeUrl } from "@/lib/tiptap-utils"
 
 /**
  * Configuration for the link popover functionality
@@ -163,7 +159,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
         window.open(safeUrl, target, features)
       }
     },
-    [url]
+    [url],
   )
 
   return {
@@ -178,10 +174,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
 /**
  * Custom hook for link popover state management
  */
-export function useLinkState(props: {
-  editor: Editor | null
-  hideWhenUnavailable: boolean
-}) {
+export function useLinkState(props: { editor: Editor | null; hideWhenUnavailable: boolean }) {
   const { editor, hideWhenUnavailable = false } = props
 
   const canSet = canSetLink(editor)
@@ -197,7 +190,7 @@ export function useLinkState(props: {
         shouldShowLinkButton({
           editor,
           hideWhenUnavailable,
-        })
+        }),
       )
     }
 
@@ -255,11 +248,7 @@ export function useLinkState(props: {
  * ```
  */
 export function useLinkPopover(config?: UseLinkPopoverConfig) {
-  const {
-    editor: providedEditor,
-    hideWhenUnavailable = false,
-    onSetLink,
-  } = config || {}
+  const { editor: providedEditor, hideWhenUnavailable = false, onSetLink } = config || {}
 
   const { editor } = useTiptapEditor(providedEditor)
 

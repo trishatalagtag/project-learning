@@ -54,10 +54,7 @@ export const historyIcons = {
 /**
  * Checks if a history action can be executed
  */
-export function canExecuteUndoRedoAction(
-  editor: Editor | null,
-  action: UndoRedoAction
-): boolean {
+export function canExecuteUndoRedoAction(editor: Editor | null, action: UndoRedoAction): boolean {
   if (!editor || !editor.isEditable) return false
   if (isNodeTypeSelected(editor, ["image"])) return false
 
@@ -67,10 +64,7 @@ export function canExecuteUndoRedoAction(
 /**
  * Executes a history action on the editor
  */
-export function executeUndoRedoAction(
-  editor: Editor | null,
-  action: UndoRedoAction
-): boolean {
+export function executeUndoRedoAction(editor: Editor | null, action: UndoRedoAction): boolean {
   if (!editor || !editor.isEditable) return false
   if (!canExecuteUndoRedoAction(editor, action)) return false
 
@@ -134,12 +128,7 @@ export function shouldShowButton(props: {
  * ```
  */
 export function useUndoRedo(config: UseUndoRedoConfig) {
-  const {
-    editor: providedEditor,
-    action,
-    hideWhenUnavailable = false,
-    onExecuted,
-  } = config
+  const { editor: providedEditor, action, hideWhenUnavailable = false, onExecuted } = config
 
   const { editor } = useTiptapEditor(providedEditor)
   const [isVisible, setIsVisible] = useState<boolean>(true)

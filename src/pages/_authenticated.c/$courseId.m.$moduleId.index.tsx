@@ -1,15 +1,16 @@
 import { useDeleteModule } from "@/components/modules/hooks/use-module-mutations";
-import { ModuleHeader } from "@/components/modules/module-header";
 import { ModuleLessonList } from "@/components/modules/module-lesson-list";
 import { AccessDenied } from "@/components/shared/access-denied";
-import { EditModeHeader } from "@/components/shared/content/edit-mode-header";
-import { EditorToolbar } from "@/components/shared/content/editor-toolbar";
-import { useModuleEditor } from "@/components/shared/content/hooks/use-module-editor";
-import { MarkdownEditor } from "@/components/shared/content/markdown-editor";
-import { MarkdownViewer } from "@/components/shared/content/markdown-viewer";
+import { ContentHeader } from "@/components/shared/content/content-header";
+import { useModuleEditor } from "@/components/shared/content/editor/hooks/use-module-editor";
+import { MarkdownEditor } from "@/components/shared/content/editor/markdown-editor";
+import { InlineTOC } from "@/components/shared/content/navigation/inline-toc"; // ✅ Added TOC
+import { TableOfContents } from "@/components/shared/content/navigation/table-of-contents"; // ✅ Added TOC
+import { MarkdownViewer } from "@/components/shared/content/viewer/markdown-viewer";
+import { EditorToolbar, TOOLBAR_PRESETS } from "@/components/shared/controls/editor-toolbar";
 import { EmptyContent } from "@/components/shared/empty/empty-content";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
-import { PreviewBanner } from "@/components/shared/preview/preview-banner";
+import { PreviewLayout } from "@/components/shared/preview/preview-layout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,23 +21,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { zodValidator } from "@tanstack/zod-adapter";
-import type { Editor } from "@tiptap/react";
-import { useQuery } from "convex/react";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { z } from "zod";
-
 import { CONTENT_STATUS } from "@/lib/constants/content-status";
 import { useCan } from "@/lib/hooks/use-can";
 import { createIdParam } from "@/lib/hooks/use-route-params";
 import { canViewUnpublishedContent } from "@/lib/rbac/permissions";
 import { useUserRole } from "@/lib/rbac/use-user-role";
+import type { TocItem } from "@/lib/tiptap/types"; // ✅ Fixed import
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
+import type { Editor } from "@tiptap/react";
+import { useQuery } from "convex/react";
+import { Loader2 } from "lucide-react";
+import { useCallback, useState } from "react";
+import { z } from "zod";
 
 const moduleSearchSchema = z.object({
   editMode: z.coerce.boolean().default(false),
@@ -58,69 +58,53 @@ function ModulePage() {
   const { editMode } = Route.useSearch();
   const navigate = useNavigate();
   const userRole = useUserRole();
-  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
 
+  // ========================================================================
+  // State
+  // ========================================================================
+  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
+  const [tocItems, setTocItems] = useState<TocItem[]>([]); // ✅ Added TOC
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // ========================================================================
+  // Data Fetching
+  // ========================================================================
   const course = useQuery(api.faculty.courses.getCourseById, {
-    courseId: courseId as Id<"courses">
+    courseId: courseId as Id<"courses">,
   });
   const module = useQuery(api.faculty.modules.getModuleById, {
-    moduleId: moduleId as Id<"modules">
+    moduleId: moduleId as Id<"modules">,
   });
+  const modules = useQuery(
+    api.faculty.navigation.getModulesWithLessons,
+    course ? { courseId: courseId as Id<"courses"> } : "skip"
+  );
   const lessons = useQuery(
     api.faculty.lessons.listLessonsByModule,
     module ? { moduleId: moduleId as Id<"modules"> } : "skip"
   );
 
-  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
-  // This ensures hooks are called in the same order on every render
+  // ========================================================================
+  // Permissions & Editor
+  // ========================================================================
   const { execute: deleteModule, isPending: isDeleting } = useDeleteModule();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
   const canView = useCan("view", "module", { status: module?.status });
   const canEdit = useCan("edit", "module", { status: module?.status });
-  const canDelete = useCan("delete", "module", { status: module?.status });
 
-  const editor = useModuleEditor(
-    moduleId as Id<"modules">,
-    module?.content
-  );
+  const editor = useModuleEditor(moduleId as Id<"modules">, module?.content);
 
-  // STEP 1: Check loading FIRST
-  if (course === undefined || module === undefined || lessons === undefined) {
-    return <LoadingPage message="Loading module..." />;
-  }
-
-  // STEP 2: Check not found
-  if (!course || !module) {
-    return <EmptyContent type="module" />;
-  }
-
-  // STEP 3: Permission check (now using loaded data)
-  if (!canView) {
-    return <AccessDenied message="This module is not published yet" />;
-  }
-
-  const isPreviewMode =
-    userRole &&
-    canViewUnpublishedContent(userRole) &&
-    module.status !== CONTENT_STATUS.PUBLISHED;
-
-  const handleDelete = async () => {
+  // ========================================================================
+  // Handlers
+  // ========================================================================
+  const handleDelete = useCallback(async () => {
     const result = await deleteModule({ moduleId: moduleId as Id<"modules"> });
     if (result.success) {
       setShowDeleteDialog(false);
+      navigate({ to: "/c/$courseId", params: { courseId } });
     }
-  };
+  }, [deleteModule, moduleId, navigate, courseId]);
 
-  const handleEdit = () => {
-    navigate({
-      to: "/c/$courseId/m/$moduleId",
-      params: { courseId, moduleId },
-      search: { editMode: true },
-    });
-  };
-
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     const success = await editor.save();
     if (success) {
       navigate({
@@ -129,107 +113,141 @@ function ModulePage() {
         search: { editMode: false },
       });
     }
-  };
+  }, [editor, navigate, courseId, moduleId]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     editor.cancel();
     navigate({
       to: "/c/$courseId/m/$moduleId",
       params: { courseId, moduleId },
       search: { editMode: false },
     });
+  }, [editor, navigate, courseId, moduleId]);
+
+  // ========================================================================
+  // Loading & Error States
+  // ========================================================================
+  if (
+    course === undefined ||
+    module === undefined ||
+    modules === undefined ||
+    lessons === undefined
+  ) {
+    return <LoadingPage message="Loading module..." />;
+  }
+
+  if (!course || !module) {
+    return <EmptyContent type="module" />;
+  }
+
+  if (!canView) {
+    return <AccessDenied message="This module is not published yet" />;
+  }
+
+  // ========================================================================
+  // Status Config
+  // ========================================================================
+  const statusConfig = {
+    draft: { variant: "secondary" as const, label: "Draft" },
+    pending: { variant: "outline" as const, label: "Pending Review" },
+    approved: { variant: "default" as const, label: "Approved" },
+    published: { variant: "default" as const, label: "Published" },
   };
 
+  const config =
+    statusConfig[module.status as keyof typeof statusConfig] || statusConfig.draft;
+  const showPreviewBanner =
+    userRole &&
+    canViewUnpublishedContent(userRole) &&
+    module.status !== CONTENT_STATUS.PUBLISHED;
+
+  // ========================================================================
+  // Render
+  // ========================================================================
   return (
-    <div className="flex h-full flex-col">
-      {isPreviewMode && (
-        <PreviewBanner status={module.status} contentType="module" />
-      )}
+    <>
+      <PreviewLayout
+        courseId={courseId as Id<"courses">}
+        modules={modules || []}
+        currentModuleId={moduleId as Id<"modules">}
+        contentStatus={module.status}
+        contentType="module"
+        breadcrumb={{
+          courseTitle: course.title,
+          moduleTitle: module.title,
+        }}
+        isEditMode={editMode && canEdit}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isSaving={editor.isSaving}
+        tableOfContents={
+          tocItems.length > 0 ? (
+            <TableOfContents anchors={tocItems} title={module.title} />
+          ) : null
+        } // ✅ Added TOC
+      >
+        <ContentHeader
+          title={module.title}
+          description={module.description}
+          statusBadge={
+            showPreviewBanner ? (
+              <Badge variant={config.variant} className="capitalize">
+                {config.label}
+              </Badge>
+            ) : undefined
+          }
+          variant="module"
+        />
 
-      <div className="shrink-0 border-b bg-background px-8 py-6">
-        <div className="flex items-start justify-between gap-4">
-          <ModuleHeader
-            module={module}
-            userRole={userRole!}
-            onEdit={canEdit ? handleEdit : undefined}
-            onDelete={canDelete ? () => setShowDeleteDialog(true) : undefined}
-          />
-          {canEdit && editMode && (
-            <div className="flex shrink-0 gap-2">
-              <Button
-                onClick={handleCancel}
-                variant="outline"
-                size="sm"
-                disabled={editor.isSaving}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSave}
-                size="sm"
-                disabled={editor.isSaving || !editor.isDirty}
-              >
-                {editor.isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save"
-                )}
-              </Button>
-            </div>
+        <div className="container mx-auto max-w-prose px-4 py-8">
+
+          {/* Mobile TOC */}
+          {tocItems.length > 0 && (
+            <InlineTOC anchors={tocItems} className="mb-6 xl:hidden" />
           )}
+
+          <section className="pb-4">
+            {!editMode ? (
+              <div className="prose prose-sm lg:prose-base dark:prose-invert max-w-none">
+                <MarkdownViewer
+                  markdown={module.content || ""}
+                  onTocUpdate={setTocItems} // ✅ Added TOC
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6">
+                <EditorToolbar
+                  editor={editorInstance}
+                  isSaving={editor.isSaving}
+                  isDirty={editor.isDirty}
+                  lastSaved={editor.lastSaved}
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                  config={TOOLBAR_PRESETS.full}
+                />
+                <MarkdownEditor
+                  initialMarkdown={module.content || ""}
+                  onUpdate={editor.setMarkdown}
+                  onEditorReady={setEditorInstance}
+                  onTocUpdate={setTocItems} // ✅ Added TOC
+                  placeholder="Describe this module..."
+                />
+              </div>
+            )}
+          </section>
+
+          <section className="pb-4">
+            <ModuleLessonList
+              moduleId={moduleId as Id<"modules">}
+              courseId={courseId as Id<"courses">}
+              lessons={lessons ?? []}
+              userRole={userRole!}
+            />
+          </section>
         </div>
-      </div>
+      </PreviewLayout>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-8 py-8">
-          <Tabs defaultValue="introduction" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="introduction">Introduction</TabsTrigger>
-              <TabsTrigger value="lessons">Lessons ({lessons?.length ?? 0})</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="introduction" className="space-y-4">
-              {!editMode ? (
-                <div className="mx-auto max-w-prose pb-[30vh]">
-                  <MarkdownViewer markdown={module.content || ""} />
-                </div>
-              ) : (
-                <div className="flex flex-col">
-                  <EditModeHeader
-                    isSaving={editor.isSaving}
-                    isDirty={editor.isDirty}
-                    lastSaved={editor.lastSaved}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                  />
-                  <EditorToolbar editor={editorInstance} />
-                  <div className="mx-auto max-w-prose py-6">
-                    <MarkdownEditor
-                      initialMarkdown={module.content || ""}
-                      onUpdate={editor.setMarkdown}
-                      onEditorReady={setEditorInstance}
-                      placeholder="Describe this module..."
-                    />
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="lessons">
-              <ModuleLessonList
-                moduleId={moduleId as Id<"modules">}
-                courseId={courseId as Id<"courses">}
-                lessons={lessons ?? []}
-                userRole={userRole!}
-              />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-
+      {/* Delete Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -258,6 +276,6 @@ function ModulePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import type { Course } from "@/lib/types/course";
-import { CourseInfoCard } from "./course-info-card";
-import { CoverImageCard } from "./cover-image-card";
-import { DangerZoneCard } from "./danger-zone-card";
-import { EnrollmentSettingsCard } from "./enrollment-settings-card";
-import { FacultyAssignmentCard } from "./faculty-assignment-card";
-import { LifecycleCard } from "./lifecycle-card";
-import { MetadataCard } from "./metadata-card";
+import type { Course } from "@/lib/types/course"
+import { CourseInfoCard } from "./course-info-card"
+import { CoverImageCard } from "./cover-image-card"
+import { DangerZoneCard } from "./danger-zone-card"
+import { EnrollmentSettingsCard } from "./enrollment-settings-card"
+import { FacultyAssignmentCard } from "./faculty-assignment-card"
+import { LifecycleCard } from "./lifecycle-card"
+import { MetadataCard } from "./metadata-card"
 
 interface CourseSettingsTabProps {
-  course: Course;
-  onDelete: () => void;
+  course: Course
+  onDelete: () => void
 }
 
 export function CourseSettingsTab({ course, onDelete }: CourseSettingsTabProps) {
@@ -30,6 +30,5 @@ export function CourseSettingsTab({ course, onDelete }: CourseSettingsTabProps) 
         <DangerZoneCard course={course} onDelete={onDelete} />
       </div>
     </div>
-  );
+  )
 }
-

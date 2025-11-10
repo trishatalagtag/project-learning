@@ -1,37 +1,21 @@
-"use client";
+"use client"
 
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import {
-  BookOpenIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
-import { useQuery } from "convex/react";
-import { Loader2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { BookOpenIcon, ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
+import { useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
+import { useMemo, useState } from "react"
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 
-import { ContentStats } from "./course-content-tab/content-stats";
-import { ModuleItem } from "./course-content-tab/module-item";
+import { ContentStats } from "./course-content-tab/content-stats"
+import { ModuleItem } from "./course-content-tab/module-item"
 
 interface CourseContentTabProps {
-  courseId: Id<"courses">;
+  courseId: Id<"courses">
 }
 
 /**
@@ -46,35 +30,35 @@ interface CourseContentTabProps {
 export function CourseContentTab({ courseId }: CourseContentTabProps) {
   const modules = useQuery(api.faculty.modules.listModulesByCourse, {
     courseId,
-  });
+  })
 
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) => {
-      const next = new Set(prev);
+      const next = new Set(prev)
       if (next.has(moduleId)) {
-        next.delete(moduleId);
+        next.delete(moduleId)
       } else {
-        next.add(moduleId);
+        next.add(moduleId)
       }
-      return next;
-    });
-  };
+      return next
+    })
+  }
 
   const expandAll = () => {
     if (modules) {
-      setExpandedModules(new Set(modules.map((m) => m._id)));
+      setExpandedModules(new Set(modules.map((m) => m._id)))
     }
-  };
+  }
 
   const collapseAll = () => {
-    setExpandedModules(new Set());
-  };
+    setExpandedModules(new Set())
+  }
 
   const allExpanded = useMemo(() => {
-    return modules && expandedModules.size === modules.length;
-  }, [modules, expandedModules]);
+    return modules && expandedModules.size === modules.length
+  }, [modules, expandedModules])
 
   // Loading state
   if (modules === undefined) {
@@ -87,7 +71,7 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
           </div>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   // Empty state
@@ -102,14 +86,14 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
               </EmptyMedia>
               <EmptyTitle>No modules yet</EmptyTitle>
               <EmptyDescription>
-                This course doesn't have any modules. Faculty can create modules in
-                the faculty dashboard.
+                This course doesn't have any modules. Faculty can create modules in the faculty
+                dashboard.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -124,11 +108,7 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
           </div>
           {modules.length > 1 && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={allExpanded ? collapseAll : expandAll}
-              >
+              <Button variant="outline" size="sm" onClick={allExpanded ? collapseAll : expandAll}>
                 {allExpanded ? (
                   <>
                     <ChevronRightIcon className="mr-2 h-4 w-4" />
@@ -162,5 +142,5 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
         ))}
       </CardContent>
     </Card>
-  );
+  )
 }

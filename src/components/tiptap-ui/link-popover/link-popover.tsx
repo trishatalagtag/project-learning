@@ -20,17 +20,9 @@ import { useLinkPopover } from "@/components/tiptap-ui/link-popover"
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button"
 import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/tiptap-ui-primitive/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/tiptap-ui-primitive/popover"
 import { Separator } from "@/components/tiptap-ui-primitive/separator"
-import {
-  Card,
-  CardBody,
-  CardItemGroup,
-} from "@/components/tiptap-ui-primitive/card"
+import { Card, CardBody, CardItemGroup } from "@/components/tiptap-ui-primitive/card"
 import { Input, InputGroup } from "@/components/tiptap-ui-primitive/input"
 
 export interface LinkMainProps {
@@ -60,9 +52,7 @@ export interface LinkMainProps {
   isActive: boolean
 }
 
-export interface LinkPopoverProps
-  extends Omit<ButtonProps, "type">,
-    UseLinkPopoverConfig {
+export interface LinkPopoverProps extends Omit<ButtonProps, "type">, UseLinkPopoverConfig {
   /**
    * Callback for when the popover opens or closes.
    */
@@ -94,7 +84,7 @@ export const LinkButton = forwardRef<HTMLButtonElement, ButtonProps>(
         {children || <LinkIcon className="tiptap-button-icon" />}
       </Button>
     )
-  }
+  },
 )
 
 LinkButton.displayName = "LinkButton"
@@ -216,34 +206,24 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
       children,
       ...buttonProps
     },
-    ref
+    ref,
   ) => {
     const { editor } = useTiptapEditor(providedEditor)
     const [isOpen, setIsOpen] = useState(false)
 
-    const {
-      isVisible,
-      canSet,
-      isActive,
-      url,
-      setUrl,
-      setLink,
-      removeLink,
-      openLink,
-      label,
-      Icon,
-    } = useLinkPopover({
-      editor,
-      hideWhenUnavailable,
-      onSetLink,
-    })
+    const { isVisible, canSet, isActive, url, setUrl, setLink, removeLink, openLink, label, Icon } =
+      useLinkPopover({
+        editor,
+        hideWhenUnavailable,
+        onSetLink,
+      })
 
     const handleOnOpenChange = useCallback(
       (nextIsOpen: boolean) => {
         setIsOpen(nextIsOpen)
         onOpenChange?.(nextIsOpen)
       },
-      [onOpenChange]
+      [onOpenChange],
     )
 
     const handleSetLink = useCallback(() => {
@@ -257,7 +237,7 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
         if (event.defaultPrevented) return
         setIsOpen(!isOpen)
       },
-      [onClick, isOpen]
+      [onClick, isOpen],
     )
 
     useEffect(() => {
@@ -299,7 +279,7 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
         </PopoverContent>
       </Popover>
     )
-  }
+  },
 )
 
 LinkPopover.displayName = "LinkPopover"

@@ -1,8 +1,8 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface LoadingSkeletonProps {
-  lines?: number;
-  className?: string;
+  lines?: number
+  className?: string
 }
 
 export function LoadingSkeleton({ lines = 3, className }: LoadingSkeletonProps) {
@@ -12,6 +12,5 @@ export function LoadingSkeleton({ lines = 3, className }: LoadingSkeletonProps) 
         <Skeleton key={i} className="h-4 w-full mb-2" />
       ))}
     </div>
-  );
+  )
 }
-

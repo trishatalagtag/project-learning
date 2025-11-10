@@ -1,29 +1,25 @@
-"use client";
+"use client"
 
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { CONTENT_STATUS } from "@/lib/constants/content-status";
-import {
-  ExclamationTriangleIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { CONTENT_STATUS } from "@/lib/constants/content-status"
+import { ExclamationTriangleIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline"
+import { useNavigate, useSearch } from "@tanstack/react-router"
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
   type SortingState,
   type VisibilityState,
-} from "@tanstack/react-table";
-import { useDebounce } from "@uidotdev/usehooks";
-import { useQuery } from "convex/react";
-import { Loader2 } from "lucide-react";
-import { useMemo } from "react";
+} from "@tanstack/react-table"
+import { useDebounce } from "@uidotdev/usehooks"
+import { useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
+import { useMemo } from "react"
 
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
-import { Button } from "@/components/ui/button";
+import { DataTablePagination } from "@/components/data-table/data-table-pagination"
+import { DataTableViewOptions } from "@/components/data-table/data-table-view-options"
+import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -31,15 +27,15 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/empty"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -47,23 +43,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { createColumns } from "./columns";
+} from "@/components/ui/table"
+import { createColumns } from "./columns"
 
 export function CoursesTable() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const search = useSearch({ from: "/_authenticated/_admin/a/courses" }) as {
-    columnVisibility?: Record<string, boolean>;
-    rowSelection?: Record<string, boolean>;
-    pageIndex?: number;
-    pageSize?: number;
-    q?: string;
-    status?: string;
-    categoryId?: string;
-    teacherId?: string;
-    sortBy?: string;
-    sortOrder?: "asc" | "desc";
-  };
+    columnVisibility?: Record<string, boolean>
+    rowSelection?: Record<string, boolean>
+    pageIndex?: number
+    pageSize?: number
+    q?: string
+    status?: string
+    categoryId?: string
+    teacherId?: string
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+  }
 
   const {
     columnVisibility = {},
@@ -76,17 +72,17 @@ export function CoursesTable() {
     teacherId = "",
     sortBy = "createdAt",
     sortOrder = "desc",
-  } = search;
+  } = search
 
-  const debouncedSearch = useDebounce(q, 300);
+  const debouncedSearch = useDebounce(q, 300)
 
   // Fetch categories for filter
-  const categories = useQuery(api.admin.categories.listCategories);
+  const categories = useQuery(api.admin.categories.listCategories)
 
   // Fetch faculty for filter
   const faculty = useQuery(api.admin.users.listUsersByRole, {
     role: "FACULTY",
-  });
+  })
 
   // Fetch courses with server-side pagination and sorting
   const coursesData = useQuery(api.admin.courses.listAllCourses, {
@@ -95,34 +91,42 @@ export function CoursesTable() {
     sortBy,
     sortOrder,
     search: debouncedSearch || undefined,
-    status: status === "all" ? undefined : (status === CONTENT_STATUS.DRAFT || status === CONTENT_STATUS.PENDING || status === CONTENT_STATUS.APPROVED || status === CONTENT_STATUS.PUBLISHED ? status as "draft" | "pending" | "approved" | "published" : status as "archived"),
+    status:
+      status === "all"
+        ? undefined
+        : status === CONTENT_STATUS.DRAFT ||
+            status === CONTENT_STATUS.PENDING ||
+            status === CONTENT_STATUS.APPROVED ||
+            status === CONTENT_STATUS.PUBLISHED
+          ? (status as "draft" | "pending" | "approved" | "published")
+          : (status as "archived"),
     categoryId: categoryId ? (categoryId as Id<"categories">) : undefined,
     teacherId: teacherId || undefined,
-  });
+  })
 
-  const data = coursesData?.courses ?? [];
-  const totalCourses = coursesData?.total ?? 0;
-  const pageCount = Math.ceil(totalCourses / pageSize);
+  const data = coursesData?.courses ?? []
+  const totalCourses = coursesData?.total ?? 0
+  const pageCount = Math.ceil(totalCourses / pageSize)
 
   const updateSearch = (updates: Partial<typeof search>) => {
     navigate({
       // @ts-ignore - prev is not typed
       search: (prev: typeof search) => ({ ...prev, ...updates }),
       replace: true,
-    });
-  };
+    })
+  }
 
   const handleView = (courseId: Id<"courses">) => {
-    navigate({ to: "/a/courses/$courseId", params: { courseId } });
-  };
+    navigate({ to: "/a/courses/$courseId", params: { courseId } })
+  }
 
   const columns = useMemo(
     () =>
       createColumns({
         onView: handleView,
       }),
-    []
-  );
+    [],
+  )
 
   const table = useReactTable({
     data,
@@ -138,49 +142,40 @@ export function CoursesTable() {
       const newSorting =
         typeof updater === "function"
           ? updater([{ id: sortBy, desc: sortOrder === "desc" }])
-          : updater;
+          : updater
 
       if (newSorting.length > 0) {
         updateSearch({
           sortBy: newSorting[0].id,
           sortOrder: newSorting[0].desc ? "desc" : "asc",
           pageIndex: 0,
-        });
+        })
       }
     },
     onColumnVisibilityChange: (updater) => {
       const newVisibility =
-        typeof updater === "function"
-          ? updater(columnVisibility as VisibilityState)
-          : updater;
-      updateSearch({ columnVisibility: newVisibility });
+        typeof updater === "function" ? updater(columnVisibility as VisibilityState) : updater
+      updateSearch({ columnVisibility: newVisibility })
     },
     onRowSelectionChange: (updater) => {
-      const newSelection =
-        typeof updater === "function" ? updater(rowSelection) : updater;
-      updateSearch({ rowSelection: newSelection });
+      const newSelection = typeof updater === "function" ? updater(rowSelection) : updater
+      updateSearch({ rowSelection: newSelection })
     },
     onPaginationChange: (updater) => {
       const newPagination =
-        typeof updater === "function"
-          ? updater({ pageIndex, pageSize })
-          : updater;
+        typeof updater === "function" ? updater({ pageIndex, pageSize }) : updater
       updateSearch({
         pageIndex: newPagination.pageIndex,
         pageSize: newPagination.pageSize,
-      });
+      })
     },
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
-  });
+  })
 
   // Loading state
-  if (
-    coursesData === undefined ||
-    categories === undefined ||
-    faculty === undefined
-  ) {
+  if (coursesData === undefined || categories === undefined || faculty === undefined) {
     return (
       <div className="container mx-auto py-10">
         <Empty>
@@ -193,17 +188,11 @@ export function CoursesTable() {
           </EmptyHeader>
         </Empty>
       </div>
-    );
+    )
   }
 
   // Empty state (no filters applied)
-  if (
-    data.length === 0 &&
-    !q &&
-    status === "all" &&
-    !categoryId &&
-    !teacherId
-  ) {
+  if (data.length === 0 && !q && status === "all" && !categoryId && !teacherId) {
     return (
       <div className="container mx-auto py-10">
         <Empty>
@@ -212,9 +201,7 @@ export function CoursesTable() {
               <MagnifyingGlassIcon className="h-12 w-12 text-muted-foreground" />
             </EmptyMedia>
             <EmptyTitle>No courses yet</EmptyTitle>
-            <EmptyDescription>
-              Get started by creating your first course.
-            </EmptyDescription>
+            <EmptyDescription>Get started by creating your first course.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={() => navigate({ to: "/a/courses/new" })}>
@@ -224,7 +211,7 @@ export function CoursesTable() {
           </EmptyContent>
         </Empty>
       </div>
-    );
+    )
   }
 
   return (
@@ -233,9 +220,7 @@ export function CoursesTable() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Courses</h1>
-          <p className="text-muted-foreground">
-            Manage your course catalog and enrollments
-          </p>
+          <p className="text-muted-foreground">Manage your course catalog and enrollments</p>
         </div>
         <Button onClick={() => navigate({ to: "/a/courses/new" })}>
           <PlusIcon className="mr-2 h-4 w-4" />
@@ -335,9 +320,8 @@ export function CoursesTable() {
         {/* Results info */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div>
-            Showing {pageIndex * pageSize + 1}-
-            {Math.min((pageIndex + 1) * pageSize, totalCourses)} of{" "}
-            {totalCourses} courses
+            Showing {pageIndex * pageSize + 1}-{Math.min((pageIndex + 1) * pageSize, totalCourses)}{" "}
+            of {totalCourses} courses
           </div>
         </div>
       </div>
@@ -371,10 +355,7 @@ export function CoursesTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <ExclamationTriangleIcon className="h-8 w-8" />
                     <p>No courses found{q && ` matching "${q}"`}</p>
@@ -388,6 +369,5 @@ export function CoursesTable() {
 
       <DataTablePagination table={table} />
     </div>
-  );
+  )
 }
-

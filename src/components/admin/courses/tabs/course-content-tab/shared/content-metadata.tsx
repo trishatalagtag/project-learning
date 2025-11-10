@@ -1,24 +1,15 @@
-import { CalendarIcon } from "@heroicons/react/24/outline";
-import { formatDistanceToNow } from "date-fns";
+import { CalendarIcon } from "@heroicons/react/24/outline"
+import { formatDistanceToNow } from "date-fns"
 
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface ContentMetadataProps {
-  createdAt: number;
-  updatedAt: number;
-  className?: string;
+  createdAt: number
+  updatedAt: number
+  className?: string
 }
 
-export function ContentMetadata({
-  createdAt,
-  updatedAt,
-  className,
-}: ContentMetadataProps) {
+export function ContentMetadata({ createdAt, updatedAt, className }: ContentMetadataProps) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -36,6 +27,5 @@ export function ContentMetadata({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  );
+  )
 }
-

@@ -24,7 +24,10 @@ interface PasswordFieldProps extends Omit<React.ComponentProps<"input">, "type" 
 }
 
 export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
-  ({ id, label = "Password", showStrength = false, error, value = "", name, onChange, onBlur }, ref) => {
+  (
+    { id, label = "Password", showStrength = false, error, value = "", name, onChange, onBlur },
+    ref,
+  ) => {
     const [isVisible, setIsVisible] = useState(false)
 
     const toggleVisibility = () => setIsVisible((prevState) => !prevState)
@@ -88,11 +91,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
               aria-label={isVisible ? "Hide password" : "Show password"}
               tabIndex={-1}
             >
-              {isVisible ? (
-                <EyeOffIcon className="h-4 w-4" />
-              ) : (
-                <EyeIcon className="h-4 w-4" />
-              )}
+              {isVisible ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
             </button>
           </div>
           {error && <FieldError>{error}</FieldError>}
@@ -113,9 +112,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
                 />
               </div>
 
-              <FieldDescription>
-                {getStrengthText(strengthScore)}. Must contain:
-              </FieldDescription>
+              <FieldDescription>{getStrengthText(strengthScore)}. Must contain:</FieldDescription>
 
               <ul className="space-y-1.5" aria-label="Password requirements">
                 {strength.map((req, index) => (
@@ -138,7 +135,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
         </FieldContent>
       </Field>
     )
-  }
+  },
 )
 
 PasswordField.displayName = "PasswordField"

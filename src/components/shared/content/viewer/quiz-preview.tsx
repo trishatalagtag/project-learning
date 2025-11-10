@@ -1,32 +1,32 @@
-"use client";
+"use client"
 
-import { EmptyContent } from "@/components/shared/empty/empty-content";
-import { LoadingSpinner } from "@/components/shared/loading/loading-spinner";
-import type { Id } from "@/convex/_generated/dataModel";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/outline";
-import { useQuiz } from "./hooks/use-quiz";
+import { EmptyContent } from "@/components/shared/empty/empty-content"
+import { LoadingSpinner } from "@/components/shared/loading/loading-spinner"
+import type { Id } from "@/convex/_generated/dataModel"
+import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/outline"
+import { useQuiz } from "./hooks/use-quiz"
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
 interface QuizPreviewProps {
-  quizId: Id<"quizzes">;
+  quizId: Id<"quizzes">
 }
 
 export function QuizPreview({ quizId }: QuizPreviewProps) {
-  const { quiz, isLoading, isNotFound } = useQuiz(quizId);
+  const { quiz, isLoading, isNotFound } = useQuiz(quizId)
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <LoadingSpinner size="lg" />
       </div>
-    );
+    )
   }
 
   if (isNotFound || !quiz) {
-    return <EmptyContent type="lesson" message="Quiz not found" />;
+    return <EmptyContent type="lesson" message="Quiz not found" />
   }
 
   return (
@@ -92,14 +92,15 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
                 {question.options && (
                   <div className="space-y-2 mt-3">
                     {question.options.map((option, optIndex) => {
-                      const isCorrect = question.correctIndex === optIndex;
+                      const isCorrect = question.correctIndex === optIndex
                       return (
                         <div
                           key={optIndex}
-                          className={`flex items-start gap-2 p-2 rounded-md border ${isCorrect
-                            ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900"
-                            : "bg-muted/30 border-border"
-                            }`}
+                          className={`flex items-start gap-2 p-2 rounded-md border ${
+                            isCorrect
+                              ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900"
+                              : "bg-muted/30 border-border"
+                          }`}
                         >
                           <span className="font-mono text-xs font-semibold mt-0.5">
                             {String.fromCharCode(65 + optIndex)}.
@@ -109,7 +110,7 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
                             <CheckCircleIcon className="h-4 w-4 text-green-600 shrink-0" />
                           )}
                         </div>
-                      );
+                      )
                     })}
                   </div>
                 )}
@@ -131,6 +132,5 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
-

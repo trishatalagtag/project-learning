@@ -1,4 +1,4 @@
-import type { Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel"
 
 import {
   ApprovalButtonGroup,
@@ -6,23 +6,23 @@ import {
   EditButtonGroup,
   PublishButtonGroup,
   UnpublishButtonGroup,
-} from "./action-button-groups";
+} from "./action-button-groups"
 
 interface AdminActionsProps {
-  courseId: Id<"courses">;
-  moduleId: Id<"modules">;
-  lessonId: Id<"lessons">;
-  lessonStatus: string;
-  canEdit: boolean;
-  canApprove: boolean;
-  onEdit: () => void;
-  onApprove?: () => void;
-  onReject?: () => void;
-  onPublish: () => void;
-  onUnpublish: () => void;
-  onDelete: () => void;
-  isApproving: boolean;
-  isPublishing: boolean;
+  courseId: Id<"courses">
+  moduleId: Id<"modules">
+  lessonId: Id<"lessons">
+  lessonStatus: string
+  canEdit: boolean
+  canApprove: boolean
+  onEdit: () => void
+  onApprove?: () => void
+  onReject?: () => void
+  onPublish: () => void
+  onUnpublish: () => void
+  onDelete: () => void
+  isApproving: boolean
+  isPublishing: boolean
 }
 
 export function AdminActions({
@@ -41,13 +41,13 @@ export function AdminActions({
   isApproving,
   isPublishing,
 }: AdminActionsProps) {
-  const isPending = lessonStatus === "pending";
-  const isApproved = lessonStatus === "approved";
-  const isPublished = lessonStatus === "published";
-  const isDraft = lessonStatus === "draft";
+  const isPending = lessonStatus === "pending"
+  const isApproved = lessonStatus === "approved"
+  const isPublished = lessonStatus === "published"
+  const isDraft = lessonStatus === "draft"
 
   return (
-    <div className="flex items-center gap-3 flex-wrap">
+    <div className="flex flex-wrap items-center gap-3">
       {/* Draft Status */}
       {isDraft && (
         <>
@@ -92,6 +92,5 @@ export function AdminActions({
         </>
       )}
     </div>
-  );
+  )
 }
-

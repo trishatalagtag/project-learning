@@ -1,57 +1,49 @@
-"use client";
+"use client"
 
-import { api } from "@/convex/_generated/api";
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import type { api } from "@/convex/_generated/api"
+import { ATTACHMENT_TYPE, ATTACHMENT_TYPE_CONFIG } from "@/lib/constants/attachment-types"
 import {
   AcademicCapIcon,
   DocumentTextIcon,
   FolderIcon,
   PlayCircleIcon,
   QuestionMarkCircleIcon,
-} from "@heroicons/react/24/outline";
-import type { FunctionReturnType } from "convex/server";
+} from "@heroicons/react/24/outline"
+import type { FunctionReturnType } from "convex/server"
+import { VideoPlayer } from "../viewer/video-player"
+import { AssignmentPreview } from "./assignment-preview"
+import { QuizPreview } from "./quiz-preview"
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ATTACHMENT_TYPE, ATTACHMENT_TYPE_CONFIG } from "@/lib/constants/attachment-types";
-
-import { AssignmentPreview } from "./assignment-preview";
-import { QuizPreview } from "./quiz-preview";
-import { VideoPlayer } from "./video-player";
-
-type Attachment = FunctionReturnType<
-  typeof api.faculty.attachments.listAttachmentsByLesson
->[number];
+type Attachment = FunctionReturnType<typeof api.faculty.attachments.listAttachmentsByLesson>[number]
 
 interface AttachmentItemProps {
-  attachment: Attachment;
+  attachment: Attachment
 }
 
 export function AttachmentItem({ attachment }: AttachmentItemProps) {
   const getIcon = () => {
     switch (attachment.type) {
       case ATTACHMENT_TYPE.VIDEO:
-        return PlayCircleIcon;
+        return PlayCircleIcon
       case ATTACHMENT_TYPE.QUIZ:
-        return QuestionMarkCircleIcon;
+        return QuestionMarkCircleIcon
       case ATTACHMENT_TYPE.ASSIGNMENT:
-        return AcademicCapIcon;
+        return AcademicCapIcon
       case ATTACHMENT_TYPE.GUIDE:
-        return DocumentTextIcon;
+        return DocumentTextIcon
       case ATTACHMENT_TYPE.RESOURCE:
-        return FolderIcon;
+        return FolderIcon
       default:
-        return DocumentTextIcon;
+        return DocumentTextIcon
     }
-  };
+  }
 
-  const Icon = getIcon();
-  const typeConfig = ATTACHMENT_TYPE_CONFIG[attachment.type as keyof typeof ATTACHMENT_TYPE_CONFIG];
-  const typeLabel = typeConfig?.label || attachment.type;
+  const Icon = getIcon()
+  const typeConfig = ATTACHMENT_TYPE_CONFIG[attachment.type as keyof typeof ATTACHMENT_TYPE_CONFIG]
+  const typeLabel = typeConfig?.label || attachment.type
 
   return (
     <Collapsible>
@@ -61,10 +53,10 @@ export function AttachmentItem({ attachment }: AttachmentItemProps) {
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Icon className="h-5 w-5" />
             </div>
-            <div className="flex-1 text-left min-w-0">
-              <p className="font-medium text-sm truncate">{attachment.title}</p>
+            <div className="min-w-0 flex-1 text-left">
+              <p className="truncate font-medium text-sm">{attachment.title}</p>
               {attachment.description && (
-                <p className="text-xs text-muted-foreground truncate mt-0.5">
+                <p className="mt-0.5 truncate text-muted-foreground text-xs">
                   {attachment.description}
                 </p>
               )}
@@ -99,7 +91,7 @@ export function AttachmentItem({ attachment }: AttachmentItemProps) {
             {/* Resource */}
             {attachment.type === ATTACHMENT_TYPE.RESOURCE && attachment.fileId && (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {attachment.description || "Download this resource"}
                 </p>
                 {/* Resource download handled by parent */}
@@ -109,7 +101,7 @@ export function AttachmentItem({ attachment }: AttachmentItemProps) {
             {/* Guide */}
             {attachment.type === ATTACHMENT_TYPE.GUIDE && (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {attachment.description || "Interactive guide"}
                 </p>
                 {attachment.stepCount && (
@@ -121,6 +113,5 @@ export function AttachmentItem({ attachment }: AttachmentItemProps) {
         </CollapsibleContent>
       </Card>
     </Collapsible>
-  );
+  )
 }
-

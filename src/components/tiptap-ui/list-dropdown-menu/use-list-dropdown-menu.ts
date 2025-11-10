@@ -66,28 +66,18 @@ export const listOptions: ListOption[] = [
   },
 ]
 
-export function canToggleAnyList(
-  editor: Editor | null,
-  listTypes: ListType[]
-): boolean {
+export function canToggleAnyList(editor: Editor | null, listTypes: ListType[]): boolean {
   if (!editor || !editor.isEditable) return false
   return listTypes.some((type) => canToggleList(editor, type))
 }
 
-export function isAnyListActive(
-  editor: Editor | null,
-  listTypes: ListType[]
-): boolean {
+export function isAnyListActive(editor: Editor | null, listTypes: ListType[]): boolean {
   if (!editor || !editor.isEditable) return false
   return listTypes.some((type) => isListActive(editor, type))
 }
 
-export function getFilteredListOptions(
-  availableTypes: ListType[]
-): typeof listOptions {
-  return listOptions.filter(
-    (option) => !option.type || availableTypes.includes(option.type)
-  )
+export function getFilteredListOptions(availableTypes: ListType[]): typeof listOptions {
+  return listOptions.filter((option) => !option.type || availableTypes.includes(option.type))
 }
 
 export function shouldShowListDropdown(params: {
@@ -115,7 +105,7 @@ export function shouldShowListDropdown(params: {
  */
 export function getActiveListType(
   editor: Editor | null,
-  availableTypes: ListType[]
+  availableTypes: ListType[],
 ): ListType | undefined {
   if (!editor || !editor.isEditable) return undefined
   return availableTypes.find((type) => isListActive(editor, type))
@@ -190,7 +180,7 @@ export function useListDropdownMenu(config?: UseListDropdownMenuConfig) {
           hideWhenUnavailable,
           listInSchema,
           canToggleAny,
-        })
+        }),
       )
     }
 

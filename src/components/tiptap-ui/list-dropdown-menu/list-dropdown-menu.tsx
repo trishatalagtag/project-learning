@@ -59,19 +59,18 @@ export function ListDropdownMenu({
   const { editor } = useTiptapEditor(providedEditor)
   const [isOpen, setIsOpen] = useState(false)
 
-  const { filteredLists, canToggle, isActive, isVisible, Icon } =
-    useListDropdownMenu({
-      editor,
-      types,
-      hideWhenUnavailable,
-    })
+  const { filteredLists, canToggle, isActive, isVisible, Icon } = useListDropdownMenu({
+    editor,
+    types,
+    hideWhenUnavailable,
+  })
 
   const handleOnOpenChange = useCallback(
     (open: boolean) => {
       setIsOpen(open)
       onOpenChange?.(open)
     },
-    [onOpenChange]
+    [onOpenChange],
   )
 
   if (!isVisible || !editor || !editor.isEditable) {

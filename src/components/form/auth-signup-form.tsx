@@ -17,7 +17,7 @@ import type { Mode, Role } from "@/models/schema"
 import { CameraIcon } from "@heroicons/react/24/outline"
 import { useNavigate } from "@tanstack/react-router"
 import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel"
 import { useMutation } from "convex/react"
 import { useRef, useState } from "react"
 import { useForm } from "react-hook-form"

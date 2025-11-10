@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   ArrowPathIcon,
@@ -6,96 +6,84 @@ import {
   ClipboardDocumentIcon,
   PencilIcon,
   XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
+} from "@heroicons/react/24/outline"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import * as z from "zod"
 
-import { useCourseMutations } from "@/hooks/use-course-mutations";
-import type { Course } from "@/lib/types/course";
+import { useCourseMutations } from "@/hooks/use-course-mutations"
+import type { Course } from "@/lib/types/course"
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemGroup,
-  ItemTitle
-} from "@/components/ui/item";
-import { Switch } from "@/components/ui/switch";
+  ItemTitle,
+} from "@/components/ui/item"
+import { Switch } from "@/components/ui/switch"
 
 const enrollmentCodeSchema = z.object({
   code: z.string().min(6, "Code must be at least 6 characters"),
-});
+})
 
 interface EnrollmentSettingsCardProps {
-  course: Course;
+  course: Course
 }
 
 export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) {
-  const mutations = useCourseMutations(course._id);
+  const mutations = useCourseMutations(course._id)
 
-  const [editingCode, setEditingCode] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [editingCode, setEditingCode] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const codeForm = useForm<z.infer<typeof enrollmentCodeSchema>>({
     resolver: zodResolver(enrollmentCodeSchema),
     defaultValues: { code: course.enrollmentCode || "" },
-  });
+  })
 
   const handleToggleEnrollment = async (isOpen: boolean) => {
-    await mutations.toggleEnrollment(isOpen);
-  };
+    await mutations.toggleEnrollment(isOpen)
+  }
 
   const handleGenerateCode = () => {
-    const code = Math.random().toString(36).substring(2, 10).toUpperCase();
-    codeForm.setValue("code", code);
-  };
+    const code = Math.random().toString(36).substring(2, 10).toUpperCase()
+    codeForm.setValue("code", code)
+  }
 
   const handleSaveCode = async (values: z.infer<typeof enrollmentCodeSchema>) => {
-    setIsSaving(true);
-    setError(null);
-    const result = await mutations.updateCode(values.code);
+    setIsSaving(true)
+    setError(null)
+    const result = await mutations.updateCode(values.code)
     if (result.success) {
-      setEditingCode(false);
+      setEditingCode(false)
     } else {
-      setError(result.error || "Failed to save");
+      setError(result.error || "Failed to save")
     }
-    setIsSaving(false);
-  };
+    setIsSaving(false)
+  }
 
   const handleCopyCode = () => {
     if (course.enrollmentCode) {
-      navigator.clipboard.writeText(course.enrollmentCode);
-      toast.success("Enrollment code copied to clipboard");
+      navigator.clipboard.writeText(course.enrollmentCode)
+      toast.success("Enrollment code copied to clipboard")
     }
-  };
+  }
 
   const handleCancel = () => {
-    codeForm.reset();
-    setEditingCode(false);
-    setError(null);
-  };
+    codeForm.reset()
+    setEditingCode(false)
+    setError(null)
+  }
 
   return (
     <Card>
@@ -108,15 +96,10 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
           <Item variant="outline">
             <ItemContent>
               <ItemTitle>Open Enrollment</ItemTitle>
-              <ItemDescription>
-                Allow students to enroll in this course
-              </ItemDescription>
+              <ItemDescription>Allow students to enroll in this course</ItemDescription>
             </ItemContent>
             <ItemActions>
-              <Switch
-                checked={course.isEnrollmentOpen}
-                onCheckedChange={handleToggleEnrollment}
-              />
+              <Switch checked={course.isEnrollmentOpen} onCheckedChange={handleToggleEnrollment} />
             </ItemActions>
           </Item>
 
@@ -124,10 +107,7 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
             {editingCode ? (
               <div className="flex-1 space-y-2">
                 <Form {...codeForm}>
-                  <form
-                    onSubmit={codeForm.handleSubmit(handleSaveCode)}
-                    className="space-y-2"
-                  >
+                  <form onSubmit={codeForm.handleSubmit(handleSaveCode)} className="space-y-2">
                     <div className="flex items-start gap-2">
                       <FormField
                         control={codeForm.control}
@@ -200,20 +180,12 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
                       <Button variant="ghost" size="sm" onClick={handleCopyCode}>
                         <ClipboardDocumentIcon className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingCode(true)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setEditingCode(true)}>
                         <PencilIcon className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingCode(true)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setEditingCode(true)}>
                       <PencilIcon className="mr-2 h-4 w-4" />
                       Set Enrollment Code
                     </Button>
@@ -225,6 +197,5 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
         </ItemGroup>
       </CardContent>
     </Card>
-  );
+  )
 }
-

@@ -1,26 +1,14 @@
-"use client";
+"use client"
 
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns"
 
-import type { Course } from "@/lib/types/course";
+import type { Course } from "@/lib/types/course"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemTitle
-} from "@/components/ui/item";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "@/components/ui/item"
 
 interface MetadataCardProps {
-  course: Course;
+  course: Course
 }
 
 export function MetadataCard({ course }: MetadataCardProps) {
@@ -40,9 +28,7 @@ export function MetadataCard({ course }: MetadataCardProps) {
                   addSuffix: true,
                 })}
                 <br />
-                <span className="text-xs">
-                  {format(new Date(course.createdAt), "PPP")}
-                </span>
+                <span className="text-xs">{format(new Date(course.createdAt), "PPP")}</span>
               </ItemDescription>
             </ItemContent>
           </Item>
@@ -55,9 +41,7 @@ export function MetadataCard({ course }: MetadataCardProps) {
                   addSuffix: true,
                 })}
                 <br />
-                <span className="text-xs">
-                  {format(new Date(course.updatedAt), "PPP")}
-                </span>
+                <span className="text-xs">{format(new Date(course.updatedAt), "PPP")}</span>
               </ItemDescription>
             </ItemContent>
           </Item>
@@ -82,6 +66,5 @@ export function MetadataCard({ course }: MetadataCardProps) {
         </ItemGroup>
       </CardContent>
     </Card>
-  );
+  )
 }
-

@@ -1,51 +1,49 @@
-"use client";
+"use client"
 
-import { EmptyContent } from "@/components/shared/empty/empty-content";
-import { LoadingSpinner } from "@/components/shared/loading/loading-spinner";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Id } from "@/convex/_generated/dataModel";
-import { BookOpenIcon, PaperClipIcon } from "@heroicons/react/24/outline";
+import { EmptyContent } from "@/components/shared/empty/empty-content"
+import { LoadingSpinner } from "@/components/shared/loading/loading-spinner"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import type { Id } from "@/convex/_generated/dataModel"
+import { BookOpenIcon, PaperClipIcon } from "@heroicons/react/24/outline"
 
-import { AttachmentList } from "./attachment-list";
-import { useLesson } from "./hooks/use-lesson";
-import { TiptapViewer } from "./tiptap-viewer";
+import { AttachmentList } from "./attachment-list"
+import { useLesson } from "./hooks/use-lesson"
+import { MarkdownViewer } from "./viewer/markdown-viewer"
 
 interface LessonViewerProps {
-  lessonId: Id<"lessons">;
+  lessonId: Id<"lessons">
 }
 
 export function LessonViewer({ lessonId }: LessonViewerProps) {
-  const { lesson, isLoading, isNotFound } = useLesson(lessonId);
+  const { lesson, isLoading, isNotFound } = useLesson(lessonId)
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12">
         <div className="flex flex-col items-center gap-3">
           <LoadingSpinner size="lg" />
-          <p className="text-sm text-muted-foreground">Loading lesson...</p>
+          <p className="text-muted-foreground text-sm">Loading lesson...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (isNotFound || !lesson) {
-    return <EmptyContent type="lesson" />;
+    return <EmptyContent type="lesson" />
   }
 
   return (
     <div className="space-y-6">
       {/* Lesson Header */}
       <div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+        <div className="mb-2 flex items-center gap-2 text-muted-foreground text-sm">
           <span>{lesson.courseName}</span>
           <span>→</span>
           <span>{lesson.moduleName}</span>
         </div>
-        <h1 className="text-2xl font-bold">{lesson.title}</h1>
-        {lesson.description && (
-          <p className="text-muted-foreground mt-2">{lesson.description}</p>
-        )}
+        <h1 className="font-bold text-2xl">{lesson.title}</h1>
+        {lesson.description && <p className="mt-2 text-muted-foreground">{lesson.description}</p>}
       </div>
 
       <Separator />
@@ -68,10 +66,10 @@ export function LessonViewer({ lessonId }: LessonViewerProps) {
 
         <TabsContent value="content" className="mt-6">
           {lesson.content ? (
-            <TiptapViewer content={lesson.content} enableToc={true} />
+            <MarkdownViewer markdown={lesson.content} />
           ) : (
-            <div className="text-center p-12 border border-dashed rounded-lg">
-              <p className="text-sm text-muted-foreground">No content yet</p>
+            <div className="rounded-lg border border-dashed p-12 text-center">
+              <p className="text-muted-foreground text-sm">No content yet</p>
             </div>
           )}
         </TabsContent>
@@ -81,6 +79,5 @@ export function LessonViewer({ lessonId }: LessonViewerProps) {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
-

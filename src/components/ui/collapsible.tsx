@@ -1,31 +1,39 @@
+"use client"
+
+import { cn } from "@/lib/utils"
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
+import { forwardRef, useEffect, useState } from "react"
 
-function Collapsible({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
-  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />
-}
+const Collapsible = CollapsiblePrimitive.Root
 
-function CollapsibleTrigger({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>) {
-  return (
-    <CollapsiblePrimitive.CollapsibleTrigger
-      data-slot="collapsible-trigger"
-      {...props}
-    />
-  )
-}
+const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger
 
-function CollapsibleContent({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
+const CollapsibleContent = forwardRef<
+  React.ElementRef<typeof CollapsiblePrimitive.CollapsibleContent>,
+  React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.CollapsibleContent>
+>(({ children, className, ...props }, ref) => {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <CollapsiblePrimitive.CollapsibleContent
-      data-slot="collapsible-content"
+      ref={ref}
+      className={cn(
+        "overflow-hidden",
+        mounted &&
+          "data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down",
+        className,
+      )}
       {...props}
-    />
+    >
+      {children}
+    </CollapsiblePrimitive.CollapsibleContent>
   )
-}
+})
 
-export { Collapsible, CollapsibleTrigger, CollapsibleContent }
+CollapsibleContent.displayName = CollapsiblePrimitive.CollapsibleContent.displayName
+
+export { Collapsible, CollapsibleContent, CollapsibleTrigger }

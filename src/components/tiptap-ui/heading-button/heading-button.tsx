@@ -4,14 +4,8 @@ import { forwardRef, useCallback } from "react"
 import { parseShortcutKeys } from "@/lib/tiptap-utils"
 
 // --- Tiptap UI ---
-import type {
-  Level,
-  UseHeadingConfig,
-} from "@/components/tiptap-ui/heading-button"
-import {
-  HEADING_SHORTCUT_KEYS,
-  useHeading,
-} from "@/components/tiptap-ui/heading-button"
+import type { Level, UseHeadingConfig } from "@/components/tiptap-ui/heading-button"
+import { HEADING_SHORTCUT_KEYS, useHeading } from "@/components/tiptap-ui/heading-button"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button"
@@ -19,9 +13,7 @@ import { Button } from "@/components/tiptap-ui-primitive/button"
 import { Badge } from "@/components/tiptap-ui-primitive/badge"
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 
-export interface HeadingButtonProps
-  extends Omit<ButtonProps, "type">,
-    UseHeadingConfig {
+export interface HeadingButtonProps extends Omit<ButtonProps, "type">, UseHeadingConfig {
   /**
    * Optional text to display alongside the icon.
    */
@@ -61,18 +53,10 @@ export const HeadingButton = forwardRef<HTMLButtonElement, HeadingButtonProps>(
       children,
       ...buttonProps
     },
-    ref
+    ref,
   ) => {
     const { editor } = useTiptapEditor(providedEditor)
-    const {
-      isVisible,
-      canToggle,
-      isActive,
-      handleToggle,
-      label,
-      Icon,
-      shortcutKeys,
-    } = useHeading({
+    const { isVisible, canToggle, isActive, handleToggle, label, Icon, shortcutKeys } = useHeading({
       editor,
       level,
       hideWhenUnavailable,
@@ -85,7 +69,7 @@ export const HeadingButton = forwardRef<HTMLButtonElement, HeadingButtonProps>(
         if (event.defaultPrevented) return
         handleToggle()
       },
-      [handleToggle, onClick]
+      [handleToggle, onClick],
     )
 
     if (!isVisible) {
@@ -112,14 +96,12 @@ export const HeadingButton = forwardRef<HTMLButtonElement, HeadingButtonProps>(
           <>
             <Icon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
-            {showShortcut && (
-              <HeadingShortcutBadge level={level} shortcutKeys={shortcutKeys} />
-            )}
+            {showShortcut && <HeadingShortcutBadge level={level} shortcutKeys={shortcutKeys} />}
           </>
         )}
       </Button>
     )
-  }
+  },
 )
 
 HeadingButton.displayName = "HeadingButton"

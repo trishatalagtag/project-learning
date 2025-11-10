@@ -17,11 +17,7 @@ import { Selection } from "@tiptap/extensions"
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button"
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer"
-import {
-  Toolbar,
-  ToolbarGroup,
-  ToolbarSeparator,
-} from "@/components/tiptap-ui-primitive/toolbar"
+import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar"
 
 // --- Tiptap Node ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
@@ -45,11 +41,7 @@ import {
   ColorHighlightPopoverContent,
   ColorHighlightPopoverButton,
 } from "@/components/tiptap-ui/color-highlight-popover"
-import {
-  LinkPopover,
-  LinkContent,
-  LinkButton,
-} from "@/components/tiptap-ui/link-popover"
+import { LinkPopover, LinkContent, LinkButton } from "@/components/tiptap-ui/link-popover"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
@@ -97,10 +89,7 @@ const MainToolbarContent = ({
 
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
-        <ListDropdownMenu
-          types={["bulletList", "orderedList", "taskList"]}
-          portal={isMobile}
-        />
+        <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} portal={isMobile} />
         <BlockquoteButton />
         <CodeBlockButton />
       </ToolbarGroup>
@@ -175,20 +164,14 @@ const MobileToolbarContent = ({
 
     <ToolbarSeparator />
 
-    {type === "highlighter" ? (
-      <ColorHighlightPopoverContent />
-    ) : (
-      <LinkContent />
-    )}
+    {type === "highlighter" ? <ColorHighlightPopoverContent /> : <LinkContent />}
   </>
 )
 
 export function SimpleEditor() {
   const isMobile = useIsMobile()
   const { height } = useWindowSize()
-  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
-    "main"
-  )
+  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">("main")
   const toolbarRef = useRef<HTMLDivElement>(null)
 
   const editor = useEditor({
@@ -270,11 +253,7 @@ export function SimpleEditor() {
           )}
         </Toolbar>
 
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
+        <EditorContent editor={editor} role="presentation" className="simple-editor-content" />
       </EditorContext.Provider>
     </div>
   )

@@ -1,28 +1,16 @@
-"use client";
+"use client"
 
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline"
 
-import type { Course } from "@/lib/types/course";
+import type { Course } from "@/lib/types/course"
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item"
 
 interface DangerZoneCardProps {
-  course: Course;
-  onDelete: () => void;
+  course: Course
+  onDelete: () => void
 }
 
 export function DangerZoneCard({ course, onDelete }: DangerZoneCardProps) {
@@ -36,9 +24,7 @@ export function DangerZoneCard({ course, onDelete }: DangerZoneCardProps) {
         <Item variant="outline" className="border-destructive">
           <ItemContent>
             <ItemTitle>Delete this course</ItemTitle>
-            <ItemDescription>
-              Once deleted, it cannot be recovered
-            </ItemDescription>
+            <ItemDescription>Once deleted, it cannot be recovered</ItemDescription>
           </ItemContent>
           <ItemActions>
             <Button variant="destructive" onClick={onDelete} size="sm">
@@ -49,6 +35,5 @@ export function DangerZoneCard({ course, onDelete }: DangerZoneCardProps) {
         </Item>
       </CardContent>
     </Card>
-  );
+  )
 }
-

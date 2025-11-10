@@ -129,11 +129,7 @@ export function shouldShowButton(props: {
  * ```
  */
 export function useImageUpload(config?: UseImageUploadConfig) {
-  const {
-    editor: providedEditor,
-    hideWhenUnavailable = false,
-    onInserted,
-  } = config || {}
+  const { editor: providedEditor, hideWhenUnavailable = false, onInserted } = config || {}
 
   const { editor } = useTiptapEditor(providedEditor)
   const isMobile = useIsMobile()
@@ -177,7 +173,7 @@ export function useImageUpload(config?: UseImageUploadConfig) {
       enabled: isVisible && canInsert,
       enableOnContentEditable: !isMobile,
       enableOnFormTags: true,
-    }
+    },
   )
 
   return {
