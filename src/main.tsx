@@ -2,7 +2,7 @@ import { type AuthSession, authClient } from "@/lib/auth"
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { ConvexReactClient } from "convex/react"
-import { NuqsAdapter } from 'nuqs/adapters/react'
+import { NuqsAdapter } from "nuqs/adapters/react"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import "./index.css"

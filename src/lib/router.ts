@@ -4,7 +4,7 @@ export function route<T extends string>(path: T) {
 
 export function routeWithParams<T extends string>(
   path: T,
-  params?: Record<string, string | number>
+  params?: Record<string, string | number>,
 ): string {
   if (!params) return path
 

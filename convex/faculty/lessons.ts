@@ -220,6 +220,8 @@ export const updateLesson = facultyMutation({
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     content: v.optional(v.string()),
+    order: v.optional(v.number()),
+    status: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -249,9 +251,11 @@ export const updateLesson = facultyMutation({
     if (args.title !== undefined) updates.title = args.title;
     if (args.description !== undefined) updates.description = args.description;
     if (args.content !== undefined) updates.content = args.content;
+    if (args.order !== undefined) updates.order = args.order;
+    if (args.status !== undefined) updates.status = args.status;
 
-    // If editing approved lesson, set back to draft on significant change
-    if (lesson.status === "approved" && Object.keys(updates).length > 1) {
+    // If editing approved lesson, set back to draft on significant change (unless status is explicitly set)
+    if (lesson.status === "approved" && args.status === undefined && Object.keys(updates).length > 1) {
       updates.status = "draft";
     }
 

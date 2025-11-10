@@ -1,23 +1,26 @@
 import { TermsDialog } from "@/components/dialogs/terms-dialog"
-import { Avatar } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Description, FieldError, Fieldset, Label } from "@/components/ui/field"
-import { FileTrigger } from "@/components/ui/file-trigger"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { TextField } from "@/components/ui/text-field"
 import { useAvatarUpload } from "@/hooks/use-avatar-upload"
 import { authClient } from "@/lib/auth"
 import { getAvatarUrl, getInitials } from "@/lib/avatar"
 import type { Mode, Role } from "@/models/schema"
 import { CameraIcon } from "@heroicons/react/24/outline"
 import { useNavigate } from "@tanstack/react-router"
-import { api } from "api"
-import type { Id } from "convex/_generated/dataModel"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react"
-import { useState } from "react"
-import { Form } from "react-aria-components"
-import { Controller, useForm } from "react-hook-form"
+import { useRef, useState } from "react"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { PasswordField } from "./password-field"
 
@@ -47,9 +50,10 @@ export function AuthSignUpForm({
   const [avatarStorageId, setAvatarStorageId] = useState<Id<"_storage"> | null>(null)
 
   const {
-    control,
+    register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AuthSignUpValues>({
     defaultValues: {
@@ -62,8 +66,13 @@ export function AuthSignUpForm({
   })
 
   const name = watch("name")
+  const password = watch("password")
+  const acceptTerms = watch("acceptTerms")
 
-  const handleAvatarSelect = async (files: FileList | null) => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
     if (files && files.length > 0) {
       const storageId = await uploadAvatar(files[0])
       if (storageId) {
@@ -114,170 +123,160 @@ export function AuthSignUpForm({
 
   return (
     <>
-      <Form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <Fieldset>
-          <div className="flex flex-col items-center gap-3">
-            <Avatar
-              src={previewUrl || getAvatarUrl({ name })}
-              alt="Profile picture"
-              size="xl"
-              isSquare={false}
-              initials={getInitials(name)}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="flex flex-col items-center gap-3">
+          <Avatar className="size-20">
+            <AvatarImage src={previewUrl || getAvatarUrl({ name })} alt="Profile picture" />
+            <AvatarFallback>{getInitials(name)}</AvatarFallback>
+          </Avatar>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarSelect}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={isUploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <CameraIcon className="mr-2 size-4" />
+            {isUploading ? "Uploading..." : previewUrl ? "Change Photo" : "Upload Photo"}
+          </Button>
+          <p className="text-muted-foreground text-xs">
+            {previewUrl
+              ? "Custom photo uploaded"
+              : "Auto-generated avatar • Upload your own (optional)"}
+          </p>
+        </div>
+
+        <Field data-invalid={!!errors.name}>
+          <FieldContent>
+            <FieldLabel htmlFor="name">Full name</FieldLabel>
+            <Input
+              id="name"
+              aria-invalid={!!errors.name}
+              {...register("name", { required: "Name is required" })}
             />
-            <FileTrigger
-              acceptedFileTypes={["image/*"]}
-              allowsMultiple={false}
-              onSelect={handleAvatarSelect}
-            >
-              <Button type="button" intent="secondary" size="sm" isPending={isUploading}>
-                <CameraIcon className="size-4" />
-                {isUploading ? "Uploading..." : previewUrl ? "Change Photo" : "Upload Photo"}
-              </Button>
-            </FileTrigger>
-            <p className="text-muted-fg text-xs">
-              {previewUrl
-                ? "Custom photo uploaded"
-                : "Auto-generated avatar • Upload your own (optional)"}
-            </p>
+            <FieldError>{errors.name?.message}</FieldError>
+          </FieldContent>
+        </Field>
+
+        <Field data-invalid={!!errors.email}>
+          <FieldContent>
+            <FieldLabel htmlFor="email">
+              Email {role !== "LEARNER" ? `(${role.toLowerCase()})` : ""}
+            </FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              aria-invalid={!!errors.email}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+$/i,
+                  message: "Invalid email address",
+                },
+              })}
+            />
+            {errors.email ? (
+              <FieldError>{errors.email.message}</FieldError>
+            ) : (
+              <FieldDescription>This will be your account email address.</FieldDescription>
+            )}
+          </FieldContent>
+        </Field>
+
+        <PasswordField
+          id="password"
+          label="Password"
+          showStrength
+          error={errors.password?.message}
+          {...register("password", {
+            required: "Password is required",
+            minLength: {
+              value: 8,
+              message: "Password must be at least 8 characters",
+            },
+            validate: (value) => {
+              const hasNumber = /[0-9]/.test(value)
+              const hasLower = /[a-z]/.test(value)
+              const hasUpper = /[A-Z]/.test(value)
+
+              if (!hasNumber || !hasLower || !hasUpper) {
+                return "Password must contain numbers and both uppercase and lowercase letters"
+              }
+              return true
+            },
+          })}
+          value={password}
+        />
+
+        <PasswordField
+          id="confirmPassword"
+          label="Confirm Password"
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword", {
+            required: "Please confirm your password",
+            validate: (value) => {
+              if (value !== password) {
+                return "Passwords do not match"
+              }
+              return true
+            },
+          })}
+        />
+
+        <Field data-invalid={!!errors.acceptTerms}>
+          <div className="flex items-start gap-2">
+            <Checkbox
+              id="acceptTerms"
+              checked={acceptTerms}
+              onCheckedChange={(checked) => setValue("acceptTerms", checked === true)}
+            />
+            <div className="space-y-1 leading-none">
+              <FieldLabel htmlFor="acceptTerms">
+                I agree to the{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(true)}
+                  className="font-medium text-primary underline hover:no-underline"
+                >
+                  Terms and Conditions
+                </button>
+              </FieldLabel>
+              <FieldError>{errors.acceptTerms?.message}</FieldError>
+            </div>
           </div>
+        </Field>
 
-          <Controller
-            name="name"
-            control={control}
-            rules={{ required: "Name is required" }}
-            render={({ field: { ref, ...field } }) => (
-              <TextField isRequired>
-                <Label>Full name</Label>
-                <Input {...field} />
-                <FieldError>{errors.name?.message}</FieldError>
-              </TextField>
-            )}
-          />
+        <input
+          type="hidden"
+          {...register("acceptTerms", {
+            required: "You must accept the terms and conditions",
+          })}
+        />
 
-          <Controller
-            name="email"
-            control={control}
-            rules={{
-              required: "Email is required",
-              pattern: {
-                value: /^\S+@\S+$/i,
-                message: "Invalid email address",
-              },
-            }}
-            render={({ field: { ref, ...field } }) => (
-              <TextField isRequired>
-                <Label>Email {role !== "LEARNER" ? `(${role.toLowerCase()})` : ""}</Label>
-                <Input {...field} type="email" />
-                <FieldError>{errors.email?.message}</FieldError>
-                <Description>This will be your account email address.</Description>
-              </TextField>
-            )}
-          />
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Creating account..." : "Create Account"}
+        </Button>
 
-          <Controller
-            name="password"
-            control={control}
-            rules={{
-              required: "Password is required",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-              validate: (value) => {
-                const hasNumber = /[0-9]/.test(value)
-                const hasLower = /[a-z]/.test(value)
-                const hasUpper = /[A-Z]/.test(value)
+        <div className="mt-4 text-center text-sm">
+          <span className="text-muted-foreground">Already have an account? </span>
+          <button
+            type="button"
+            onClick={() => onSwitchMode?.("signin")}
+            className="font-medium text-primary hover:underline"
+          >
+            Sign in
+          </button>
+        </div>
+      </form>
 
-                if (!hasNumber || !hasLower || !hasUpper) {
-                  return "Password must contain numbers and both uppercase and lowercase letters"
-                }
-                return true
-              },
-            }}
-            render={({ field: { ref, ...field } }) => (
-              <PasswordField
-                {...field}
-                error={errors.password?.message}
-                showStrength={true}
-                isRequired
-                label="Password"
-              />
-            )}
-          />
-
-          <Controller
-            name="confirmPassword"
-            control={control}
-            rules={{
-              required: "Please confirm your password",
-              validate: (value) => {
-                const password = watch("password")
-                if (value !== password) {
-                  return "Passwords do not match"
-                }
-                return true
-              },
-            }}
-            render={({ field: { ref, ...field } }) => (
-              <PasswordField
-                {...field}
-                error={errors.confirmPassword?.message}
-                label="Confirm Password"
-                isRequired
-              />
-            )}
-          />
-
-          <Controller
-            name="acceptTerms"
-            control={control}
-            rules={{
-              required: "You must accept the terms and conditions",
-            }}
-            render={({ field: { value, onChange, ...field } }) => (
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <Checkbox {...field} isSelected={value} onChange={onChange} className="mt-0.5">
-                    <span className="text-sm">
-                      I agree to the{" "}
-                      <button
-                        type="button"
-                        onClick={() => setShowTerms(true)}
-                        className="font-medium text-fg underline hover:no-underline"
-                      >
-                        Terms and Conditions
-                      </button>
-                    </span>
-                  </Checkbox>
-                </div>
-                {errors.acceptTerms && (
-                  <p className="text-danger text-sm">{errors.acceptTerms.message}</p>
-                )}
-              </div>
-            )}
-          />
-
-          <div data-slot="control">
-            <Button type="submit" className={"w-full"} isPending={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Create Account"}
-            </Button>
-          </div>
-
-          <div className="mt-4 text-center text-sm">
-            <span className="text-muted-fg">Already have an account? </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onPress={() => onSwitchMode?.("signin")}
-              className="min-h-0 border-0 p-0 font-medium text-fg hover:underline"
-            >
-              Sign in
-            </Button>
-          </div>
-        </Fieldset>
-      </Form>
-
-      <TermsDialog isOpen={showTerms} onOpenChange={setShowTerms} />
+      <TermsDialog open={showTerms} onOpenChange={setShowTerms} />
     </>
   )
 }

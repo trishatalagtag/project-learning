@@ -1,5 +1,6 @@
-import { QueryCtx, MutationCtx } from "../_generated/server";
 import { Doc, Id } from "../_generated/dataModel";
+import { MutationCtx, QueryCtx } from "../_generated/server";
+import { createUserMap, getUserByUserId } from "./auth";
 
 /**
  * Get parent course for a module
@@ -66,6 +67,8 @@ export async function enrichCourse(
   description: string;
   categoryId: Id<"categories">;
   categoryName: string;
+  teacherId?: string;
+  teacherName?: string;
   status: string;
   enrollmentCount: number;
   moduleCount: number;
@@ -73,17 +76,19 @@ export async function enrichCourse(
   createdAt: number;
   updatedAt: number;
 }> {
-  const category = await ctx.db.get(course.categoryId);
-
-  const [enrollments, modules] = await Promise.all([
+    const [category, teacher, enrollments, modules] = await Promise.all([
+    ctx.db.get(course.categoryId),
+    course.teacherId ? getUserByUserId(ctx, course.teacherId) : null,
     ctx.db
       .query("enrollments")
       .withIndex("by_course", (q) => q.eq("courseId", course._id))
-      .collect(),
+      .collect()
+      .then((items) => items.length),
     ctx.db
       .query("modules")
       .withIndex("by_course", (q) => q.eq("courseId", course._id))
-      .collect(),
+      .collect()
+      .then((items) => items.length),
   ]);
 
   return {
@@ -93,9 +98,11 @@ export async function enrichCourse(
     description: course.description,
     categoryId: course.categoryId,
     categoryName: category?.name ?? "Unknown",
+    teacherId: course.teacherId,
+    teacherName: teacher?.name,
     status: course.status,
-    enrollmentCount: enrollments.length,
-    moduleCount: modules.length,
+    enrollmentCount: enrollments,
+    moduleCount: modules,
     isEnrollmentOpen: course.isEnrollmentOpen,
     createdAt: course.createdAt,
     updatedAt: course.updatedAt,
@@ -116,6 +123,8 @@ export async function enrichCourses(
     description: string;
     categoryId: Id<"categories">;
     categoryName: string;
+    teacherId?: string;
+    teacherName?: string;
     status: string;
     enrollmentCount: number;
     moduleCount: number;
@@ -133,15 +142,20 @@ export async function enrichCourses(
     categories.filter(Boolean).map((c) => [c!._id, c!])
   );
 
-  // Batch load enrollments and modules for all courses
+  // Batch load all teachers
+  const teacherIds = [...new Set(courses.map((c) => c.teacherId).filter((id): id is string => !!id))];
+  const teacherMap = await createUserMap(ctx, teacherIds);
+
+  // Batch load enrollments and modules for all courses (using collect().length for performance)
   const courseIds = courses.map((c) => c._id);
-  const [allEnrollments, allModules] = await Promise.all([
+  const [enrollmentCounts, moduleCounts] = await Promise.all([
     Promise.all(
       courseIds.map((id) =>
         ctx.db
           .query("enrollments")
           .withIndex("by_course", (q) => q.eq("courseId", id))
           .collect()
+          .then((items) => items.length)
       )
     ),
     Promise.all(
@@ -150,6 +164,7 @@ export async function enrichCourses(
           .query("modules")
           .withIndex("by_course", (q) => q.eq("courseId", id))
           .collect()
+          .then((items) => items.length)
       )
     ),
   ]);
@@ -162,9 +177,11 @@ export async function enrichCourses(
     description: course.description,
     categoryId: course.categoryId,
     categoryName: categoryMap.get(course.categoryId)?.name ?? "Unknown",
+    teacherId: course.teacherId,
+    teacherName: course.teacherId ? teacherMap.get(course.teacherId)?.name : undefined,
     status: course.status,
-    enrollmentCount: allEnrollments[idx].length,
-    moduleCount: allModules[idx].length,
+    enrollmentCount: enrollmentCounts[idx],
+    moduleCount: moduleCounts[idx],
     isEnrollmentOpen: course.isEnrollmentOpen,
     createdAt: course.createdAt,
     updatedAt: course.updatedAt,

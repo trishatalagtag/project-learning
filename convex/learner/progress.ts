@@ -2,6 +2,55 @@ import { v } from "convex/values";
 import { learnerMutation, learnerQuery } from "../lib/functions";
 import { Id } from "../_generated/dataModel";
 
+
+export const getLessonProgressByCourse = learnerQuery({
+  args: { courseId: v.id("courses") },
+  returns: v.array(
+    v.object({
+      lessonId: v.id("lessons"),
+      completed: v.boolean(),
+    })
+  ),
+  handler: async (ctx, { courseId }) => {
+    const modules = await ctx.db
+      .query("modules")
+      .withIndex("by_course", (q) => q.eq("courseId", courseId))
+      .collect();
+
+    const lessonIds = (
+      await Promise.all(
+        modules.map((m) =>
+          ctx.db
+            .query("lessons")
+            .withIndex("by_module", (q) => q.eq("moduleId", m._id))
+            .collect()
+        )
+      )
+    )
+      .flat()
+      .map((l) => l._id);
+
+    // Get progress for all lessons
+    const progress = await Promise.all(
+      lessonIds.map(async (lessonId) => {
+        const record = await ctx.db
+          .query("lessonProgress")
+          .withIndex("by_user_and_lesson", (q) =>
+            q.eq("userId", ctx.user.userId).eq("lessonId", lessonId)
+          )
+          .first();
+
+        return {
+          lessonId,
+          completed: record?.completed || false,
+        };
+      })
+    );
+
+    return progress;
+  },
+});
+
 /**
  * Get my overall platform progress summary
  */

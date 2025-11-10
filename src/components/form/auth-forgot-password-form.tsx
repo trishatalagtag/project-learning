@@ -1,10 +1,14 @@
 import { Button } from "@/components/ui/button"
-import { Description, FieldError, Fieldset, Label } from "@/components/ui/field"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { TextField } from "@/components/ui/text-field"
 import { authClient } from "@/lib/auth"
-import { Form } from "react-aria-components"
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 type ForgotPasswordValues = {
@@ -18,7 +22,7 @@ interface ForgotPasswordFormProps {
 
 export function ForgotPasswordForm({ defaultEmail, onSuccess }: ForgotPasswordFormProps) {
   const {
-    control,
+    register,
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<ForgotPasswordValues>({
@@ -58,9 +62,9 @@ export function ForgotPasswordForm({ defaultEmail, onSuccess }: ForgotPasswordFo
   if (isSubmitSuccessful) {
     return (
       <div className="space-y-4 py-4 text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-success/10">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
           <svg
-            className="size-6 text-success"
+            className="size-6 text-green-600 dark:text-green-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -70,7 +74,7 @@ export function ForgotPasswordForm({ defaultEmail, onSuccess }: ForgotPasswordFo
         </div>
         <div>
           <h3 className="font-semibold text-lg">Check your email</h3>
-          <p className="mt-2 text-muted-fg text-sm">
+          <p className="mt-2 text-muted-foreground text-sm">
             We've sent a password reset link to your email address.
           </p>
         </div>
@@ -79,37 +83,36 @@ export function ForgotPasswordForm({ defaultEmail, onSuccess }: ForgotPasswordFo
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <Fieldset>
-        <Controller
-          name="email"
-          control={control}
-          rules={{
-            required: "Email is required",
-            pattern: {
-              value: /^\S+@\S+$/i,
-              message: "Please enter a valid email address",
-            },
-          }}
-          render={({ field: { ref, ...field } }) => (
-            <TextField isRequired isInvalid={!!errors.email}>
-              <Label>Email</Label>
-              <Input {...field} type="email" placeholder="you@example.com" />
-              {errors.email ? (
-                <FieldError>{errors.email.message}</FieldError>
-              ) : (
-                <Description>Enter the email address associated with your account</Description>
-              )}
-            </TextField>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <Field data-invalid={!!errors.email}>
+        <FieldContent>
+          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            aria-invalid={!!errors.email}
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^\S+@\S+$/i,
+                message: "Please enter a valid email address",
+              },
+            })}
+          />
+          {errors.email ? (
+            <FieldError>{errors.email.message}</FieldError>
+          ) : (
+            <FieldDescription>
+              Enter the email address associated with your account
+            </FieldDescription>
           )}
-        />
+        </FieldContent>
+      </Field>
 
-        <div data-slot="control">
-          <Button type="submit" className="w-full" isPending={isSubmitting}>
-            {isSubmitting ? "Sending link..." : "Send Reset Link"}
-          </Button>
-        </div>
-      </Fieldset>
-    </Form>
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Sending link..." : "Send Reset Link"}
+      </Button>
+    </form>
   )
 }

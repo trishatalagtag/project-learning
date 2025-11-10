@@ -1,5 +1,6 @@
 import { _CustomErrorComponent } from "@/components/common/error"
 import { NotFoundComponent } from "@/components/common/not-found"
+import { Toaster } from "@/components/ui/sonner"
 import type { AuthSession } from "@/lib/auth"
 import { authenticateModes, platformRoles } from "@/models/schema"
 import { GlobalModalsProvider } from "@/providers/global-modals"
@@ -16,6 +17,7 @@ const RootLayout = () => (
   <div className="isolate">
     <Outlet />
     <GlobalModalsProvider />
+    <Toaster/>
   </div>
 )
 

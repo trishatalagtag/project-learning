@@ -14,7 +14,7 @@ export async function getCurrentAuthUser(
   return user;
 }
 
-function normalizeUserId(user: AuthDoc<"user"> | null): string | null {
+export function normalizeUserId(user: AuthDoc<"user"> | null): string | null {
   console.log("=== normalizeUserId: INPUT ===", user ? { _id: user._id, userId: user.userId } : null);
   if (!user) return null;
   const result = user.userId ?? String(user._id);

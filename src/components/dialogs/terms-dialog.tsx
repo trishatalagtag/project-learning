@@ -1,27 +1,25 @@
 import { Button } from "@/components/ui/button"
 import {
-  Modal,
-  ModalBody,
-  ModalClose,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalTitle,
-} from "@/components/ui/modal"
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface TermsDialogProps {
-  isOpen: boolean
+  open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function TermsDialog({ isOpen, onOpenChange }: TermsDialogProps) {
+export function TermsDialog({ open, onOpenChange }: TermsDialogProps) {
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-      <ModalContent size="xl">
-        <ModalHeader>
-          <ModalTitle>Terms and Conditions</ModalTitle>
-        </ModalHeader>
-        <ModalBody className="max-h-[60vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Terms and Conditions</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-[60vh] overflow-y-auto">
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <h3 className="font-semibold text-base">1. Acceptance of Terms</h3>
             <p className="text-sm">
@@ -53,12 +51,14 @@ export function TermsDialog({ isOpen, onOpenChange }: TermsDialogProps) {
               or inappropriate content will not be tolerated and may result in account suspension.
             </p>
           </div>
-        </ModalBody>
-        <ModalFooter>
-          <ModalClose>Close</ModalClose>
-          <Button onPress={() => onOpenChange(false)}>I Understand</Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          <Button onClick={() => onOpenChange(false)}>I Understand</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

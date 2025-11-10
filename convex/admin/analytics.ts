@@ -38,12 +38,12 @@ export const getSystemStats = adminQuery({
     const publishedCourses = allCourses.filter((c) => c.status === "published");
     const pendingCourses = allCourses.filter((c) => c.status === "pending");
 
-    // Get enrollments
-    const allEnrollments = await ctx.db.query("enrollments").collect();
-    const activeEnrollments = allEnrollments.filter((e) => e.status === "active");
-    const completedEnrollments = allEnrollments.filter(
-      (e) => e.status === "completed"
-    );
+    // Get enrollments (use collect().length for better performance)
+    const [totalEnrollments, activeEnrollments, completedEnrollments] = await Promise.all([
+      ctx.db.query("enrollments").collect().then((items) => items.length),
+      ctx.db.query("enrollments").withIndex("by_status", (q) => q.eq("status", "active")).collect().then((items) => items.length),
+      ctx.db.query("enrollments").withIndex("by_status", (q) => q.eq("status", "completed")).collect().then((items) => items.length),
+    ]);
 
     // Get content counts
     const modules = await ctx.db.query("modules").collect();
@@ -59,9 +59,9 @@ export const getSystemStats = adminQuery({
       totalCourses: allCourses.length,
       publishedCourses: publishedCourses.length,
       pendingCourses: pendingCourses.length,
-      totalEnrollments: allEnrollments.length,
-      activeEnrollments: activeEnrollments.length,
-      completedEnrollments: completedEnrollments.length,
+      totalEnrollments,
+      activeEnrollments,
+      completedEnrollments,
       totalModules: modules.length,
       totalLessons: lessons.length,
       totalQuizzes: quizzes.length,

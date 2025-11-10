@@ -1,4 +1,5 @@
 {
+  "$schema": "https://ui.shadcn.com/schema.json",
   "style": "new-york",
   "rsc": false,
   "tsx": true,
@@ -9,16 +10,12 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks"
-  },
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "iconLibrary": "lucide",
-  "registries": {
-    "@intentui": "https://intentui.com/r/{name}"
   }
 }

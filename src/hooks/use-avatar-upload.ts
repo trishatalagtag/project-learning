@@ -1,8 +1,8 @@
-import { api } from "api"
-import type { Id } from "convex/_generated/dataModel"
-import { useMutation } from "convex/react"
-import { useState } from "react"
-import { toast } from "sonner"
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function useAvatarUpload() {
   const [isUploading, setIsUploading] = useState(false)

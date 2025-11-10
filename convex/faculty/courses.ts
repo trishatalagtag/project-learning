@@ -6,6 +6,7 @@ import {
   getSortDefaults,
   gradingConfigValidator,
   listArgs,
+  validateGradingConfig,
 } from "../lib/validators";
 
 /**
@@ -241,6 +242,11 @@ export const createCourse = facultyMutation({
     // Generate enrollment code
     const enrollmentCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
+    // Validate grading config if provided
+    if (args.gradingConfig) {
+      validateGradingConfig(args.gradingConfig);
+    }
+
     // Default grading config
     const defaultGradingConfig = {
       passingScore: 85,
@@ -334,6 +340,60 @@ export const updateCourse = facultyMutation({
     }
 
     await ctx.db.patch(args.courseId, updates);
+
+    return null;
+  },
+});
+
+/**
+ * Partially update course fields
+ * Faculty can only update their own courses
+ * Admins can update any course
+ */
+export const patchCourse = facultyMutation({
+  args: {
+    courseId: v.id("courses"),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    content: v.optional(v.string()),
+    categoryId: v.optional(v.id("categories")),
+    coverImageId: v.optional(v.id("_storage")),
+    isEnrollmentOpen: v.optional(v.boolean()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const course = await ctx.db.get(args.courseId);
+    if (!course) throw new Error("Course not found");
+
+    // Check access
+    if (ctx.user.role !== "ADMIN" && course.teacherId !== ctx.user.userId) {
+      throw new Error("Access denied. You are not the assigned teacher for this course.");
+    }
+
+    // Build updates object (only include provided fields)
+    const updates: Record<string, any> = { updatedAt: Date.now() };
+
+    if (args.title !== undefined) updates.title = args.title;
+    if (args.description !== undefined) updates.description = args.description;
+    if (args.content !== undefined) updates.content = args.content;
+    if (args.categoryId !== undefined) {
+      // Verify category exists
+      const category = await ctx.db.get(args.categoryId);
+      if (!category) throw new Error("Category not found");
+      updates.categoryId = args.categoryId;
+    }
+    if (args.coverImageId !== undefined) updates.coverImageId = args.coverImageId;
+    if (args.isEnrollmentOpen !== undefined) updates.isEnrollmentOpen = args.isEnrollmentOpen;
+
+    // If faculty editing approved course, reset to draft
+    if (ctx.user.role === "FACULTY" && course.status === "approved" && Object.keys(updates).length > 1) {
+      updates.status = "draft";
+    }
+
+    // Only update if there are actual changes
+    if (Object.keys(updates).length > 1) {
+      await ctx.db.patch(args.courseId, updates);
+    }
 
     return null;
   },

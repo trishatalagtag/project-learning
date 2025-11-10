@@ -2,11 +2,11 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { authenticatedMutation } from "../lib/functions";
 import {
-    validateFileSize,
-    validateFileType,
-    ALLOWED_IMAGE_TYPES,
-    ALLOWED_VIDEO_TYPES,
-    ALLOWED_DOCUMENT_TYPES,
+  ALLOWED_DOCUMENT_TYPES,
+  ALLOWED_IMAGE_TYPES,
+  ALLOWED_VIDEO_TYPES,
+  validateFileSize,
+  validateFileType,
 } from "../lib/validators";
 
 /**
@@ -110,12 +110,25 @@ export const validateFile = authenticatedMutation({
 /**
  * Delete file from storage
  * Only file owner or admin can delete
+ * Prevents deletion if file is still referenced by course content
  */
 export const deleteFile = authenticatedMutation({
   args: { fileId: v.id("_storage") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    // TODO: in production, check ownership
+    // Check if file is in use anywhere
+    const [courseCover, guideImages, submissionFiles, lessonAttachments] = await Promise.all([
+      ctx.db.query("courses").filter((q) => q.eq(q.field("coverImageId"), args.fileId)).first(),
+      ctx.db.query("guideSteps").filter((q) => q.eq(q.field("imageId"), args.fileId)).first(),
+      ctx.db.query("assignmentSubmissions").filter((q) => q.eq(q.field("fileId"), args.fileId)).first(),
+      ctx.db.query("lessonAttachments").filter((q) => q.eq(q.field("fileId"), args.fileId)).first(),
+    ]);
+
+    if (courseCover || guideImages || submissionFiles || lessonAttachments) {
+      throw new Error("Cannot delete file: it is still referenced by course content. Remove the reference first.");
+    }
+
+    // TODO: In production, add ownership verification based on your requirements
     await ctx.storage.delete(args.fileId);
     return null;
   },

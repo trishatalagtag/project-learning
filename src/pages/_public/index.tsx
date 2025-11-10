@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { api } from "api"
-import type { Id } from "convex/_generated/dataModel"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react"
 import { z } from "zod"
 
@@ -22,9 +22,6 @@ export const Route = createFileRoute("/_public/")({
 
 function RouteComponent() {
   const searchParams = Route.useSearch()
-
-  const _navigate = Route.useNavigate()
-
   const offset = (searchParams.page - 1) * searchParams.limit
 
   const result = useQuery(api.learner.courses.listPublicCourses, {
@@ -60,7 +57,7 @@ function RouteComponent() {
           searchParams,
         },
         null,
-        2
+        2,
       )}
     </pre>
   )

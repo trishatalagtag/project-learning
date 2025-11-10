@@ -1,0 +1,44 @@
+import type { FunctionReturnType } from "convex/server";
+
+import type { api } from "@/convex/_generated/api";
+
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import { STATUS_CONFIG } from "@/lib/constants/content-status";
+
+type Status = FunctionReturnType<
+  typeof api.faculty.modules.listModulesByCourse
+>[number]["status"];
+
+interface StatusBadgeProps {
+  status: Status;
+  className?: string;
+}
+
+export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG];
+  const Icon = config.icon;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant={config.variant} className={className}>
+            <Icon className="mr-1 h-3 w-3" />
+            {config.label}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">{config.description}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+

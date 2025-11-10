@@ -287,3 +287,52 @@ export function isSubmissionLate(
   if (!dueDate) return false;
   return submittedAt > dueDate;
 }
+
+// ==================== GRADING VALIDATION ====================
+
+/**
+ * Validate grading configuration
+ * Throws error if invalid
+ */
+export function validateGradingConfig(config: {
+  passingScore: number;
+  gradingMethod: "numerical" | "competency" | "weighted";
+  components?: Array<{ name: string; weight: number }>;
+}): void {
+  // Validate passing score
+  if (config.passingScore < 0 || config.passingScore > 100) {
+    throw new Error("Passing score must be between 0 and 100");
+  }
+
+  // Validate weighted components
+  if (config.gradingMethod === "weighted") {
+    if (!config.components || config.components.length === 0) {
+      throw new Error("Weighted grading requires at least one component");
+    }
+
+    const total = config.components.reduce((sum, c) => sum + c.weight, 0);
+    if (Math.abs(total - 100) > 0.01) {
+      throw new Error(`Component weights must sum to 100 (current: ${total.toFixed(2)})`);
+    }
+
+    // Validate each component
+    for (const comp of config.components) {
+      if (!comp.name || comp.name.trim().length === 0) {
+        throw new Error("All components must have a name");
+      }
+      if (comp.weight <= 0) {
+        throw new Error("Component weight must be positive");
+      }
+      if (comp.weight > 100) {
+        throw new Error("Component weight cannot exceed 100");
+      }
+    }
+  }
+
+  // Validate numerical grading
+  if (config.gradingMethod === "numerical") {
+    if (config.components && config.components.length > 0) {
+      throw new Error("Numerical grading should not have components");
+    }
+  }
+}

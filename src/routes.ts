@@ -9,50 +9,353 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './pages/__root'
-import { Route as IndexRouteImport } from './pages/index'
+import { Route as PublicRouteImport } from './pages/_public'
+import { Route as AuthenticatedRouteImport } from './pages/_authenticated'
+import { Route as PublicIndexRouteImport } from './pages/_public/index'
+import { Route as AuthenticatedCCourseIdRouteImport } from './pages/_authenticated.c/$courseId'
+import { Route as AuthenticatedAdminARouteImport } from './pages/_authenticated._admin.a'
+import { Route as AuthenticatedCCourseIdIndexRouteImport } from './pages/_authenticated.c/$courseId.index'
+import { Route as AuthenticatedAdminAIndexRouteImport } from './pages/_authenticated._admin.a/index'
+import { Route as AuthenticatedAdminACoursesRouteImport } from './pages/_authenticated._admin.a/courses'
+import { Route as AuthenticatedAdminACoursesIndexRouteImport } from './pages/_authenticated._admin.a/courses/index'
+import { Route as AuthenticatedAdminACoursesNewRouteImport } from './pages/_authenticated._admin.a/courses/new'
+import { Route as AuthenticatedAdminACoursesCourseIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId'
+import { Route as AuthenticatedCCourseIdMModuleIdIndexRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.index'
+import { Route as AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.lessons.$lessonId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PublicRoute = PublicRouteImport.update({
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PublicRoute,
+} as any)
+const AuthenticatedCCourseIdRoute = AuthenticatedCCourseIdRouteImport.update({
+  id: '/c/$courseId',
+  path: '/c/$courseId',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminARoute = AuthenticatedAdminARouteImport.update({
+  id: '/_admin/a',
+  path: '/a',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCCourseIdIndexRoute =
+  AuthenticatedCCourseIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCCourseIdRoute,
+  } as any)
+const AuthenticatedAdminAIndexRoute =
+  AuthenticatedAdminAIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminACoursesRoute =
+  AuthenticatedAdminACoursesRouteImport.update({
+    id: '/courses',
+    path: '/courses',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminACoursesIndexRoute =
+  AuthenticatedAdminACoursesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminACoursesRoute,
+  } as any)
+const AuthenticatedAdminACoursesNewRoute =
+  AuthenticatedAdminACoursesNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedAdminACoursesRoute,
+  } as any)
+const AuthenticatedAdminACoursesCourseIdRoute =
+  AuthenticatedAdminACoursesCourseIdRouteImport.update({
+    id: '/$courseId',
+    path: '/$courseId',
+    getParentRoute: () => AuthenticatedAdminACoursesRoute,
+  } as any)
+const AuthenticatedCCourseIdMModuleIdIndexRoute =
+  AuthenticatedCCourseIdMModuleIdIndexRouteImport.update({
+    id: '/m/$moduleId/',
+    path: '/m/$moduleId/',
+    getParentRoute: () => AuthenticatedCCourseIdRoute,
+  } as any)
+const AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute =
+  AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport.update({
+    id: '/m/$moduleId/lessons/$lessonId',
+    path: '/m/$moduleId/lessons/$lessonId',
+    getParentRoute: () => AuthenticatedCCourseIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof PublicIndexRoute
+  '/a': typeof AuthenticatedAdminARouteWithChildren
+  '/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
+  '/a/courses': typeof AuthenticatedAdminACoursesRouteWithChildren
+  '/a/': typeof AuthenticatedAdminAIndexRoute
+  '/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
+  '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
+  '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
+  '/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
+  '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof PublicIndexRoute
+  '/a': typeof AuthenticatedAdminAIndexRoute
+  '/c/$courseId': typeof AuthenticatedCCourseIdIndexRoute
+  '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
+  '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
+  '/a/courses': typeof AuthenticatedAdminACoursesIndexRoute
+  '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_public': typeof PublicRouteWithChildren
+  '/_public/': typeof PublicIndexRoute
+  '/_authenticated/_admin/a': typeof AuthenticatedAdminARouteWithChildren
+  '/_authenticated/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
+  '/_authenticated/_admin/a/courses': typeof AuthenticatedAdminACoursesRouteWithChildren
+  '/_authenticated/_admin/a/': typeof AuthenticatedAdminAIndexRoute
+  '/_authenticated/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
+  '/_authenticated/_admin/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
+  '/_authenticated/_admin/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
+  '/_authenticated/_admin/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
+  '/_authenticated/c/$courseId/m/$moduleId/': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/a'
+    | '/c/$courseId'
+    | '/a/courses'
+    | '/a/'
+    | '/c/$courseId/'
+    | '/a/courses/$courseId'
+    | '/a/courses/new'
+    | '/a/courses/'
+    | '/c/$courseId/m/$moduleId'
+    | '/c/$courseId/m/$moduleId/lessons/$lessonId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/a'
+    | '/c/$courseId'
+    | '/a/courses/$courseId'
+    | '/a/courses/new'
+    | '/a/courses'
+    | '/c/$courseId/m/$moduleId'
+    | '/c/$courseId/m/$moduleId/lessons/$lessonId'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/_public'
+    | '/_public/'
+    | '/_authenticated/_admin/a'
+    | '/_authenticated/c/$courseId'
+    | '/_authenticated/_admin/a/courses'
+    | '/_authenticated/_admin/a/'
+    | '/_authenticated/c/$courseId/'
+    | '/_authenticated/_admin/a/courses/$courseId'
+    | '/_authenticated/_admin/a/courses/new'
+    | '/_authenticated/_admin/a/courses/'
+    | '/_authenticated/c/$courseId/m/$moduleId/'
+    | '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  PublicRoute: typeof PublicRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof PublicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/': {
+      id: '/_public/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_authenticated/c/$courseId': {
+      id: '/_authenticated/c/$courseId'
+      path: '/c/$courseId'
+      fullPath: '/c/$courseId'
+      preLoaderRoute: typeof AuthenticatedCCourseIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/_admin/a': {
+      id: '/_authenticated/_admin/a'
+      path: '/a'
+      fullPath: '/a'
+      preLoaderRoute: typeof AuthenticatedAdminARouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/c/$courseId/': {
+      id: '/_authenticated/c/$courseId/'
+      path: '/'
+      fullPath: '/c/$courseId/'
+      preLoaderRoute: typeof AuthenticatedCCourseIdIndexRouteImport
+      parentRoute: typeof AuthenticatedCCourseIdRoute
+    }
+    '/_authenticated/_admin/a/': {
+      id: '/_authenticated/_admin/a/'
+      path: '/'
+      fullPath: '/a/'
+      preLoaderRoute: typeof AuthenticatedAdminAIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/courses': {
+      id: '/_authenticated/_admin/a/courses'
+      path: '/courses'
+      fullPath: '/a/courses'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/courses/': {
+      id: '/_authenticated/_admin/a/courses/'
+      path: '/'
+      fullPath: '/a/courses/'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesRoute
+    }
+    '/_authenticated/_admin/a/courses/new': {
+      id: '/_authenticated/_admin/a/courses/new'
+      path: '/new'
+      fullPath: '/a/courses/new'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesNewRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId': {
+      id: '/_authenticated/_admin/a/courses/$courseId'
+      path: '/$courseId'
+      fullPath: '/a/courses/$courseId'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesRoute
+    }
+    '/_authenticated/c/$courseId/m/$moduleId/': {
+      id: '/_authenticated/c/$courseId/m/$moduleId/'
+      path: '/m/$moduleId'
+      fullPath: '/c/$courseId/m/$moduleId'
+      preLoaderRoute: typeof AuthenticatedCCourseIdMModuleIdIndexRouteImport
+      parentRoute: typeof AuthenticatedCCourseIdRoute
+    }
+    '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId': {
+      id: '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId'
+      path: '/m/$moduleId/lessons/$lessonId'
+      fullPath: '/c/$courseId/m/$moduleId/lessons/$lessonId'
+      preLoaderRoute: typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport
+      parentRoute: typeof AuthenticatedCCourseIdRoute
     }
   }
 }
 
+interface AuthenticatedAdminACoursesRouteChildren {
+  AuthenticatedAdminACoursesCourseIdRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
+  AuthenticatedAdminACoursesNewRoute: typeof AuthenticatedAdminACoursesNewRoute
+  AuthenticatedAdminACoursesIndexRoute: typeof AuthenticatedAdminACoursesIndexRoute
+}
+
+const AuthenticatedAdminACoursesRouteChildren: AuthenticatedAdminACoursesRouteChildren =
+  {
+    AuthenticatedAdminACoursesCourseIdRoute:
+      AuthenticatedAdminACoursesCourseIdRoute,
+    AuthenticatedAdminACoursesNewRoute: AuthenticatedAdminACoursesNewRoute,
+    AuthenticatedAdminACoursesIndexRoute: AuthenticatedAdminACoursesIndexRoute,
+  }
+
+const AuthenticatedAdminACoursesRouteWithChildren =
+  AuthenticatedAdminACoursesRoute._addFileChildren(
+    AuthenticatedAdminACoursesRouteChildren,
+  )
+
+interface AuthenticatedAdminARouteChildren {
+  AuthenticatedAdminACoursesRoute: typeof AuthenticatedAdminACoursesRouteWithChildren
+  AuthenticatedAdminAIndexRoute: typeof AuthenticatedAdminAIndexRoute
+}
+
+const AuthenticatedAdminARouteChildren: AuthenticatedAdminARouteChildren = {
+  AuthenticatedAdminACoursesRoute: AuthenticatedAdminACoursesRouteWithChildren,
+  AuthenticatedAdminAIndexRoute: AuthenticatedAdminAIndexRoute,
+}
+
+const AuthenticatedAdminARouteWithChildren =
+  AuthenticatedAdminARoute._addFileChildren(AuthenticatedAdminARouteChildren)
+
+interface AuthenticatedCCourseIdRouteChildren {
+  AuthenticatedCCourseIdIndexRoute: typeof AuthenticatedCCourseIdIndexRoute
+  AuthenticatedCCourseIdMModuleIdIndexRoute: typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute: typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
+}
+
+const AuthenticatedCCourseIdRouteChildren: AuthenticatedCCourseIdRouteChildren =
+  {
+    AuthenticatedCCourseIdIndexRoute: AuthenticatedCCourseIdIndexRoute,
+    AuthenticatedCCourseIdMModuleIdIndexRoute:
+      AuthenticatedCCourseIdMModuleIdIndexRoute,
+    AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute:
+      AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute,
+  }
+
+const AuthenticatedCCourseIdRouteWithChildren =
+  AuthenticatedCCourseIdRoute._addFileChildren(
+    AuthenticatedCCourseIdRouteChildren,
+  )
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedAdminARoute: typeof AuthenticatedAdminARouteWithChildren
+  AuthenticatedCCourseIdRoute: typeof AuthenticatedCCourseIdRouteWithChildren
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminARoute: AuthenticatedAdminARouteWithChildren,
+  AuthenticatedCCourseIdRoute: AuthenticatedCCourseIdRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
+interface PublicRouteChildren {
+  PublicIndexRoute: typeof PublicIndexRoute
+}
+
+const PublicRouteChildren: PublicRouteChildren = {
+  PublicIndexRoute: PublicIndexRoute,
+}
+
+const PublicRouteWithChildren =
+  PublicRoute._addFileChildren(PublicRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  PublicRoute: PublicRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

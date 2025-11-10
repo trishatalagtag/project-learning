@@ -1,37 +1,34 @@
 import { ForgotPasswordForm } from "@/components/form/auth-forgot-password-form"
 import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalDescription,
-  ModalHeader,
-  ModalTitle,
-} from "@/components/ui/modal"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface ForgotPasswordDialogProps {
-  isOpen: boolean
+  open: boolean
   onOpenChange: (open: boolean) => void
   defaultEmail?: string
 }
 
 export function ForgotPasswordDialog({
-  isOpen,
+  open,
   onOpenChange,
   defaultEmail,
 }: ForgotPasswordDialogProps) {
   return (
-    <Modal open={isOpen} onOpenChange={onOpenChange}>
-      <ModalContent size="md">
-        <ModalHeader>
-          <ModalTitle>Reset Password</ModalTitle>
-          <ModalDescription>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Reset Password</DialogTitle>
+          <DialogDescription>
             Enter your email address and we'll send you a link to reset your password.
-          </ModalDescription>
-        </ModalHeader>
-        <ModalBody>
-          <ForgotPasswordForm defaultEmail={defaultEmail} onSuccess={() => onOpenChange(false)} />
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+          </DialogDescription>
+        </DialogHeader>
+        <ForgotPasswordForm defaultEmail={defaultEmail} onSuccess={() => onOpenChange(false)} />
+      </DialogContent>
+    </Dialog>
   )
 }

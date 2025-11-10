@@ -1,14 +1,12 @@
 import { AuthSignInForm } from "@/components/form/auth-signin-form"
 import { AuthSignUpForm } from "@/components/form/auth-signup-form"
 import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalDescription,
-  ModalFooter,
-  ModalHeader,
-  ModalTitle,
-} from "@/components/ui/modal"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useAuthParams } from "@/hooks/use-auth-params"
 import type { Mode, Role } from "@/models/schema"
 import { useCallback, useRef } from "react"
@@ -54,30 +52,28 @@ export function AuthDialog() {
   }
 
   return (
-    <Modal open={isOpen} onOpenChange={(open) => !open && closeModal()}>
-      <ModalContent>
-        <ModalHeader>
-          <ModalTitle>{getTitle(mode, snapshotRole)}</ModalTitle>
-          <ModalDescription>{getDescription(mode)}</ModalDescription>
-        </ModalHeader>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{getTitle(mode, snapshotRole)}</DialogTitle>
+          <DialogDescription>{getDescription(mode)}</DialogDescription>
+        </DialogHeader>
 
-        <ModalBody>
-          {mode === "signin" ? (
-            <AuthSignInForm
-              role={snapshotRole}
-              onSuccess={handleSuccess}
-              onSwitchMode={switchMode}
-            />
-          ) : (
-            <AuthSignUpForm
-              role={snapshotRole}
-              onSuccess={handleSuccess}
-              onSwitchMode={switchMode}
-            />
-          )}
-        </ModalBody>
-        <ModalFooter />
-      </ModalContent>
-    </Modal>
+        {mode === "signin" ? (
+          <AuthSignInForm
+            role={snapshotRole}
+            onSuccess={handleSuccess}
+            onSwitchMode={switchMode}
+            open={isOpen}
+          />
+        ) : (
+          <AuthSignUpForm
+            role={snapshotRole}
+            onSuccess={handleSuccess}
+            onSwitchMode={switchMode}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }

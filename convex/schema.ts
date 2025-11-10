@@ -265,7 +265,8 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_course", ["courseId"])
     .index("by_user_and_course", ["userId", "courseId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_course_and_status", ["courseId", "status"]),
 
   // LESSON PROGRESS 
   lessonProgress: defineTable({

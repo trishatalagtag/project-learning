@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
-import { Doc } from "../_generated/dataModel";
+import { createUserMap, getCurrentAuthUser, isFacultyOrAdmin, normalizeUserId } from "../lib/auth";
 
 /**
  * Get global announcements (platform-wide)
@@ -84,6 +84,25 @@ export const getCourseAnnouncements = query({
   handler: async (ctx, args) => {
     const limit = args.limit ?? 20;
 
+    // Check if user is enrolled or is faculty/admin
+    const user = await getCurrentAuthUser(ctx);
+    if (user) {
+      const userId = normalizeUserId(user);
+      if (userId) {
+        const [enrollment, isFaculty] = await Promise.all([
+          ctx.db
+            .query("enrollments")
+            .withIndex("by_user_and_course", (q) => q.eq("userId", userId).eq("courseId", args.courseId))
+            .first(),
+          isFacultyOrAdmin(ctx),
+        ]);
+
+        if (!enrollment && !isFaculty) {
+          throw new Error("You are not enrolled in this course and are not authorized to view announcements");
+        }
+      }
+    }
+
     // get course announcements
     const announcements = await ctx.db
       .query("announcements")
@@ -91,20 +110,17 @@ export const getCourseAnnouncements = query({
       .order("desc")
       .take(limit);
 
-    // populate author names
-    const withAuthors = await Promise.all(
-      announcements.map(async (announcement) => {
-        const author = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), announcement.authorId))
-          .first();
+    // Batch load author names
+    const authorIds = [...new Set(announcements.map((a) => a.authorId))];
+    const authorMap = await createUserMap(ctx, authorIds);
 
-        return {
-          ...announcement,
-          authorName: author?.name ?? "Unknown",
-        };
-      })
-    );
+    const withAuthors = announcements.map((announcement) => {
+      const author = authorMap.get(announcement.authorId);
+      return {
+        ...announcement,
+        authorName: author?.name ?? "Unknown",
+      };
+    });
 
     // sort: pinned first, then by creation time
     return withAuthors.sort((a, b) => {

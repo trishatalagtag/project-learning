@@ -1,9 +1,10 @@
 import {
-  AcademicCapIcon as AcademicCapOutlineIcon, ChartPieIcon,
+  AcademicCapIcon as AcademicCapOutlineIcon,
+  ChartPieIcon,
   ListBulletIcon,
   PlusIcon,
   TagIcon,
-  UserPlusIcon
+  UserPlusIcon,
 } from "@heroicons/react/24/outline"
 import {
   AcademicCapIcon,

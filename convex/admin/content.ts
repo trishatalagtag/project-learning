@@ -1,7 +1,13 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { Id } from "../_generated/dataModel";
 import { createUserMap } from "../lib/auth";
 import { adminMutation, adminQuery } from "../lib/functions";
+import {
+  validateLessonStatus,
+  validateModuleStatus,
+  type ContentStatus,
+} from "../lib/status_validation";
 
 /**
  * List content paginated by type and status
@@ -446,113 +452,113 @@ export const listApprovedContent = adminQuery({
       ? assignments.filter((a) => a.courseId === args.courseId)
       : assignments;
 
-    // For lessons, need to check module's courseId
+    // For lessons, need to check module's courseId - batch load modules first
     let filteredLessons = lessons;
     if (args.courseId) {
-      const moduleIds = filteredModules.map((m) => m._id);
-      filteredLessons = [];
-      for (const lesson of lessons) {
-        const module = await ctx.db.get(lesson.moduleId);
-        if (module && module.courseId === args.courseId) {
-          filteredLessons.push(lesson);
-        }
-      }
+      const lessonModuleIds = [...new Set(lessons.map((l) => l.moduleId))];
+      const lessonModules = await Promise.all(lessonModuleIds.map((id) => ctx.db.get(id)));
+      const lessonModuleMap = new Map(lessonModules.filter(Boolean).map((m) => [m!._id, m!]));
+      filteredLessons = lessons.filter((lesson) => {
+        const module = lessonModuleMap.get(lesson.moduleId);
+        return module && module.courseId === args.courseId;
+      });
     }
 
-    // Enrich modules
-    const enrichedModules = await Promise.all(
-      filteredModules.map(async (module) => {
-        const course = await ctx.db.get(module.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), module.createdBy))
-          .first();
+    // Batch load all creators
+    const allCreatorIds = [
+      ...filteredModules.map((m) => m.createdBy),
+      ...filteredLessons.map((l) => l.createdBy),
+      ...filteredQuizzes.map((q) => q.createdBy),
+      ...filteredAssignments.map((a) => a.createdBy),
+    ];
+    const creatorMap = await createUserMap(ctx, [...new Set(allCreatorIds)]);
 
-        return {
-          _id: module._id,
-          title: module.title,
-          courseId: module.courseId,
-          courseName: course?.title ?? "Unknown",
-          createdBy: module.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: module.createdAt,
-          updatedAt: module.updatedAt,
-        };
-      })
-    );
+    // Batch load all courses
+    const courseIds = [
+      ...new Set([
+        ...filteredModules.map((m) => m.courseId),
+        ...filteredQuizzes.map((q) => q.courseId),
+        ...filteredAssignments.map((a) => a.courseId),
+      ]),
+    ];
+    const courses = await Promise.all(courseIds.map((id) => ctx.db.get(id)));
+    const courseMap = new Map(courses.filter(Boolean).map((c) => [c!._id, c!]));
+
+    // Batch load modules for lessons
+    const moduleIds = [...new Set(filteredLessons.map((l) => l.moduleId))];
+    const modulesForLessons = await Promise.all(moduleIds.map((id) => ctx.db.get(id)));
+    const moduleMap = new Map(modulesForLessons.filter(Boolean).map((m) => [m!._id, m!]));
+
+    // Enrich modules
+    const enrichedModules = filteredModules.map((module) => {
+      const course = courseMap.get(module.courseId);
+      const creator = creatorMap.get(module.createdBy);
+      return {
+        _id: module._id,
+        title: module.title,
+        courseId: module.courseId,
+        courseName: course?.title ?? "Unknown",
+        createdBy: module.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: module.createdAt,
+        updatedAt: module.updatedAt,
+      };
+    });
 
     // Enrich lessons
-    const enrichedLessons = await Promise.all(
-      filteredLessons.map(async (lesson) => {
-        const module = await ctx.db.get(lesson.moduleId);
-        const course = module ? await ctx.db.get(module.courseId) : null;
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), lesson.createdBy))
-          .first();
-
-        return {
-          _id: lesson._id,
-          title: lesson.title,
-          moduleId: lesson.moduleId,
-          moduleName: module?.title ?? "Unknown",
-          courseId: module?.courseId ?? ("" as any),
-          courseName: course?.title ?? "Unknown",
-          createdBy: lesson.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: lesson.createdAt,
-          updatedAt: lesson.updatedAt,
-        };
-      })
-    );
+    const enrichedLessons = filteredLessons.map((lesson) => {
+      const module = moduleMap.get(lesson.moduleId);
+      const course = module ? courseMap.get(module.courseId) : null;
+      const creator = creatorMap.get(lesson.createdBy);
+      return {
+        _id: lesson._id,
+        title: lesson.title,
+        moduleId: lesson.moduleId,
+        moduleName: module?.title ?? "Unknown",
+        courseId: module?.courseId ?? ("" as Id<"courses">),
+        courseName: course?.title ?? "Unknown",
+        createdBy: lesson.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: lesson.createdAt,
+        updatedAt: lesson.updatedAt,
+      };
+    });
 
     // Enrich quizzes
-    const enrichedQuizzes = await Promise.all(
-      filteredQuizzes.map(async (quiz) => {
-        const course = await ctx.db.get(quiz.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), quiz.createdBy))
-          .first();
-
-        return {
-          _id: quiz._id,
-          title: quiz.title,
-          courseId: quiz.courseId,
-          courseName: course?.title ?? "Unknown",
-          linkedToLessonId: quiz.linkedToLessonId,
-          linkedToModuleId: quiz.linkedToModuleId,
-          createdBy: quiz.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: quiz.createdAt,
-          updatedAt: quiz.updatedAt,
-        };
-      })
-    );
+    const enrichedQuizzes = filteredQuizzes.map((quiz) => {
+      const course = courseMap.get(quiz.courseId);
+      const creator = creatorMap.get(quiz.createdBy);
+      return {
+        _id: quiz._id,
+        title: quiz.title,
+        courseId: quiz.courseId,
+        courseName: course?.title ?? "Unknown",
+        linkedToLessonId: quiz.linkedToLessonId,
+        linkedToModuleId: quiz.linkedToModuleId,
+        createdBy: quiz.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: quiz.createdAt,
+        updatedAt: quiz.updatedAt,
+      };
+    });
 
     // Enrich assignments
-    const enrichedAssignments = await Promise.all(
-      filteredAssignments.map(async (assignment) => {
-        const course = await ctx.db.get(assignment.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), assignment.createdBy))
-          .first();
-
-        return {
-          _id: assignment._id,
-          title: assignment.title,
-          courseId: assignment.courseId,
-          courseName: course?.title ?? "Unknown",
-          linkedToLessonId: assignment.linkedToLessonId,
-          linkedToModuleId: assignment.linkedToModuleId,
-          createdBy: assignment.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: assignment.createdAt,
-          updatedAt: assignment.updatedAt,
-        };
-      })
-    );
+    const enrichedAssignments = filteredAssignments.map((assignment) => {
+      const course = courseMap.get(assignment.courseId);
+      const creator = creatorMap.get(assignment.createdBy);
+      return {
+        _id: assignment._id,
+        title: assignment.title,
+        courseId: assignment.courseId,
+        courseName: course?.title ?? "Unknown",
+        linkedToLessonId: assignment.linkedToLessonId,
+        linkedToModuleId: assignment.linkedToModuleId,
+        createdBy: assignment.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: assignment.createdAt,
+        updatedAt: assignment.updatedAt,
+      };
+    });
 
     return {
       modules: enrichedModules,
@@ -694,113 +700,113 @@ export const listRejectedContent = adminQuery({
       ? assignments.filter((a) => a.courseId === args.courseId)
       : assignments;
 
-    // For lessons, need to check module's courseId
+    // For lessons, need to check module's courseId - batch load modules first
     let filteredLessons = lessons;
     if (args.courseId) {
-      const moduleIds = filteredModules.map((m) => m._id);
-      filteredLessons = [];
-      for (const lesson of lessons) {
-        const module = await ctx.db.get(lesson.moduleId);
-        if (module && module.courseId === args.courseId) {
-          filteredLessons.push(lesson);
-        }
-      }
+      const lessonModuleIds = [...new Set(lessons.map((l) => l.moduleId))];
+      const lessonModules = await Promise.all(lessonModuleIds.map((id) => ctx.db.get(id)));
+      const lessonModuleMap = new Map(lessonModules.filter(Boolean).map((m) => [m!._id, m!]));
+      filteredLessons = lessons.filter((lesson) => {
+        const module = lessonModuleMap.get(lesson.moduleId);
+        return module && module.courseId === args.courseId;
+      });
     }
 
-    // Enrich modules
-    const enrichedModules = await Promise.all(
-      filteredModules.map(async (module) => {
-        const course = await ctx.db.get(module.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), module.createdBy))
-          .first();
+    // Batch load all creators
+    const allCreatorIds = [
+      ...filteredModules.map((m) => m.createdBy),
+      ...filteredLessons.map((l) => l.createdBy),
+      ...filteredQuizzes.map((q) => q.createdBy),
+      ...filteredAssignments.map((a) => a.createdBy),
+    ];
+    const creatorMap = await createUserMap(ctx, [...new Set(allCreatorIds)]);
 
-        return {
-          _id: module._id,
-          title: module.title,
-          courseId: module.courseId,
-          courseName: course?.title ?? "Unknown",
-          createdBy: module.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: module.createdAt,
-          updatedAt: module.updatedAt,
-        };
-      })
-    );
+    // Batch load all courses
+    const courseIds = [
+      ...new Set([
+        ...filteredModules.map((m) => m.courseId),
+        ...filteredQuizzes.map((q) => q.courseId),
+        ...filteredAssignments.map((a) => a.courseId),
+      ]),
+    ];
+    const courses = await Promise.all(courseIds.map((id) => ctx.db.get(id)));
+    const courseMap = new Map(courses.filter(Boolean).map((c) => [c!._id, c!]));
+
+    // Batch load modules for lessons
+    const moduleIds = [...new Set(filteredLessons.map((l) => l.moduleId))];
+    const modulesForLessons = await Promise.all(moduleIds.map((id) => ctx.db.get(id)));
+    const moduleMap = new Map(modulesForLessons.filter(Boolean).map((m) => [m!._id, m!]));
+
+    // Enrich modules
+    const enrichedModules = filteredModules.map((module) => {
+      const course = courseMap.get(module.courseId);
+      const creator = creatorMap.get(module.createdBy);
+      return {
+        _id: module._id,
+        title: module.title,
+        courseId: module.courseId,
+        courseName: course?.title ?? "Unknown",
+        createdBy: module.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: module.createdAt,
+        updatedAt: module.updatedAt,
+      };
+    });
 
     // Enrich lessons
-    const enrichedLessons = await Promise.all(
-      filteredLessons.map(async (lesson) => {
-        const module = await ctx.db.get(lesson.moduleId);
-        const course = module ? await ctx.db.get(module.courseId) : null;
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), lesson.createdBy))
-          .first();
-
-        return {
-          _id: lesson._id,
-          title: lesson.title,
-          moduleId: lesson.moduleId,
-          moduleName: module?.title ?? "Unknown",
-          courseId: module?.courseId ?? ("" as any),
-          courseName: course?.title ?? "Unknown",
-          createdBy: lesson.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: lesson.createdAt,
-          updatedAt: lesson.updatedAt,
-        };
-      })
-    );
+    const enrichedLessons = filteredLessons.map((lesson) => {
+      const module = moduleMap.get(lesson.moduleId);
+      const course = module ? courseMap.get(module.courseId) : null;
+      const creator = creatorMap.get(lesson.createdBy);
+      return {
+        _id: lesson._id,
+        title: lesson.title,
+        moduleId: lesson.moduleId,
+        moduleName: module?.title ?? "Unknown",
+        courseId: module?.courseId ?? ("" as Id<"courses">),
+        courseName: course?.title ?? "Unknown",
+        createdBy: lesson.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: lesson.createdAt,
+        updatedAt: lesson.updatedAt,
+      };
+    });
 
     // Enrich quizzes
-    const enrichedQuizzes = await Promise.all(
-      filteredQuizzes.map(async (quiz) => {
-        const course = await ctx.db.get(quiz.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), quiz.createdBy))
-          .first();
-
-        return {
-          _id: quiz._id,
-          title: quiz.title,
-          courseId: quiz.courseId,
-          courseName: course?.title ?? "Unknown",
-          linkedToLessonId: quiz.linkedToLessonId,
-          linkedToModuleId: quiz.linkedToModuleId,
-          createdBy: quiz.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: quiz.createdAt,
-          updatedAt: quiz.updatedAt,
-        };
-      })
-    );
+    const enrichedQuizzes = filteredQuizzes.map((quiz) => {
+      const course = courseMap.get(quiz.courseId);
+      const creator = creatorMap.get(quiz.createdBy);
+      return {
+        _id: quiz._id,
+        title: quiz.title,
+        courseId: quiz.courseId,
+        courseName: course?.title ?? "Unknown",
+        linkedToLessonId: quiz.linkedToLessonId,
+        linkedToModuleId: quiz.linkedToModuleId,
+        createdBy: quiz.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: quiz.createdAt,
+        updatedAt: quiz.updatedAt,
+      };
+    });
 
     // Enrich assignments
-    const enrichedAssignments = await Promise.all(
-      filteredAssignments.map(async (assignment) => {
-        const course = await ctx.db.get(assignment.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), assignment.createdBy))
-          .first();
-
-        return {
-          _id: assignment._id,
-          title: assignment.title,
-          courseId: assignment.courseId,
-          courseName: course?.title ?? "Unknown",
-          linkedToLessonId: assignment.linkedToLessonId,
-          linkedToModuleId: assignment.linkedToModuleId,
-          createdBy: assignment.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: assignment.createdAt,
-          updatedAt: assignment.updatedAt,
-        };
-      })
-    );
+    const enrichedAssignments = filteredAssignments.map((assignment) => {
+      const course = courseMap.get(assignment.courseId);
+      const creator = creatorMap.get(assignment.createdBy);
+      return {
+        _id: assignment._id,
+        title: assignment.title,
+        courseId: assignment.courseId,
+        courseName: course?.title ?? "Unknown",
+        linkedToLessonId: assignment.linkedToLessonId,
+        linkedToModuleId: assignment.linkedToModuleId,
+        createdBy: assignment.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: assignment.createdAt,
+        updatedAt: assignment.updatedAt,
+      };
+    });
 
     return {
       modules: enrichedModules,
@@ -928,109 +934,109 @@ export const listPendingContent = adminQuery({
       ? assignments.filter((a) => a.courseId === args.courseId)
       : assignments;
 
-    // For lessons, need to check module's courseId
+    // For lessons, need to check module's courseId - batch load modules first
     let filteredLessons = lessons;
     if (args.courseId) {
-      const moduleIds = filteredModules.map((m) => m._id);
-      filteredLessons = [];
-      for (const lesson of lessons) {
-        const module = await ctx.db.get(lesson.moduleId);
-        if (module && module.courseId === args.courseId) {
-          filteredLessons.push(lesson);
-        }
-      }
+      const lessonModuleIds = [...new Set(lessons.map((l) => l.moduleId))];
+      const lessonModules = await Promise.all(lessonModuleIds.map((id) => ctx.db.get(id)));
+      const lessonModuleMap = new Map(lessonModules.filter(Boolean).map((m) => [m!._id, m!]));
+      filteredLessons = lessons.filter((lesson) => {
+        const module = lessonModuleMap.get(lesson.moduleId);
+        return module && module.courseId === args.courseId;
+      });
     }
 
-    // Enrich modules
-    const enrichedModules = await Promise.all(
-      filteredModules.map(async (module) => {
-        const course = await ctx.db.get(module.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), module.createdBy))
-          .first();
+    // Batch load all creators
+    const allCreatorIds = [
+      ...filteredModules.map((m) => m.createdBy),
+      ...filteredLessons.map((l) => l.createdBy),
+      ...filteredQuizzes.map((q) => q.createdBy),
+      ...filteredAssignments.map((a) => a.createdBy),
+    ];
+    const creatorMap = await createUserMap(ctx, [...new Set(allCreatorIds)]);
 
-        return {
-          _id: module._id,
-          title: module.title,
-          courseId: module.courseId,
-          courseName: course?.title ?? "Unknown",
-          createdBy: module.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: module.createdAt,
-        };
-      })
-    );
+    // Batch load all courses
+    const courseIds = [
+      ...new Set([
+        ...filteredModules.map((m) => m.courseId),
+        ...filteredQuizzes.map((q) => q.courseId),
+        ...filteredAssignments.map((a) => a.courseId),
+      ]),
+    ];
+    const courses = await Promise.all(courseIds.map((id) => ctx.db.get(id)));
+    const courseMap = new Map(courses.filter(Boolean).map((c) => [c!._id, c!]));
+
+    // Batch load modules for lessons
+    const moduleIds = [...new Set(filteredLessons.map((l) => l.moduleId))];
+    const modulesForLessons = await Promise.all(moduleIds.map((id) => ctx.db.get(id)));
+    const moduleMap = new Map(modulesForLessons.filter(Boolean).map((m) => [m!._id, m!]));
+
+    // Enrich modules
+    const enrichedModules = filteredModules.map((module) => {
+      const course = courseMap.get(module.courseId);
+      const creator = creatorMap.get(module.createdBy);
+      return {
+        _id: module._id,
+        title: module.title,
+        courseId: module.courseId,
+        courseName: course?.title ?? "Unknown",
+        createdBy: module.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: module.createdAt,
+      };
+    });
 
     // Enrich lessons
-    const enrichedLessons = await Promise.all(
-      filteredLessons.map(async (lesson) => {
-        const module = await ctx.db.get(lesson.moduleId);
-        const course = module ? await ctx.db.get(module.courseId) : null;
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), lesson.createdBy))
-          .first();
-
-        return {
-          _id: lesson._id,
-          title: lesson.title,
-          moduleId: lesson.moduleId,
-          moduleName: module?.title ?? "Unknown",
-          courseId: module?.courseId ?? ("" as any),
-          courseName: course?.title ?? "Unknown",
-          createdBy: lesson.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: lesson.createdAt,
-        };
-      })
-    );
+    const enrichedLessons = filteredLessons.map((lesson) => {
+      const module = moduleMap.get(lesson.moduleId);
+      const course = module ? courseMap.get(module.courseId) : null;
+      const creator = creatorMap.get(lesson.createdBy);
+      return {
+        _id: lesson._id,
+        title: lesson.title,
+        moduleId: lesson.moduleId,
+        moduleName: module?.title ?? "Unknown",
+        courseId: module?.courseId ?? ("" as Id<"courses">),
+        courseName: course?.title ?? "Unknown",
+        createdBy: lesson.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: lesson.createdAt,
+      };
+    });
 
     // Enrich quizzes
-    const enrichedQuizzes = await Promise.all(
-      filteredQuizzes.map(async (quiz) => {
-        const course = await ctx.db.get(quiz.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), quiz.createdBy))
-          .first();
-
-        return {
-          _id: quiz._id,
-          title: quiz.title,
-          courseId: quiz.courseId,
-          courseName: course?.title ?? "Unknown",
-          linkedToLessonId: quiz.linkedToLessonId,
-          linkedToModuleId: quiz.linkedToModuleId,
-          createdBy: quiz.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: quiz.createdAt,
-        };
-      })
-    );
+    const enrichedQuizzes = filteredQuizzes.map((quiz) => {
+      const course = courseMap.get(quiz.courseId);
+      const creator = creatorMap.get(quiz.createdBy);
+      return {
+        _id: quiz._id,
+        title: quiz.title,
+        courseId: quiz.courseId,
+        courseName: course?.title ?? "Unknown",
+        linkedToLessonId: quiz.linkedToLessonId,
+        linkedToModuleId: quiz.linkedToModuleId,
+        createdBy: quiz.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: quiz.createdAt,
+      };
+    });
 
     // Enrich assignments
-    const enrichedAssignments = await Promise.all(
-      filteredAssignments.map(async (assignment) => {
-        const course = await ctx.db.get(assignment.courseId);
-        const creator = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("id"), assignment.createdBy))
-          .first();
-
-        return {
-          _id: assignment._id,
-          title: assignment.title,
-          courseId: assignment.courseId,
-          courseName: course?.title ?? "Unknown",
-          linkedToLessonId: assignment.linkedToLessonId,
-          linkedToModuleId: assignment.linkedToModuleId,
-          createdBy: assignment.createdBy,
-          createdByName: creator?.name ?? "Unknown",
-          createdAt: assignment.createdAt,
-        };
-      })
-    );
+    const enrichedAssignments = filteredAssignments.map((assignment) => {
+      const course = courseMap.get(assignment.courseId);
+      const creator = creatorMap.get(assignment.createdBy);
+      return {
+        _id: assignment._id,
+        title: assignment.title,
+        courseId: assignment.courseId,
+        courseName: course?.title ?? "Unknown",
+        linkedToLessonId: assignment.linkedToLessonId,
+        linkedToModuleId: assignment.linkedToModuleId,
+        createdBy: assignment.createdBy,
+        createdByName: creator?.name ?? "Unknown",
+        createdAt: assignment.createdAt,
+      };
+    });
 
     return {
       modules: enrichedModules,
@@ -1059,6 +1065,14 @@ export const approveModule = adminMutation({
       throw new Error("Only pending modules can be approved");
     }
 
+    // Validate: check if any lessons have higher status than approved
+    const lessons = await ctx.db
+      .query("lessons")
+      .withIndex("by_module", (q) => q.eq("moduleId", args.moduleId))
+      .collect();
+
+    validateModuleStatus("approved" as ContentStatus, lessons, module.title);
+
     await ctx.db.patch(args.moduleId, {
       status: "approved",
       updatedAt: Date.now(),
@@ -1085,6 +1099,20 @@ export const approveLesson = adminMutation({
     if (lesson.status !== "pending") {
       throw new Error("Only pending lessons can be approved");
     }
+
+    // Get parent module to validate status constraint
+    const module = await ctx.db.get(lesson.moduleId);
+
+    if (!module) {
+      throw new Error("Parent module not found");
+    }
+
+    // Validate: lesson cannot be approved if module isn't approved
+    validateLessonStatus(
+      "approved" as ContentStatus,
+      module.status as ContentStatus,
+      lesson.title
+    );
 
     await ctx.db.patch(args.lessonId, {
       status: "approved",
@@ -1161,31 +1189,31 @@ export const rejectContent = adminMutation({
       v.literal("quiz"),
       v.literal("assignment")
     ),
-    contentId: v.string(), // Generic ID, cast to specific type
+    contentId: v.union(
+      v.id("modules"),
+      v.id("lessons"),
+      v.id("quizzes"),
+      v.id("assignments")
+    ),
     reason: v.string(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    let content: any;
-    let table: string;
+    let content: { status: string } | null = null;
 
     // Get content based on type
     switch (args.contentType) {
       case "module":
-        content = await ctx.db.get(args.contentId as any);
-        table = "modules";
+        content = await ctx.db.get(args.contentId as Id<"modules">);
         break;
       case "lesson":
-        content = await ctx.db.get(args.contentId as any);
-        table = "lessons";
+        content = await ctx.db.get(args.contentId as Id<"lessons">);
         break;
       case "quiz":
-        content = await ctx.db.get(args.contentId as any);
-        table = "quizzes";
+        content = await ctx.db.get(args.contentId as Id<"quizzes">);
         break;
       case "assignment":
-        content = await ctx.db.get(args.contentId as any);
-        table = "assignments";
+        content = await ctx.db.get(args.contentId as Id<"assignments">);
         break;
     }
 
@@ -1198,13 +1226,116 @@ export const rejectContent = adminMutation({
     }
 
     // Set back to draft
-    await ctx.db.patch(args.contentId as any, {
-      status: "draft",
-      updatedAt: Date.now(),
-    });
+    switch (args.contentType) {
+      case "module":
+        // Validate: check if any lessons have higher status than draft
+        const module = await ctx.db.get(args.contentId as Id<"modules">);
+        if (!module) {
+          throw new Error("Module not found");
+        }
+        const lessons = await ctx.db
+          .query("lessons")
+          .withIndex("by_module", (q) => q.eq("moduleId", args.contentId as Id<"modules">))
+          .collect();
+
+        validateModuleStatus("draft" as ContentStatus, lessons, module.title);
+
+        await ctx.db.patch(args.contentId as Id<"modules">, {
+          status: "draft",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "lesson":
+        // Rejecting to draft is always safe (going down, no parent check needed)
+        await ctx.db.patch(args.contentId as Id<"lessons">, {
+          status: "draft",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "quiz":
+        await ctx.db.patch(args.contentId as Id<"quizzes">, {
+          status: "draft",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "assignment":
+        await ctx.db.patch(args.contentId as Id<"assignments">, {
+          status: "draft",
+          updatedAt: Date.now(),
+        });
+        break;
+    }
 
     // TODO: In production, notify creator with rejection reason
     // Could store rejection history in a separate table
+
+    return null;
+  },
+});
+
+/**
+ * Publish lesson (approved → published)
+ * Admin only - makes lesson visible to learners
+ */
+export const publishLesson = adminMutation({
+  args: { lessonId: v.id("lessons") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const lesson = await ctx.db.get(args.lessonId);
+
+    if (!lesson) {
+      throw new Error("Lesson not found");
+    }
+
+    if (lesson.status !== "approved") {
+      throw new Error("Only approved lessons can be published");
+    }
+
+    // Get parent module to validate status constraint
+    const module = await ctx.db.get(lesson.moduleId);
+
+    if (!module) {
+      throw new Error("Parent module not found");
+    }
+
+    // Module must be published for lesson to be published
+    if (module.status !== "published") {
+      throw new Error(
+        `Cannot publish lesson. Parent module "${module.title}" must be published first.`
+      );
+    }
+
+    await ctx.db.patch(args.lessonId, {
+      status: "published",
+      updatedAt: Date.now(),
+    });
+
+    return null;
+  },
+});
+
+/**
+ * Unpublish lesson (published → approved)
+ * Admin only - hides lesson from learners
+ */
+export const unpublishLesson = adminMutation({
+  args: { lessonId: v.id("lessons") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const lesson = await ctx.db.get(args.lessonId);
+
+    if (!lesson) {
+      throw new Error("Lesson not found");
+    }
+
+    if (lesson.status !== "published") {
+      throw new Error("Only published lessons can be unpublished");
+    }
+
+    await ctx.db.patch(args.lessonId, {
+      status: "approved",
+      updatedAt: Date.now(),
+    });
 
     return null;
   },

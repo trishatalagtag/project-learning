@@ -21,9 +21,23 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      'api': fileURLToPath(new URL('./convex/_generated/api', import.meta.url)),
-    },
+    alias: [
+      {
+        find: /^@\/convex\/(.+)$/,
+        replacement: path.resolve(__dirname, './convex/$1'),
+      },
+      {
+        find: /^convex\/_generated\/(.+)$/,
+        replacement: path.resolve(__dirname, './convex/_generated/$1'),
+      },
+      {
+        find: /^@\/(.+)$/,
+        replacement: path.resolve(__dirname, './src/$1'),
+      },
+      {
+        find: '^api$',
+        replacement: fileURLToPath(new URL('./convex/_generated/api', import.meta.url)),
+      },
+    ],
   }
 })

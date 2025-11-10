@@ -1,6 +1,6 @@
-import { QueryCtx, MutationCtx } from "../_generated/server";
 import { Doc, Id } from "../_generated/dataModel";
-import { getUserByUserId, createUserMap } from "./auth";
+import { MutationCtx, QueryCtx } from "../_generated/server";
+import { createUserMap, getUsersByUserIds } from "./auth";
 
 /**
  * Enrich a single module with related data
@@ -268,4 +268,76 @@ export async function enrichWithCreators<
     ...item,
     createdByName: userMap.get(item.createdBy)?.name ?? "Unknown",
   }));
+}
+
+/**
+ * Generic helper to enrich content items with creators, parents, and counts
+ * Eliminates N+1 queries by batching all related data loads
+ */
+export async function enrichContentItems<
+  T extends { _id: Id<any>; createdBy: string; [key: string]: any }
+>(
+  ctx: QueryCtx,
+  items: T[],
+  options: {
+    loadParent?: (item: T) => Promise<Doc<any> | null>;
+    loadCounts?: (item: T) => Promise<Record<string, number>>;
+    loadCreator?: boolean;
+  }
+): Promise<Array<T & { createdByName: string; [key: string]: any }>> {
+  if (items.length === 0) return [];
+
+  // Batch 1: Load all creators at once
+  let creatorMap = new Map<string, any>();
+  if (options.loadCreator !== false) {
+    const creatorIds = [...new Set(items.map((item) => item.createdBy))];
+    const creators = await getUsersByUserIds(ctx, creatorIds);
+    creatorMap = new Map(
+      creators.filter(Boolean).map((u) => {
+        const userId = u?.userId ?? String(u?._id);
+        return [userId, u];
+      })
+    );
+  }
+
+  // Batch 2: Load all parents at once
+  let parentMap = new Map<Id<any>, any>();
+  if (options.loadParent) {
+    const parents = await Promise.all(items.map((item) => options.loadParent!(item)));
+    parentMap = new Map(parents.map((parent, idx) => [items[idx]._id, parent]));
+  }
+
+  // Batch 3: Calculate all counts at once
+  let countsMap = new Map<Id<any>, Record<string, number>>();
+  if (options.loadCounts) {
+    const allCounts = await Promise.all(items.map((item) => options.loadCounts!(item)));
+    countsMap = new Map(allCounts.map((counts, idx) => [items[idx]._id, counts]));
+  }
+
+  // Combine everything
+  return items.map((item) => {
+    const enriched: any = { ...item };
+
+    if (options.loadCreator !== false) {
+      const userId = item.createdBy;
+      enriched.createdByName = creatorMap.get(userId)?.name ?? "Unknown";
+    }
+
+    if (options.loadParent) {
+      const parent = parentMap.get(item._id);
+      if (parent) {
+        enriched.courseName = parent.title ?? parent.name ?? "Unknown";
+        enriched.courseId = parent._id;
+      }
+    }
+
+    if (options.loadCounts) {
+      const counts = countsMap.get(item._id);
+      if (counts) {
+        Object.assign(enriched, counts);
+      }
+    }
+
+    return enriched;
+  });
 }
