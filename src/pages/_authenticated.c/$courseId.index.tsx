@@ -9,15 +9,15 @@ import { MarkdownViewer } from "@/components/shared/content/viewer/markdown-view
 import { EditorToolbar, TOOLBAR_PRESETS } from "@/components/shared/controls/editor-toolbar";
 import { CourseLearningCard } from "@/components/shared/course-learning-card";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
-import { PreviewLayout } from "@/components/shared/preview/preview-layout";
+import { PreviewLayout } from "@/components/structure/preview-layout";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { useFileUrl } from "@/hooks/use-file";
 import type { ContentStatus } from "@/lib/constants/content-status";
 import { CONTENT_STATUS } from "@/lib/constants/content-status";
-import { useCan } from "@/lib/hooks/use-can";
-import { useFileUrl } from "@/lib/hooks/use-file";
 import { canViewUnpublishedContent, ROLE } from "@/lib/rbac/permissions";
+import { useCan } from "@/lib/rbac/use-can";
 import { useUserId, useUserRole } from "@/lib/rbac/use-user-role";
 import type { TocItem } from "@/lib/tiptap/types"; // ✅ Fixed import
 import { createFileRoute, useNavigate } from "@tanstack/react-router";

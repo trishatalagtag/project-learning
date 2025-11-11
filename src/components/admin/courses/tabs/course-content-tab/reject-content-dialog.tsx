@@ -97,7 +97,7 @@ export function RejectContentDialog({
               disabled={isRejecting}
               className="resize-none"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Be specific to help the creator understand what needs to be fixed
             </p>
           </div>

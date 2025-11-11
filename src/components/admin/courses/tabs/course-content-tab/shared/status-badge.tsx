@@ -1,9 +1,7 @@
-import type { FunctionReturnType } from "convex/server"
-
-import type { api } from "@/convex/_generated/api"
-
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import type { api } from "@/convex/_generated/api"
+import type { FunctionReturnType } from "convex/server"
 
 import { STATUS_CONFIG } from "@/lib/constants/content-status"
 
@@ -23,7 +21,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge variant={config.variant} className={className}>
-            <Icon className="mr-1 h-3 w-3" />
+            <Icon className="mr-1.5 h-3.5 w-3.5" />
             {config.label}
           </Badge>
         </TooltipTrigger>

@@ -1,4 +1,4 @@
-import { CalendarIcon } from "@heroicons/react/24/outline"
+import { ClockIcon } from "@heroicons/react/24/outline"
 import { formatDistanceToNow } from "date-fns"
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -14,15 +14,21 @@ export function ContentMetadata({ createdAt, updatedAt, className }: ContentMeta
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={`flex items-center gap-1 cursor-help ${className}`}>
-            <CalendarIcon className="h-3.5 w-3.5" />
+          <div className={`flex cursor-help items-center gap-1.5 ${className}`}>
+            <ClockIcon className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Updated {formatDistanceToNow(updatedAt, { addSuffix: true })}</span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
           <div className="space-y-1 text-xs">
-            <p>Created: {new Date(createdAt).toLocaleDateString()}</p>
-            <p>Updated: {new Date(updatedAt).toLocaleDateString()}</p>
+            <div className="flex items-center gap-2">
+              <ClockIcon className="h-3 w-3" />
+              <span>Created: {new Date(createdAt).toLocaleDateString()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ClockIcon className="h-3 w-3" />
+              <span>Updated: {new Date(updatedAt).toLocaleDateString()}</span>
+            </div>
           </div>
         </TooltipContent>
       </Tooltip>

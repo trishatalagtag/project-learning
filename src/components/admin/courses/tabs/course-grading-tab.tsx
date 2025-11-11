@@ -1,25 +1,5 @@
 "use client"
 
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-import {
-  ChartBarIcon,
-  CheckBadgeIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  InformationCircleIcon,
-  PlusCircleIcon,
-  ScaleIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQuery } from "convex/react"
-import { Loader2, Sparkles } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
-import { toast } from "sonner"
-import * as z from "zod"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,7 +17,26 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
+import {
+  ChartBarIcon,
+  CheckBadgeIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  InformationCircleIcon,
+  PlusCircleIcon,
+  ScaleIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQuery } from "convex/react"
+import { Loader2, Sparkles } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useFieldArray, useForm } from "react-hook-form"
+import { toast } from "sonner"
+import * as z from "zod"
 
 const gradingConfigSchema = z
   .object({
@@ -183,7 +182,7 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
         <CardContent className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading configuration...</p>
+            <p className="text-muted-foreground text-sm">Loading configuration...</p>
           </div>
         </CardContent>
       </Card>
@@ -196,23 +195,18 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
       description:
         "Students receive percentage scores (0-100) based on their performance in assessments.",
       icon: ChartBarIcon,
-      color: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800",
     },
     competency: {
       title: "Competency-Based",
       description:
         'Students are marked as "Competent" or "Not Yet Competent" based on skill mastery.',
       icon: CheckBadgeIcon,
-      color:
-        "bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800",
     },
     weighted: {
       title: "Weighted Components",
       description:
         "Multiple assessment components with custom weights (e.g., exams 60%, projects 40%).",
       icon: ScaleIcon,
-      color:
-        "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800",
     },
   }
 
@@ -234,22 +228,21 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                 name="gradingMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Grading Method</FormLabel>
+                    <FormLabel className="font-semibold text-base">Grading Method</FormLabel>
                     <FormDescription>
                       Choose the assessment approach for this course
                     </FormDescription>
                     <FormControl>
-                      <div className="grid gap-4 sm:grid-cols-3 mt-4">
+                      <div className="mt-4 grid gap-4 sm:grid-cols-3">
                         {(["numerical", "competency", "weighted"] as const).map((method) => {
                           const Icon = gradingMethodInfo[method].icon
                           return (
                             <label
                               key={method}
-                              className={`relative flex cursor-pointer flex-col rounded-lg border-2 p-4 transition-all hover:border-primary/50 ${
-                                field.value === method
-                                  ? "border-primary bg-primary/5 shadow-sm"
-                                  : "border-border hover:shadow-sm"
-                              }`}
+                              className={`relative flex cursor-pointer flex-col rounded-lg border-2 p-4 transition-all hover:border-primary/50 ${field.value === method
+                                ? "border-primary bg-primary/5 shadow-sm"
+                                : "border-border hover:shadow-sm"
+                                }`}
                             >
                               <input
                                 type="radio"
@@ -260,9 +253,7 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                                 disabled={isSubmitting}
                               />
                               <div className="flex items-start gap-3">
-                                <div
-                                  className={`rounded-lg p-2 ${gradingMethodInfo[method].color}`}
-                                >
+                                <div className="rounded-lg bg-primary/10 p-2 text-primary">
                                   <Icon className="h-5 w-5" />
                                 </div>
                                 <div className="flex-1 space-y-1">
@@ -274,7 +265,7 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                                       <CheckCircleIcon className="h-4 w-4 text-primary" />
                                     )}
                                   </div>
-                                  <p className="text-xs text-muted-foreground leading-relaxed">
+                                  <p className="text-muted-foreground text-xs leading-relaxed">
                                     {gradingMethodInfo[method].description}
                                   </p>
                                 </div>
@@ -299,28 +290,28 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                   <FormItem>
                     <div className="flex items-center justify-between">
                       <div>
-                        <FormLabel className="text-base font-semibold">Passing Score</FormLabel>
+                        <FormLabel className="font-semibold text-base">Passing Score</FormLabel>
                         <FormDescription>
                           Minimum score required to pass this course
                         </FormDescription>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-bold text-primary">{watchPassingScore}%</div>
+                        <div className="font-bold text-3xl text-primary">{watchPassingScore}%</div>
                       </div>
                     </div>
                     <FormControl>
-                      <div className="space-y-4 mt-4">
+                      <div className="mt-4 space-y-4">
                         <Input
                           type="range"
                           min={0}
                           max={100}
                           step={5}
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
                           disabled={isSubmitting}
                           className="cursor-pointer"
                         />
-                        <div className="flex justify-between text-xs text-muted-foreground">
+                        <div className="flex justify-between text-muted-foreground text-xs">
                           <span>0%</span>
                           <span>50%</span>
                           <span>100%</span>
@@ -340,8 +331,8 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base font-semibold">Grading Components</Label>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <Label className="font-semibold text-base">Grading Components</Label>
+                        <p className="mt-1 text-muted-foreground text-sm">
                           Define weighted components that sum to 100%
                         </p>
                       </div>
@@ -378,12 +369,12 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                           onClick={() => applyPreset(GRADING_PRESETS.tesda)}
                         >
                           <CardHeader className="pb-3">
-                            <CardTitle className="text-sm flex items-center gap-2">
+                            <CardTitle className="flex items-center gap-2 text-sm">
                               <ScaleIcon className="h-4 w-4" />
                               TESDA Standard
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="text-xs space-y-1">
+                          <CardContent className="space-y-1 text-xs">
                             {GRADING_PRESETS.tesda.map((comp, i) => (
                               <div key={i} className="flex justify-between">
                                 <span className="text-muted-foreground">{comp.name}</span>
@@ -398,12 +389,12 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                           onClick={() => applyPreset(GRADING_PRESETS.academic)}
                         >
                           <CardHeader className="pb-3">
-                            <CardTitle className="text-sm flex items-center gap-2">
+                            <CardTitle className="flex items-center gap-2 text-sm">
                               <ChartBarIcon className="h-4 w-4" />
                               Academic
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="text-xs space-y-1">
+                          <CardContent className="space-y-1 text-xs">
                             {GRADING_PRESETS.academic.map((comp, i) => (
                               <div key={i} className="flex justify-between">
                                 <span className="text-muted-foreground">{comp.name}</span>
@@ -418,12 +409,12 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                           onClick={() => applyPreset(GRADING_PRESETS.practical)}
                         >
                           <CardHeader className="pb-3">
-                            <CardTitle className="text-sm flex items-center gap-2">
+                            <CardTitle className="flex items-center gap-2 text-sm">
                               <CheckBadgeIcon className="h-4 w-4" />
                               Skills-Based
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="text-xs space-y-1">
+                          <CardContent className="space-y-1 text-xs">
                             {GRADING_PRESETS.practical.map((comp, i) => (
                               <div key={i} className="flex justify-between">
                                 <span className="text-muted-foreground">{comp.name}</span>
@@ -438,49 +429,42 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                     {/* Weight Progress */}
                     {fields.length > 0 && (
                       <Card
-                        className={`${
-                          isWeightValid
-                            ? "border-green-500/50 bg-green-500/5"
-                            : totalWeight > 100
-                              ? "border-destructive/50 bg-destructive/5"
-                              : "border-orange-500/50 bg-orange-500/5"
-                        }`}
+                        className={`${isWeightValid
+                          ? "border-primary/50 bg-primary/5"
+                          : totalWeight > 100
+                            ? "border-destructive/50 bg-destructive/5"
+                            : "border-accent/50 bg-accent/5"
+                          }`}
                       >
-                        <CardContent className="pt-6">
+                        <CardContent>
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 {isWeightValid ? (
-                                  <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                                  <CheckCircleIcon className="h-5 w-5 text-primary" />
                                 ) : (
-                                  <ExclamationCircleIcon className="h-5 w-5 text-orange-600" />
+                                  <ExclamationCircleIcon className="h-5 w-5 text-destructive" />
                                 )}
                                 <span className="font-semibold text-sm">Total Weight</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-2xl font-bold">
+                                <span className="font-bold text-2xl">
                                   {totalWeight.toFixed(1)}%
                                 </span>
-                                {isWeightValid && (
-                                  <Badge variant="default" className="bg-green-600">
-                                    Valid
-                                  </Badge>
-                                )}
+                                {isWeightValid && <Badge variant="default">Valid</Badge>}
                               </div>
                             </div>
                             <Progress
                               value={weightProgress}
                               className={cn(
                                 "h-2",
-                                isWeightValid
-                                  ? "bg-green-600"
-                                  : totalWeight > 100
-                                    ? "bg-destructive"
-                                    : "bg-orange-500",
+                                isWeightValid && "[&>div]:bg-primary",
+                                totalWeight > 100 && "[&>div]:bg-destructive",
+                                totalWeight < 100 && !isWeightValid && "[&>div]:bg-accent",
                               )}
                             />
                             {!isWeightValid && (
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-muted-foreground text-xs">
                                 {totalWeight < 100
                                   ? `Add ${(100 - totalWeight).toFixed(1)}% more to reach 100%`
                                   : `Reduce by ${(totalWeight - 100).toFixed(1)}% to reach 100%`}
@@ -497,14 +481,14 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                         {fields.map((field, index) => (
                           <Card
                             key={field.id}
-                            className="border-2 hover:border-primary/50 transition-colors"
+                            className="border-2 transition-colors hover:border-primary/50"
                           >
-                            <CardContent className="pt-6">
+                            <CardContent>
                               <div className="flex items-start gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
                                   {index + 1}
                                 </div>
-                                <div className="flex-1 grid gap-4 sm:grid-cols-2">
+                                <div className="grid flex-1 gap-4 sm:grid-cols-2">
                                   <FormField
                                     control={form.control}
                                     name={`components.${index}.name`}
@@ -588,11 +572,11 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                       !showPresets && (
                         <Card className="border-dashed">
                           <CardContent className="flex flex-col items-center justify-center py-12">
-                            <div className="rounded-full bg-muted p-3 mb-4">
+                            <div className="mb-4 rounded-full bg-muted p-3">
                               <PlusCircleIcon className="h-6 w-6 text-muted-foreground" />
                             </div>
-                            <h3 className="font-semibold mb-1">No components yet</h3>
-                            <p className="text-sm text-muted-foreground text-center mb-4 max-w-sm">
+                            <h3 className="mb-1 font-semibold">No components yet</h3>
+                            <p className="mb-4 max-w-sm text-center text-muted-foreground text-sm">
                               Add grading components or use a preset to get started quickly
                             </p>
                             <div className="flex gap-2">
@@ -627,7 +611,7 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
 
               {/* Submit Button */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <InformationCircleIcon className="h-4 w-4" />
                   <span>Changes will affect all future assessments</span>
                 </div>
@@ -661,7 +645,7 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
       {watchGradingMethod && (
         <Card className="bg-muted/50">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <InformationCircleIcon className="h-5 w-5" />
               Configuration Summary
             </CardTitle>
@@ -669,7 +653,7 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Method</p>
+                <p className="mb-1 text-muted-foreground text-xs">Method</p>
                 <div className="flex items-center gap-2">
                   {(() => {
                     const Icon = gradingMethodInfo[watchGradingMethod].icon
@@ -679,14 +663,14 @@ export function CourseGradingTab({ courseId }: CourseGradingTabProps) {
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Passing Score</p>
+                <p className="mb-1 text-muted-foreground text-xs">Passing Score</p>
                 <p className="font-semibold">{watchPassingScore}%</p>
               </div>
             </div>
 
             {watchGradingMethod === "weighted" && fields.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground mb-2">Components</p>
+                <p className="mb-2 text-muted-foreground text-xs">Components</p>
                 <div className="space-y-2">
                   {watchComponents?.map((comp, i) => (
                     <div key={i} className="flex items-center justify-between text-sm">

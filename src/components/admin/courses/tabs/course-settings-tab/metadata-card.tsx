@@ -1,11 +1,9 @@
 "use client"
 
-import { format, formatDistanceToNow } from "date-fns"
-
-import type { Course } from "@/lib/types/course"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "@/components/ui/item"
+import type { Course } from "@/lib/types/course"
+import { format, formatDistanceToNow } from "date-fns"
 
 interface MetadataCardProps {
   course: Course
@@ -50,7 +48,7 @@ export function MetadataCard({ course }: MetadataCardProps) {
             <ItemContent>
               <ItemTitle>Modules</ItemTitle>
               <ItemDescription>
-                <span className="text-2xl font-bold">{course.moduleCount}</span>
+                <span className="font-bold text-2xl">{course.moduleCount}</span>
               </ItemDescription>
             </ItemContent>
           </Item>
@@ -59,7 +57,7 @@ export function MetadataCard({ course }: MetadataCardProps) {
             <ItemContent>
               <ItemTitle>Enrollments</ItemTitle>
               <ItemDescription>
-                <span className="text-2xl font-bold">{course.enrollmentCount}</span>
+                <span className="font-bold text-2xl">{course.enrollmentCount}</span>
               </ItemDescription>
             </ItemContent>
           </Item>

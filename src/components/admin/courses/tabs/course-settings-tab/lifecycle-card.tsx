@@ -1,18 +1,5 @@
 "use client"
 
-import {
-  ArchiveBoxIcon,
-  CheckCircleIcon,
-  RocketLaunchIcon,
-  XCircleIcon,
-} from "@heroicons/react/24/outline"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
-
-import { useCourseMutations } from "@/hooks/use-course-mutations"
-import { CONTENT_STATUS } from "@/lib/constants/content-status"
-import type { Course } from "@/lib/types/course"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -32,6 +19,17 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { Textarea } from "@/components/ui/textarea"
+import { useCourseMutations } from "@/hooks/use-course-mutations"
+import { CONTENT_STATUS } from "@/lib/constants/content-status"
+import type { Course } from "@/lib/types/course"
+import {
+  ArchiveBoxIcon,
+  CheckCircleIcon,
+  RocketLaunchIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
 
 interface LifecycleCardProps {
   course: Course

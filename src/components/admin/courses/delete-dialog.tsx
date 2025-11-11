@@ -56,7 +56,7 @@ export function DeleteDialog({ open, onOpenChange, course, onSuccess }: DeleteDi
           <AlertDialogDescription>
             Are you sure you want to delete "{course?.title}"? This action cannot be undone.
             {course && course.enrollmentCount > 0 && (
-              <span className="block mt-2 text-destructive font-medium">
+              <span className="mt-2 block font-medium text-destructive">
                 Warning: This course has {course.enrollmentCount} active enrollment(s). You may need
                 to unpublish it instead.
               </span>

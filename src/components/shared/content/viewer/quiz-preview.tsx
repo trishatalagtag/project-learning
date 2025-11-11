@@ -36,7 +36,7 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
           <div className="flex-1">
             <CardTitle className="text-lg">{quiz.title}</CardTitle>
             {quiz.instructions && (
-              <p className="text-sm text-muted-foreground mt-2">{quiz.instructions}</p>
+              <p className="mt-2 text-muted-foreground text-sm">{quiz.instructions}</p>
             )}
           </div>
           <Badge variant="outline" className="shrink-0">
@@ -70,16 +70,16 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
             <Card key={question._id} className="border-2">
               <CardHeader className="pb-3">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-sm">{question.questionText}</p>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="mt-2 flex items-center gap-2">
                       <Badge variant="secondary" className="text-xs">
                         Multiple Choice
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         {question.points} {question.points === 1 ? "point" : "points"}
                       </span>
                     </div>
@@ -90,24 +90,24 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
               <CardContent className="pt-0">
                 {/* Multiple Choice Options */}
                 {question.options && (
-                  <div className="space-y-2 mt-3">
+                  <div className="mt-3 space-y-2">
                     {question.options.map((option, optIndex) => {
                       const isCorrect = question.correctIndex === optIndex
                       return (
                         <div
                           key={optIndex}
-                          className={`flex items-start gap-2 p-2 rounded-md border ${
+                          className={`flex items-start gap-2 rounded-md border p-2 ${
                             isCorrect
-                              ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900"
-                              : "bg-muted/30 border-border"
+                              ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/20"
+                              : "border-border bg-muted/30"
                           }`}
                         >
-                          <span className="font-mono text-xs font-semibold mt-0.5">
+                          <span className="mt-0.5 font-mono font-semibold text-xs">
                             {String.fromCharCode(65 + optIndex)}.
                           </span>
-                          <span className="text-sm flex-1">{option}</span>
+                          <span className="flex-1 text-sm">{option}</span>
                           {isCorrect && (
-                            <CheckCircleIcon className="h-4 w-4 text-green-600 shrink-0" />
+                            <CheckCircleIcon className="h-4 w-4 shrink-0 text-green-600" />
                           )}
                         </div>
                       )
@@ -117,11 +117,11 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
 
                 {/* Explanation */}
                 {question.explanation && (
-                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-900">
-                    <p className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1">
+                  <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950/20">
+                    <p className="mb-1 font-medium text-blue-900 text-xs dark:text-blue-100">
                       Explanation
                     </p>
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                    <p className="text-blue-700 text-xs dark:text-blue-300">
                       {question.explanation}
                     </p>
                   </div>

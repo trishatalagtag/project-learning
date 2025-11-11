@@ -125,7 +125,7 @@ export function CoverImageUpload({ courseId, currentImageUrl, onSuccess }: Cover
         <div className="flex aspect-video w-full max-w-md items-center justify-center rounded-lg border border-dashed">
           <div className="flex flex-col items-center gap-2 text-center">
             <PhotoIcon className="h-12 w-12 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">No cover image</p>
+            <p className="text-muted-foreground text-sm">No cover image</p>
           </div>
         </div>
       )}

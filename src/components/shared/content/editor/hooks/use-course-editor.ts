@@ -1,6 +1,6 @@
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
-import { useMutationWithToast } from "@/lib/hooks/use-mutation-with-toast"
+import { useMutationWithToast } from "@/hooks/use-mutation-with-toast"
 import { useDebounce } from "@uidotdev/usehooks"
 import { useEffect, useState } from "react"
 

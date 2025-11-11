@@ -1,10 +1,11 @@
-import { type AuthSession, authClient } from "@/lib/auth"
+import { type AuthSession, authClient } from "@/lib/auth/guards"
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { ConvexReactClient } from "convex/react"
 import { NuqsAdapter } from "nuqs/adapters/react"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
+import { MigrationsTrigger } from "./components/migrations-trigger"
 import "./index.css"
 import { routeTree } from "./routes"
 
@@ -29,6 +30,7 @@ function InnerApp() {
     <StrictMode>
       <NuqsAdapter>
         <ConvexBetterAuthProvider client={convex} authClient={authClient}>
+          <MigrationsTrigger />
           <RouterProvider router={router} context={{ auth: { session, error, isPending } }} />
         </ConvexBetterAuthProvider>
       </NuqsAdapter>

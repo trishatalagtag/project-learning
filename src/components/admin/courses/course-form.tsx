@@ -1,23 +1,15 @@
 "use client"
 
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQuery } from "convex/react"
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -28,6 +20,19 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import {
+  AcademicCapIcon,
+  BookOpenIcon,
+  FolderIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQuery } from "convex/react"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
 import type { Course } from "./columns"
 
@@ -42,19 +47,19 @@ const formSchema = z.object({
 
 type CourseFormProps =
   | {
-      open: boolean
-      onOpenChange: (open: boolean) => void
-      mode: "create"
-      course?: never
-      onSuccess?: (courseId: Id<"courses">) => void
-    }
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    mode: "create"
+    course?: never
+    onSuccess?: (courseId: Id<"courses">) => void
+  }
   | {
-      open: boolean
-      onOpenChange: (open: boolean) => void
-      mode: "edit"
-      course: Course
-      onSuccess?: () => void
-    }
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    mode: "edit"
+    course: Course
+    onSuccess?: () => void
+  }
 
 export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: CourseFormProps) {
   const createCourse = useMutation(api.faculty.courses.createCourse)
@@ -175,9 +180,6 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
               courseId: course._id,
               teacherId: newTeacherId,
             })
-          } else {
-            // Unassign teacher - would need unassignFaculty mutation
-            // For now, we'll skip this
           }
         }
 
@@ -192,138 +194,153 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
     }
   }
 
+  const errors = form.formState.errors
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{mode === "create" ? "Create Course" : "Edit Course"}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <AcademicCapIcon className="h-5 w-5 text-primary" />
+            {mode === "create" ? "Create New Course" : "Edit Course"}
+          </DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Course title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Course description" {...field} rows={3} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Content</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Course introduction content" {...field} rows={4} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="categoryId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {flatCategories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {"  ".repeat(cat.level - 1)}
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <FieldGroup>
+            <Field data-invalid={!!errors.title}>
+              <FieldLabel htmlFor="title">Course Title</FieldLabel>
+              <Input
+                id="title"
+                placeholder="e.g., Sustainable Crop Production Techniques"
+                aria-invalid={!!errors.title}
+                {...form.register("title")}
               />
+              <FieldDescription>Choose a clear, descriptive title</FieldDescription>
+              <FieldError>{errors.title?.message}</FieldError>
+            </Field>
 
-              <FormField
-                control={form.control}
-                name="teacherId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Teacher (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || "unassigned"}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select teacher" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {faculty?.map((teacher) => (
-                          <SelectItem key={teacher.userId} value={teacher.userId}>
-                            {teacher.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            <Field data-invalid={!!errors.description}>
+              <FieldLabel htmlFor="description">Description</FieldLabel>
+              <Textarea
+                id="description"
+                placeholder="Describe what farmers will learn in this course..."
+                rows={3}
+                aria-invalid={!!errors.description}
+                {...form.register("description")}
               />
+              <FieldDescription>A brief overview of the course content</FieldDescription>
+              <FieldError>{errors.description?.message}</FieldError>
+            </Field>
+
+            <Field data-invalid={!!errors.content}>
+              <FieldLabel htmlFor="content">Course Introduction</FieldLabel>
+              <Textarea
+                id="content"
+                placeholder="Welcome to the course! In this course, you will learn modern farming practices..."
+                rows={4}
+                aria-invalid={!!errors.content}
+                {...form.register("content")}
+              />
+              <FieldDescription>
+                Detailed introduction content shown to enrolled students
+              </FieldDescription>
+              <FieldError>{errors.content?.message}</FieldError>
+            </Field>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field data-invalid={!!errors.categoryId}>
+                <FieldContent>
+                  <FieldLabel htmlFor="categoryId" className="flex items-center gap-2">
+                    <FolderIcon className="h-4 w-4 text-muted-foreground" />
+                    Category
+                  </FieldLabel>
+                  <FieldDescription>Course subject area</FieldDescription>
+                </FieldContent>
+                <Select
+                  value={form.watch("categoryId")}
+                  onValueChange={(value) => form.setValue("categoryId", value)}
+                >
+                  <SelectTrigger id="categoryId" aria-invalid={!!errors.categoryId}>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {flatCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className="font-mono">
+                        {"\u00A0\u00A0".repeat(cat.level - 1)}
+                        {cat.level > 1 && "└─ "}
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FieldError>{errors.categoryId?.message}</FieldError>
+              </Field>
+
+              <Field data-invalid={!!errors.teacherId}>
+                <FieldContent>
+                  <FieldLabel htmlFor="teacherId" className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4 text-muted-foreground" />
+                    Teacher
+                  </FieldLabel>
+                  <FieldDescription>Assign a faculty member (optional)</FieldDescription>
+                </FieldContent>
+                <Select
+                  value={form.watch("teacherId") || "unassigned"}
+                  onValueChange={(value) => form.setValue("teacherId", value)}
+                >
+                  <SelectTrigger id="teacherId">
+                    <SelectValue placeholder="Select teacher" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">
+                      <span className="text-muted-foreground">Unassigned</span>
+                    </SelectItem>
+                    {faculty?.map((teacher) => (
+                      <SelectItem key={teacher._id} value={teacher._id}>
+                        {teacher.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FieldError>{errors.teacherId?.message}</FieldError>
+              </Field>
             </div>
 
-            <FormField
-              control={form.control}
-              name="isEnrollmentOpen"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Enrollment Open</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      Allow learners to enroll in this course
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <Field orientation="horizontal">
+              <Switch
+                id="isEnrollmentOpen"
+                checked={form.watch("isEnrollmentOpen")}
+                onCheckedChange={(checked) => form.setValue("isEnrollmentOpen", checked)}
+              />
+              <FieldContent>
+                <FieldLabel htmlFor="isEnrollmentOpen">Open for Enrollment</FieldLabel>
+                <FieldDescription>Allow learners to enroll in this course</FieldDescription>
+              </FieldContent>
+            </Field>
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : mode === "create" ? "Create Course" : "Save Changes"}
+                {isSubmitting ? (
+                  <>
+                    <BookOpenIcon className="mr-2 h-4 w-4 animate-pulse" />
+                    Saving...
+                  </>
+                ) : mode === "create" ? (
+                  <>
+                    <BookOpenIcon className="mr-2 h-4 w-4" />
+                    Create Course
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
             </div>
-          </form>
-        </Form>
+          </FieldGroup>
+        </form>
       </DialogContent>
     </Dialog>
   )

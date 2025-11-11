@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { adminMutation, adminQuery } from "../lib/functions";
 
 /**
- * List all categories (admin view with full details)
+ * List all categories
  * Admin only
  */
 export const listCategories = adminQuery({
@@ -24,7 +24,6 @@ export const listCategories = adminQuery({
   handler: async (ctx) => {
     const categories = await ctx.db.query("categories").collect();
 
-    // Enrich with parent names and course counts
     const enrichedCategories = await Promise.all(
       categories.map(async (category) => {
         let parentName: string | undefined;
@@ -33,7 +32,6 @@ export const listCategories = adminQuery({
           parentName = parent?.name;
         }
 
-        // Count courses in this category
         const courses = await ctx.db
           .query("courses")
           .withIndex("by_category", (q) => q.eq("categoryId", category._id))
@@ -54,7 +52,6 @@ export const listCategories = adminQuery({
       })
     );
 
-    // Sort by level, then order
     return enrichedCategories.sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
       return a.order - b.order;
@@ -70,18 +67,16 @@ export const createCategory = adminMutation({
   args: {
     name: v.string(),
     description: v.string(),
-    level: v.number(), // 1, 2, or 3
+    level: v.number(),
     parentId: v.optional(v.id("categories")),
     order: v.optional(v.number()),
   },
   returns: v.id("categories"),
   handler: async (ctx, args) => {
-    // Validate level
     if (args.level < 1 || args.level > 3) {
       throw new Error("Level must be 1, 2, or 3");
     }
 
-    // Validate parent relationship
     if (args.level > 1 && !args.parentId) {
       throw new Error(`Level ${args.level} category requires a parent`);
     }
@@ -96,7 +91,6 @@ export const createCategory = adminMutation({
         throw new Error("Parent category not found");
       }
 
-      // Validate parent level is correct
       const expectedParentLevel = args.level - 1;
       if (parent.level !== expectedParentLevel) {
         throw new Error(
@@ -105,7 +99,6 @@ export const createCategory = adminMutation({
       }
     }
 
-    // Get next order number if not provided
     let order = args.order ?? 0;
     if (order === 0) {
       const siblings = await ctx.db
@@ -149,7 +142,6 @@ export const updateCategory = adminMutation({
       throw new Error("Category not found");
     }
 
-    // Build update object
     const updates: Record<string, any> = {};
     if (args.name !== undefined) updates.name = args.name;
     if (args.description !== undefined) updates.description = args.description;
@@ -165,7 +157,7 @@ export const updateCategory = adminMutation({
 
 /**
  * Delete category
- * Admin only - cannot delete if has children or courses
+ * Admin only
  */
 export const deleteCategory = adminMutation({
   args: { categoryId: v.id("categories") },
@@ -177,7 +169,6 @@ export const deleteCategory = adminMutation({
       throw new Error("Category not found");
     }
 
-    // Check for child categories
     const children = await ctx.db
       .query("categories")
       .withIndex("by_parent", (q) => q.eq("parentId", args.categoryId))
@@ -189,7 +180,6 @@ export const deleteCategory = adminMutation({
       );
     }
 
-    // Check for courses in this category
     const courses = await ctx.db
       .query("courses")
       .withIndex("by_category", (q) => q.eq("categoryId", args.categoryId))

@@ -1,6 +1,6 @@
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
-import { useMutationWithToast } from "@/lib/hooks/use-mutation-with-toast"
+import { useMutationWithToast } from "@/hooks/use-mutation-with-toast"
 
 export function useDeleteModule() {
   return useMutationWithToast(api.faculty.modules.deleteModule, {
@@ -13,7 +13,7 @@ export function useDeleteModule() {
   })
 }
 
-export function useReorderModules(courseId: Id<"courses">) {
+export function useReorderModules(_courseId: Id<"courses">) {
   return useMutationWithToast(api.faculty.modules.reorderModules, {
     successMessage: "Modules reordered",
     errorMessage: "Failed to reorder modules",

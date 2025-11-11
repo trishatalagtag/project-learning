@@ -7,7 +7,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { authClient } from "@/lib/auth"
+import { authClient } from "@/lib/auth/guards"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 

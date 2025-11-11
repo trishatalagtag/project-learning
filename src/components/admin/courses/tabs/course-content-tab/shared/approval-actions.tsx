@@ -31,16 +31,16 @@ export function ApprovalActions({
           onApprove()
         }}
         disabled={!canApprove || isApproving}
-        className={layout === "vertical" ? "w-full" : "flex-1"}
+        className={`${layout === "vertical" ? "w-full" : "flex-1"} gap-2`}
       >
         {isApproving ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
             Approving...
           </>
         ) : (
           <>
-            <CheckCircleIcon className="mr-2 h-4 w-4" />
+            <CheckCircleIcon className="h-4 w-4" />
             Approve
           </>
         )}
@@ -53,9 +53,9 @@ export function ApprovalActions({
           onReject()
         }}
         disabled={!canReject}
-        className={layout === "vertical" ? "w-full" : "flex-1"}
+        className={`${layout === "vertical" ? "w-full" : "flex-1"} gap-2`}
       >
-        <XCircleIcon className="mr-2 h-4 w-4" />
+        <XCircleIcon className="h-4 w-4" />
         Reject
       </Button>
     </div>

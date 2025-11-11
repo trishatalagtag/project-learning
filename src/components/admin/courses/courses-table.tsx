@@ -1,24 +1,8 @@
 "use client"
 
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-import { CONTENT_STATUS } from "@/lib/constants/content-status"
-import { ExclamationTriangleIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline"
-import { useNavigate, useSearch } from "@tanstack/react-router"
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  type SortingState,
-  type VisibilityState,
-} from "@tanstack/react-table"
-import { useDebounce } from "@uidotdev/usehooks"
-import { useQuery } from "convex/react"
-import { Loader2 } from "lucide-react"
-import { useMemo } from "react"
-
-import { DataTablePagination } from "@/components/data-table/data-table-pagination"
-import { DataTableViewOptions } from "@/components/data-table/data-table-view-options"
+import { DataTablePagination } from "@/components/table/data-table-pagination"
+import { DataTableViewOptions } from "@/components/table/data-table-view-options"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -29,6 +13,14 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from "@/components/ui/item"
 import {
   Select,
   SelectContent,
@@ -44,7 +36,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { createColumns } from "./columns"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { CONTENT_STATUS } from "@/lib/constants/content-status"
+import { cn } from "@/lib/utils"
+import {
+  AcademicCapIcon,
+  ChevronRightIcon,
+  ExclamationTriangleIcon,
+  FolderIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  UserIcon,
+  UsersIcon
+} from "@heroicons/react/24/outline"
+import { useNavigate, useSearch } from "@tanstack/react-router"
+import {
+  flexRender,
+  getCoreRowModel,
+  type SortingState,
+  useReactTable,
+  type VisibilityState,
+} from "@tanstack/react-table"
+import { useDebounce } from "@uidotdev/usehooks"
+import { useQuery } from "convex/react"
+import { formatDistanceToNow } from "date-fns"
+import { Loader2 } from "lucide-react"
+import { useMemo } from "react"
+import { type Course, createColumns } from "./columns"
 
 export function CoursesTable() {
   const navigate = useNavigate()
@@ -95,9 +114,9 @@ export function CoursesTable() {
       status === "all"
         ? undefined
         : status === CONTENT_STATUS.DRAFT ||
-            status === CONTENT_STATUS.PENDING ||
-            status === CONTENT_STATUS.APPROVED ||
-            status === CONTENT_STATUS.PUBLISHED
+          status === CONTENT_STATUS.PENDING ||
+          status === CONTENT_STATUS.APPROVED ||
+          status === CONTENT_STATUS.PUBLISHED
           ? (status as "draft" | "pending" | "approved" | "published")
           : (status as "archived"),
     categoryId: categoryId ? (categoryId as Id<"categories">) : undefined,
@@ -110,7 +129,7 @@ export function CoursesTable() {
 
   const updateSearch = (updates: Partial<typeof search>) => {
     navigate({
-      // @ts-ignore - prev is not typed
+      // @ts-expect-error - prev is not typed
       search: (prev: typeof search) => ({ ...prev, ...updates }),
       replace: true,
     })
@@ -214,15 +233,27 @@ export function CoursesTable() {
     )
   }
 
+  const getStatusVariant = (courseStatus: string) => {
+    const variants = {
+      draft: "secondary",
+      pending: "outline",
+      approved: "default",
+      published: "default",
+      archived: "destructive",
+    } as const
+
+    return variants[courseStatus as keyof typeof variants] || "secondary"
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Courses</h1>
+          <h1 className="font-bold text-3xl tracking-tight">Courses</h1>
           <p className="text-muted-foreground">Manage your course catalog and enrollments</p>
         </div>
-        <Button onClick={() => navigate({ to: "/a/courses/new" })}>
+        <Button onClick={() => navigate({ to: "/a/courses/new" })} className="sm:ml-auto">
           <PlusIcon className="mr-2 h-4 w-4" />
           Create Course
         </Button>
@@ -232,8 +263,8 @@ export function CoursesTable() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           {/* Search */}
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <div className="relative w-full min-w-[200px] sm:max-w-sm sm:flex-1">
+            <MagnifyingGlassIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search courses..."
               value={q}
@@ -252,7 +283,7 @@ export function CoursesTable() {
               })
             }
           >
-            <SelectTrigger className="h-9 w-[140px]">
+            <SelectTrigger className="h-9 w-full sm:w-[140px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -275,14 +306,15 @@ export function CoursesTable() {
               })
             }
           >
-            <SelectTrigger className="h-9 w-[160px]">
+            <SelectTrigger className="h-9 w-full sm:w-[160px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat._id} value={cat._id}>
-                  {"  ".repeat(cat.level - 1)}
+                  {"\u00A0\u00A0".repeat(cat.level - 1)}
+                  {cat.level > 1 && "└─ "}
                   {cat.name}
                 </SelectItem>
               ))}
@@ -299,26 +331,26 @@ export function CoursesTable() {
               })
             }
           >
-            <SelectTrigger className="h-9 w-[180px]">
+            <SelectTrigger className="h-9 w-full sm:w-[180px]">
               <SelectValue placeholder="Teacher" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All teachers</SelectItem>
               {faculty.map((teacher) => (
-                <SelectItem key={teacher.userId} value={teacher.userId}>
+                <SelectItem key={teacher._id} value={teacher._id}>
                   {teacher.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <div className="ml-auto">
+          <div className="hidden sm:ml-auto md:block">
             <DataTableViewOptions table={table} />
           </div>
         </div>
 
         {/* Results info */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-muted-foreground text-sm">
           <div>
             Showing {pageIndex * pageSize + 1}-{Math.min((pageIndex + 1) * pageSize, totalCourses)}{" "}
             of {totalCourses} courses
@@ -326,8 +358,91 @@ export function CoursesTable() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border">
+      {/* Mobile List View */}
+      <div className="md:hidden">
+        {data.length > 0 ? (
+          <ItemGroup className="space-y-0">
+            {data.map((course: Course, index) => {
+              const isFirst = index === 0
+              const isLast = index === data.length - 1
+              const isOnly = data.length === 1
+
+              return (
+                <Item
+                  key={course._id}
+                  variant="outline"
+                  className={cn(
+                    "cursor-pointer transition-colors hover:bg-accent/50",
+                    // Single item - fully rounded
+                    isOnly && "rounded-lg",
+                    // First item - rounded top only, no bottom border
+                    isFirst && !isOnly && "rounded-t-lg rounded-b-none border-b-0",
+                    // Last item - rounded bottom only
+                    isLast && !isOnly && "rounded-t-none rounded-b-lg",
+                    // Middle items - no rounding, no bottom border
+                    !isFirst && !isLast && "rounded-none border-b-0"
+                  )}
+                  onClick={() => handleView(course._id)}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <AcademicCapIcon className="h-5 w-5" />
+                  </div>
+
+                  <ItemContent className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <ItemTitle className="line-clamp-1">{course.title}</ItemTitle>
+                      <Badge
+                        variant={getStatusVariant(course.status)}
+                        className="shrink-0 capitalize"
+                      >
+                        {course.status}
+                      </Badge>
+                    </div>
+
+                    <ItemDescription className="mt-1 space-y-1">
+                      <div className="flex items-center gap-4 text-xs">
+                        {course.categoryName && (
+                          <span className="flex items-center gap-1">
+                            <FolderIcon className="h-3.5 w-3.5" />
+                            {course.categoryName}
+                          </span>
+                        )}
+                        {course.teacherName && (
+                          <span className="flex items-center gap-1">
+                            <UserIcon className="h-3.5 w-3.5" />
+                            {course.teacherName}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-xs">
+                        <span className="flex items-center gap-1">
+                          <UsersIcon className="h-3.5 w-3.5" />
+                          {course.enrollmentCount} enrolled
+                        </span>
+                        <span>
+                          Updated {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}
+                        </span>
+                      </div>
+                    </ItemDescription>
+                  </ItemContent>
+
+                  <ItemActions className="shrink-0">
+                    <ChevronRightIcon className="h-5 w-5 text-muted-foreground" />
+                  </ItemActions>
+                </Item>
+              )
+            })}
+          </ItemGroup>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-12 text-center text-muted-foreground">
+            <ExclamationTriangleIcon className="h-8 w-8" />
+            <p>No courses found{q && ` matching "${q}"`}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden rounded-md border md:block">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

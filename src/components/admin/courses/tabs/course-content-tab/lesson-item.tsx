@@ -1,6 +1,8 @@
 "use client"
 
-import { api } from "@/convex/_generated/api"
+import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import type { api } from "@/convex/_generated/api"
 import {
   ChevronDownIcon,
   DocumentTextIcon,
@@ -11,9 +13,6 @@ import {
 import { Link } from "@tanstack/react-router"
 import type { FunctionReturnType } from "convex/server"
 import { useState } from "react"
-
-import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import { useContentApproval } from "./hooks/use-content-approval"
@@ -59,25 +58,26 @@ export function LessonItem({
   return (
     <>
       <div
-        className={`group hover:bg-muted/50 transition-colors ${
-          isPending ? "bg-orange-500/5" : ""
-        }`}
+        className={`group transition-colors hover:bg-muted/50 ${isPending ? "border-l-4 border-l-destructive bg-destructive/5" : ""
+          }`}
       >
         <div className="flex items-start gap-3 px-4 py-3 pl-6">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted border border-border text-xs font-medium text-muted-foreground">
+          {/* Lesson number with better styling */}
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-primary/20 bg-primary/5 font-semibold text-primary text-xs">
             {lessonNumber}
           </div>
 
-          <div className="flex items-center justify-center h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary">
+          {/* Lesson icon with document indicator */}
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
             <DocumentTextIcon className="h-4 w-4" />
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <h4 className="font-medium text-sm">{lesson.title}</h4>
-                  <StatusBadge status={lesson.status} className="capitalize text-xs" />
+                  <StatusBadge status={lesson.status} className="text-xs capitalize" />
 
                   {/* Preview button */}
                   <TooltipProvider>
@@ -89,7 +89,7 @@ export function LessonItem({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Button variant="ghost" size="sm" className="h-6 px-2">
-                            <EyeIcon className="h-3.5 w-3.5 mr-1" />
+                            <EyeIcon className="mr-1 h-3.5 w-3.5" />
                             <span className="text-xs">View</span>
                           </Button>
                         </Link>
@@ -106,28 +106,37 @@ export function LessonItem({
                 </div>
 
                 {lesson.description && !showDetails && (
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                  <p className="mt-1 line-clamp-2 text-muted-foreground text-xs">
                     {lesson.description}
                   </p>
                 )}
 
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
                   {lesson.attachmentCount > 0 && (
-                    <div className="flex items-center gap-1">
-                      <PaperClipIcon className="h-3.5 w-3.5" />
-                      <span>
-                        {lesson.attachmentCount}{" "}
-                        {lesson.attachmentCount === 1 ? "attachment" : "attachments"}
-                      </span>
-                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-muted-foreground">
+                            <PaperClipIcon className="h-3.5 w-3.5" />
+                            <span className="font-medium">{lesson.attachmentCount}</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">
+                            {lesson.attachmentCount}{" "}
+                            {lesson.attachmentCount === 1 ? "attachment" : "attachments"}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                   <ContentMetadata createdAt={lesson.createdAt} updatedAt={lesson.updatedAt} />
                 </div>
 
                 {lesson.description && showDetails && (
-                  <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border">
-                    <p className="text-xs font-medium mb-1">Lesson Description</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                  <div className="mt-3 rounded-lg border border-border bg-muted/50 p-3">
+                    <p className="mb-1 font-medium text-xs">Lesson Description</p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
                       {lesson.description}
                     </p>
                   </div>
@@ -152,7 +161,7 @@ export function LessonItem({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 shrink-0"
+                        className="h-8 w-8 shrink-0 p-0"
                         onClick={(e) => {
                           e.stopPropagation()
                           setShowDetails(!showDetails)

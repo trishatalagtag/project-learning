@@ -4,7 +4,7 @@ import { Bars3Icon, PlayIcon } from "@heroicons/react/24/outline"
 import { Link } from "@tanstack/react-router"
 
 import { StatusBadge } from "@/components/shared/status/status-badge"
-import { api } from "@/convex/_generated/api"
+import type { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import { canViewUnpublishedContent, type UserRole } from "@/lib/rbac/permissions"
@@ -59,7 +59,7 @@ export function LessonListItem({
         </div>
       )}
 
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary transition-all duration-500 ease-out animate-in fade-in zoom-in">
+      <div className="fade-in zoom-in flex h-8 w-8 shrink-0 animate-in items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm transition-all duration-500 ease-out">
         {displayOrder}
       </div>
 
@@ -70,13 +70,13 @@ export function LessonListItem({
       >
         <div className="flex items-center gap-2">
           <PlayIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <h3 className="truncate text-sm font-semibold">{lesson.title}</h3>
+          <h3 className="truncate font-semibold text-sm">{lesson.title}</h3>
           {showStatus && lesson.status !== CONTENT_STATUS.PUBLISHED && (
             <StatusBadge status={lesson.status} className="shrink-0 text-xs" />
           )}
         </div>
         {lesson.description && (
-          <p className="mt-1 truncate text-xs text-muted-foreground">{lesson.description}</p>
+          <p className="mt-1 truncate text-muted-foreground text-xs">{lesson.description}</p>
         )}
       </Link>
     </div>

@@ -1,10 +1,10 @@
-import { forwardRef, Fragment, useMemo } from "react"
+import { Fragment, forwardRef, useMemo } from "react"
 
 // --- Tiptap UI Primitive ---
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tiptap-ui-primitive/tooltip"
 
 // --- Lib ---
-import { cn, parseShortcutKeys } from "@/lib/tiptap-utils"
+import { cn, parseShortcutKeys } from "@/lib/tiptap/tiptap-utils"
 
 import "@/components/tiptap-ui-primitive/button/button-colors.scss"
 import "@/components/tiptap-ui-primitive/button/button-group.scss"

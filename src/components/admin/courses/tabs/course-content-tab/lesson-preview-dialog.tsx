@@ -45,7 +45,7 @@ export function LessonPreviewDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="h-screen w-screen max-w-screen max-h-[calc(100dvh)] min-w-full m-0 rounded-none overflow-auto">
+        <DialogContent className="m-0 h-screen max-h-[calc(100dvh)] w-screen min-w-full max-w-screen overflow-auto rounded-none">
           <DialogHeader>
             <div className="flex items-center gap-2">
               <EyeIcon className="h-5 w-5 text-muted-foreground" />

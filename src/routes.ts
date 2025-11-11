@@ -12,12 +12,22 @@ import { Route as rootRouteImport } from './pages/__root'
 import { Route as PublicRouteImport } from './pages/_public'
 import { Route as AuthenticatedRouteImport } from './pages/_authenticated'
 import { Route as PublicIndexRouteImport } from './pages/_public/index'
+import { Route as PublicFaqRouteImport } from './pages/_public/faq'
+import { Route as PublicContactRouteImport } from './pages/_public/contact'
+import { Route as PublicAboutRouteImport } from './pages/_public/about'
+import { Route as PublicCoursesIndexRouteImport } from './pages/_public/courses.index'
+import { Route as PublicStaffLoginRouteImport } from './pages/_public/staff.login'
+import { Route as PublicCoursesCourseIdRouteImport } from './pages/_public/courses.$courseId'
+import { Route as AuthenticatedCCoursesRouteImport } from './pages/_authenticated.c/courses'
 import { Route as AuthenticatedCCourseIdRouteImport } from './pages/_authenticated.c/$courseId'
 import { Route as AuthenticatedAdminARouteImport } from './pages/_authenticated._admin.a'
 import { Route as AuthenticatedCCourseIdIndexRouteImport } from './pages/_authenticated.c/$courseId.index'
 import { Route as AuthenticatedAdminAIndexRouteImport } from './pages/_authenticated._admin.a/index'
+import { Route as AuthenticatedAdminAUsersRouteImport } from './pages/_authenticated._admin.a/users'
 import { Route as AuthenticatedAdminACoursesRouteImport } from './pages/_authenticated._admin.a/courses'
+import { Route as AuthenticatedAdminAUsersIndexRouteImport } from './pages/_authenticated._admin.a/users/index'
 import { Route as AuthenticatedAdminACoursesIndexRouteImport } from './pages/_authenticated._admin.a/courses/index'
+import { Route as AuthenticatedAdminAUsersUserIdRouteImport } from './pages/_authenticated._admin.a/users/$userId'
 import { Route as AuthenticatedAdminACoursesNewRouteImport } from './pages/_authenticated._admin.a/courses/new'
 import { Route as AuthenticatedAdminACoursesCourseIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId'
 import { Route as AuthenticatedCCourseIdMModuleIdIndexRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.index'
@@ -35,6 +45,41 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRoute,
+} as any)
+const PublicFaqRoute = PublicFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicContactRoute = PublicContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicAboutRoute = PublicAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicCoursesIndexRoute = PublicCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicStaffLoginRoute = PublicStaffLoginRouteImport.update({
+  id: '/staff/login',
+  path: '/staff/login',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicCoursesCourseIdRoute = PublicCoursesCourseIdRouteImport.update({
+  id: '/courses/$courseId',
+  path: '/courses/$courseId',
+  getParentRoute: () => PublicRoute,
+} as any)
+const AuthenticatedCCoursesRoute = AuthenticatedCCoursesRouteImport.update({
+  id: '/c/courses',
+  path: '/c/courses',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCCourseIdRoute = AuthenticatedCCourseIdRouteImport.update({
   id: '/c/$courseId',
@@ -58,17 +103,35 @@ const AuthenticatedAdminAIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
+const AuthenticatedAdminAUsersRoute =
+  AuthenticatedAdminAUsersRouteImport.update({
+    id: '/users',
+    path: '/users',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
 const AuthenticatedAdminACoursesRoute =
   AuthenticatedAdminACoursesRouteImport.update({
     id: '/courses',
     path: '/courses',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
+const AuthenticatedAdminAUsersIndexRoute =
+  AuthenticatedAdminAUsersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminAUsersRoute,
+  } as any)
 const AuthenticatedAdminACoursesIndexRoute =
   AuthenticatedAdminACoursesIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedAdminACoursesRoute,
+  } as any)
+const AuthenticatedAdminAUsersUserIdRoute =
+  AuthenticatedAdminAUsersUserIdRouteImport.update({
+    id: '/$userId',
+    path: '/$userId',
+    getParentRoute: () => AuthenticatedAdminAUsersRoute,
   } as any)
 const AuthenticatedAdminACoursesNewRoute =
   AuthenticatedAdminACoursesNewRouteImport.update({
@@ -96,25 +159,44 @@ const AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
+  '/faq': typeof PublicFaqRoute
   '/': typeof PublicIndexRoute
   '/a': typeof AuthenticatedAdminARouteWithChildren
   '/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
+  '/c/courses': typeof AuthenticatedCCoursesRoute
+  '/courses/$courseId': typeof PublicCoursesCourseIdRoute
+  '/staff/login': typeof PublicStaffLoginRoute
+  '/courses': typeof PublicCoursesIndexRoute
   '/a/courses': typeof AuthenticatedAdminACoursesRouteWithChildren
+  '/a/users': typeof AuthenticatedAdminAUsersRouteWithChildren
   '/a/': typeof AuthenticatedAdminAIndexRoute
   '/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
   '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
   '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
+  '/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
   '/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
+  '/a/users/': typeof AuthenticatedAdminAUsersIndexRoute
   '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
 export interface FileRoutesByTo {
+  '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
+  '/faq': typeof PublicFaqRoute
   '/': typeof PublicIndexRoute
+  '/c/courses': typeof AuthenticatedCCoursesRoute
+  '/courses/$courseId': typeof PublicCoursesCourseIdRoute
+  '/staff/login': typeof PublicStaffLoginRoute
+  '/courses': typeof PublicCoursesIndexRoute
   '/a': typeof AuthenticatedAdminAIndexRoute
   '/c/$courseId': typeof AuthenticatedCCourseIdIndexRoute
   '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
   '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
+  '/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
   '/a/courses': typeof AuthenticatedAdminACoursesIndexRoute
+  '/a/users': typeof AuthenticatedAdminAUsersIndexRoute
   '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
@@ -122,55 +204,94 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
+  '/_public/about': typeof PublicAboutRoute
+  '/_public/contact': typeof PublicContactRoute
+  '/_public/faq': typeof PublicFaqRoute
   '/_public/': typeof PublicIndexRoute
   '/_authenticated/_admin/a': typeof AuthenticatedAdminARouteWithChildren
   '/_authenticated/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
+  '/_authenticated/c/courses': typeof AuthenticatedCCoursesRoute
+  '/_public/courses/$courseId': typeof PublicCoursesCourseIdRoute
+  '/_public/staff/login': typeof PublicStaffLoginRoute
+  '/_public/courses/': typeof PublicCoursesIndexRoute
   '/_authenticated/_admin/a/courses': typeof AuthenticatedAdminACoursesRouteWithChildren
+  '/_authenticated/_admin/a/users': typeof AuthenticatedAdminAUsersRouteWithChildren
   '/_authenticated/_admin/a/': typeof AuthenticatedAdminAIndexRoute
   '/_authenticated/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
   '/_authenticated/_admin/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
   '/_authenticated/_admin/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
+  '/_authenticated/_admin/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
   '/_authenticated/_admin/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
+  '/_authenticated/_admin/a/users/': typeof AuthenticatedAdminAUsersIndexRoute
   '/_authenticated/c/$courseId/m/$moduleId/': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
   '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/about'
+    | '/contact'
+    | '/faq'
     | '/'
     | '/a'
     | '/c/$courseId'
+    | '/c/courses'
+    | '/courses/$courseId'
+    | '/staff/login'
+    | '/courses'
     | '/a/courses'
+    | '/a/users'
     | '/a/'
     | '/c/$courseId/'
     | '/a/courses/$courseId'
     | '/a/courses/new'
+    | '/a/users/$userId'
     | '/a/courses/'
+    | '/a/users/'
     | '/c/$courseId/m/$moduleId'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/about'
+    | '/contact'
+    | '/faq'
     | '/'
+    | '/c/courses'
+    | '/courses/$courseId'
+    | '/staff/login'
+    | '/courses'
     | '/a'
     | '/c/$courseId'
     | '/a/courses/$courseId'
     | '/a/courses/new'
+    | '/a/users/$userId'
     | '/a/courses'
+    | '/a/users'
     | '/c/$courseId/m/$moduleId'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
   id:
     | '__root__'
     | '/_authenticated'
     | '/_public'
+    | '/_public/about'
+    | '/_public/contact'
+    | '/_public/faq'
     | '/_public/'
     | '/_authenticated/_admin/a'
     | '/_authenticated/c/$courseId'
+    | '/_authenticated/c/courses'
+    | '/_public/courses/$courseId'
+    | '/_public/staff/login'
+    | '/_public/courses/'
     | '/_authenticated/_admin/a/courses'
+    | '/_authenticated/_admin/a/users'
     | '/_authenticated/_admin/a/'
     | '/_authenticated/c/$courseId/'
     | '/_authenticated/_admin/a/courses/$courseId'
     | '/_authenticated/_admin/a/courses/new'
+    | '/_authenticated/_admin/a/users/$userId'
     | '/_authenticated/_admin/a/courses/'
+    | '/_authenticated/_admin/a/users/'
     | '/_authenticated/c/$courseId/m/$moduleId/'
     | '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId'
   fileRoutesById: FileRoutesById
@@ -203,6 +324,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/faq': {
+      id: '/_public/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof PublicFaqRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/contact': {
+      id: '/_public/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof PublicContactRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/about': {
+      id: '/_public/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof PublicAboutRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/courses/': {
+      id: '/_public/courses/'
+      path: '/courses'
+      fullPath: '/courses'
+      preLoaderRoute: typeof PublicCoursesIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/staff/login': {
+      id: '/_public/staff/login'
+      path: '/staff/login'
+      fullPath: '/staff/login'
+      preLoaderRoute: typeof PublicStaffLoginRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/courses/$courseId': {
+      id: '/_public/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/courses/$courseId'
+      preLoaderRoute: typeof PublicCoursesCourseIdRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_authenticated/c/courses': {
+      id: '/_authenticated/c/courses'
+      path: '/c/courses'
+      fullPath: '/c/courses'
+      preLoaderRoute: typeof AuthenticatedCCoursesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/c/$courseId': {
       id: '/_authenticated/c/$courseId'
       path: '/c/$courseId'
@@ -231,6 +401,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAIndexRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
+    '/_authenticated/_admin/a/users': {
+      id: '/_authenticated/_admin/a/users'
+      path: '/users'
+      fullPath: '/a/users'
+      preLoaderRoute: typeof AuthenticatedAdminAUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
     '/_authenticated/_admin/a/courses': {
       id: '/_authenticated/_admin/a/courses'
       path: '/courses'
@@ -238,12 +415,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminACoursesRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
+    '/_authenticated/_admin/a/users/': {
+      id: '/_authenticated/_admin/a/users/'
+      path: '/'
+      fullPath: '/a/users/'
+      preLoaderRoute: typeof AuthenticatedAdminAUsersIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminAUsersRoute
+    }
     '/_authenticated/_admin/a/courses/': {
       id: '/_authenticated/_admin/a/courses/'
       path: '/'
       fullPath: '/a/courses/'
       preLoaderRoute: typeof AuthenticatedAdminACoursesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminACoursesRoute
+    }
+    '/_authenticated/_admin/a/users/$userId': {
+      id: '/_authenticated/_admin/a/users/$userId'
+      path: '/$userId'
+      fullPath: '/a/users/$userId'
+      preLoaderRoute: typeof AuthenticatedAdminAUsersUserIdRouteImport
+      parentRoute: typeof AuthenticatedAdminAUsersRoute
     }
     '/_authenticated/_admin/a/courses/new': {
       id: '/_authenticated/_admin/a/courses/new'
@@ -295,13 +486,31 @@ const AuthenticatedAdminACoursesRouteWithChildren =
     AuthenticatedAdminACoursesRouteChildren,
   )
 
+interface AuthenticatedAdminAUsersRouteChildren {
+  AuthenticatedAdminAUsersUserIdRoute: typeof AuthenticatedAdminAUsersUserIdRoute
+  AuthenticatedAdminAUsersIndexRoute: typeof AuthenticatedAdminAUsersIndexRoute
+}
+
+const AuthenticatedAdminAUsersRouteChildren: AuthenticatedAdminAUsersRouteChildren =
+  {
+    AuthenticatedAdminAUsersUserIdRoute: AuthenticatedAdminAUsersUserIdRoute,
+    AuthenticatedAdminAUsersIndexRoute: AuthenticatedAdminAUsersIndexRoute,
+  }
+
+const AuthenticatedAdminAUsersRouteWithChildren =
+  AuthenticatedAdminAUsersRoute._addFileChildren(
+    AuthenticatedAdminAUsersRouteChildren,
+  )
+
 interface AuthenticatedAdminARouteChildren {
   AuthenticatedAdminACoursesRoute: typeof AuthenticatedAdminACoursesRouteWithChildren
+  AuthenticatedAdminAUsersRoute: typeof AuthenticatedAdminAUsersRouteWithChildren
   AuthenticatedAdminAIndexRoute: typeof AuthenticatedAdminAIndexRoute
 }
 
 const AuthenticatedAdminARouteChildren: AuthenticatedAdminARouteChildren = {
   AuthenticatedAdminACoursesRoute: AuthenticatedAdminACoursesRouteWithChildren,
+  AuthenticatedAdminAUsersRoute: AuthenticatedAdminAUsersRouteWithChildren,
   AuthenticatedAdminAIndexRoute: AuthenticatedAdminAIndexRoute,
 }
 
@@ -331,11 +540,13 @@ const AuthenticatedCCourseIdRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminARoute: typeof AuthenticatedAdminARouteWithChildren
   AuthenticatedCCourseIdRoute: typeof AuthenticatedCCourseIdRouteWithChildren
+  AuthenticatedCCoursesRoute: typeof AuthenticatedCCoursesRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminARoute: AuthenticatedAdminARouteWithChildren,
   AuthenticatedCCourseIdRoute: AuthenticatedCCourseIdRouteWithChildren,
+  AuthenticatedCCoursesRoute: AuthenticatedCCoursesRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -343,11 +554,23 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface PublicRouteChildren {
+  PublicAboutRoute: typeof PublicAboutRoute
+  PublicContactRoute: typeof PublicContactRoute
+  PublicFaqRoute: typeof PublicFaqRoute
   PublicIndexRoute: typeof PublicIndexRoute
+  PublicCoursesCourseIdRoute: typeof PublicCoursesCourseIdRoute
+  PublicStaffLoginRoute: typeof PublicStaffLoginRoute
+  PublicCoursesIndexRoute: typeof PublicCoursesIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
+  PublicAboutRoute: PublicAboutRoute,
+  PublicContactRoute: PublicContactRoute,
+  PublicFaqRoute: PublicFaqRoute,
   PublicIndexRoute: PublicIndexRoute,
+  PublicCoursesCourseIdRoute: PublicCoursesCourseIdRoute,
+  PublicStaffLoginRoute: PublicStaffLoginRoute,
+  PublicCoursesIndexRoute: PublicCoursesIndexRoute,
 }
 
 const PublicRouteWithChildren =

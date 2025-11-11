@@ -1,12 +1,12 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
-import { type Editor } from "@tiptap/react"
 import { NodeSelection, TextSelection } from "@tiptap/pm/state"
-
+import type { Editor } from "@tiptap/react"
+import { useCallback, useEffect, useState } from "react"
+// --- Icons ---
+import { CodeBlockIcon } from "@/components/tiptap-icons/code-block-icon"
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
-
 // --- Lib ---
 import {
   findNodePosition,
@@ -14,10 +14,7 @@ import {
   isNodeTypeSelected,
   isValidPosition,
   selectionWithinConvertibleTypes,
-} from "@/lib/tiptap-utils"
-
-// --- Icons ---
-import { CodeBlockIcon } from "@/components/tiptap-icons/code-block-icon"
+} from "@/lib/tiptap/tiptap-utils"
 
 export const CODE_BLOCK_SHORTCUT_KEY = "mod+alt+c"
 

@@ -1,23 +1,23 @@
 import { _CustomErrorComponent } from "@/components/common/error"
 import { NotFoundComponent } from "@/components/common/not-found"
 import { Toaster } from "@/components/ui/sonner"
-import type { AuthSession } from "@/lib/auth"
-import { authenticateModes, platformRoles } from "@/models/schema"
-import { GlobalModalsProvider } from "@/providers/global-modals"
+import type { AuthSession } from "@/lib/auth/guards"
+import { authenticateModes, platformRoles } from "@/lib/models/schema"
+import { GlobalModalsProvider } from "@/lib/providers/global-modals"
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router"
 import { zodValidator } from "@tanstack/zod-adapter"
 import { z } from "zod"
 
 export const globalSearchSchema = z.object({
   authenticateMode: authenticateModes.optional(),
-  role: platformRoles.optional(),
+  role: z.union([z.literal("all"), platformRoles]).optional(),
 })
 
 const RootLayout = () => (
   <div className="isolate">
     <Outlet />
     <GlobalModalsProvider />
-    <Toaster/>
+    <Toaster />
   </div>
 )
 

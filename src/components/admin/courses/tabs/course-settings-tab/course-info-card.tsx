@@ -1,19 +1,5 @@
 "use client"
 
-import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery } from "convex/react"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-import { useCourseMutations } from "@/hooks/use-course-mutations"
-import { CONTENT_STATUS } from "@/lib/constants/content-status"
-import type { Course } from "@/lib/types/course"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -43,6 +29,18 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { useCourseMutations } from "@/hooks/use-course-mutations"
+import { CONTENT_STATUS } from "@/lib/constants/content-status"
+import type { Course } from "@/lib/types/course"
+import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
 const titleSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -162,7 +160,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                       name="title"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-medium text-muted-foreground">
+                          <FormLabel className="font-medium text-muted-foreground text-xs">
                             Course Title
                           </FormLabel>
                           <FormControl>
@@ -180,7 +178,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                     />
                     {error && (
                       <div className="rounded-md bg-destructive/10 p-2">
-                        <p className="text-xs text-destructive">{error}</p>
+                        <p className="text-destructive text-xs">{error}</p>
                       </div>
                     )}
                     <div className="flex gap-2">
@@ -228,8 +226,8 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="text-sm font-medium">Course Title</ItemTitle>
-                  <ItemDescription className="text-base font-semibold text-foreground mt-1">
+                  <ItemTitle className="font-medium text-sm">Course Title</ItemTitle>
+                  <ItemDescription className="mt-1 font-semibold text-base text-foreground">
                     {course.title}
                   </ItemDescription>
                 </ItemContent>
@@ -269,7 +267,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                       name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-medium text-muted-foreground">
+                          <FormLabel className="font-medium text-muted-foreground text-xs">
                             Description
                           </FormLabel>
                           <FormControl>
@@ -288,7 +286,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                     />
                     {error && (
                       <div className="rounded-md bg-destructive/10 p-2">
-                        <p className="text-xs text-destructive">{error}</p>
+                        <p className="text-destructive text-xs">{error}</p>
                       </div>
                     )}
                     <div className="flex gap-2">
@@ -336,8 +334,8 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="text-sm font-medium">Description</ItemTitle>
-                  <ItemDescription className="text-sm text-foreground/80 mt-1 whitespace-pre-wrap">
+                  <ItemTitle className="font-medium text-sm">Description</ItemTitle>
+                  <ItemDescription className="mt-1 whitespace-pre-wrap text-foreground/80 text-sm">
                     {course.description}
                   </ItemDescription>
                 </ItemContent>
@@ -377,7 +375,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                       name="categoryId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-medium text-muted-foreground">
+                          <FormLabel className="font-medium text-muted-foreground text-xs">
                             Category
                           </FormLabel>
                           <Select
@@ -413,7 +411,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                     />
                     {error && (
                       <div className="rounded-md bg-destructive/10 p-2">
-                        <p className="text-xs text-destructive">{error}</p>
+                        <p className="text-destructive text-xs">{error}</p>
                       </div>
                     )}
                     <div className="flex gap-2">
@@ -461,8 +459,8 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="text-sm font-medium">Category</ItemTitle>
-                  <ItemDescription className="text-sm text-foreground/80 mt-1">
+                  <ItemTitle className="font-medium text-sm">Category</ItemTitle>
+                  <ItemDescription className="mt-1 text-foreground/80 text-sm">
                     {course.categoryName}
                   </ItemDescription>
                 </ItemContent>
@@ -491,7 +489,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
           {/* STATUS */}
           <Item variant="outline">
             <ItemContent>
-              <ItemTitle className="text-sm font-medium">Status</ItemTitle>
+              <ItemTitle className="font-medium text-sm">Status</ItemTitle>
               <div className="mt-1">
                 <Badge
                   variant={course.status === CONTENT_STATUS.PUBLISHED ? "default" : "secondary"}

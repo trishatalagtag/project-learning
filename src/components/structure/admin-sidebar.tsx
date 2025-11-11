@@ -54,7 +54,7 @@ export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>
               </SidebarMenuButton>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <SidebarMenu className="ml-4 mt-1">
+              <SidebarMenu className="mt-1 ml-4">
                 {item.children.map((child) => {
                   const ChildIcon = child.icon
                   const childWithExtras = child as MenuItemWithExtras

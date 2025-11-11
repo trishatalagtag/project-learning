@@ -15,15 +15,15 @@ import { MarkdownViewer } from "@/components/shared/content/viewer/markdown-view
 import { EditorToolbar, TOOLBAR_PRESETS } from "@/components/shared/controls/editor-toolbar"; // ✅ Import presets
 import { EmptyContent } from "@/components/shared/empty/empty-content";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
-import { useCourseNavigation } from "@/components/shared/preview/hooks/use-course-navigation";
-import { PreviewLayout } from "@/components/shared/preview/preview-layout";
+import { useCourseNavigation } from "@/components/structure/hooks/use-course-navigation";
+import { PreviewLayout } from "@/components/structure/preview-layout";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { createIdParam } from "@/hooks/use-route-params";
 import { CONTENT_STATUS } from "@/lib/constants/content-status";
-import { useCan } from "@/lib/hooks/use-can";
-import { createIdParam } from "@/lib/hooks/use-route-params";
 import { canViewUnpublishedContent } from "@/lib/rbac/permissions";
+import { useCan } from "@/lib/rbac/use-can";
 import { useUserRole } from "@/lib/rbac/use-user-role";
 import type { TocItem } from "@/lib/tiptap/types"; // ✅ Fixed import
 

@@ -4,7 +4,7 @@ import { EmptyContent } from "@/components/shared/empty/empty-content"
 import { LoadingSpinner } from "@/components/shared/loading/loading-spinner"
 import type { Id } from "@/convex/_generated/dataModel"
 import { CalendarIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
-import { useAssignment } from "./hooks/use-assignment"
+import { useAssignment } from "../hooks/use-assignment"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,7 +34,7 @@ export function AssignmentPreview({ assignmentId }: AssignmentPreviewProps) {
       <CardHeader>
         <CardTitle className="text-lg">{assignment.title}</CardTitle>
         {assignment.description && (
-          <p className="text-sm text-muted-foreground mt-2">{assignment.description}</p>
+          <p className="mt-2 text-muted-foreground text-sm">{assignment.description}</p>
         )}
       </CardHeader>
 
@@ -45,7 +45,7 @@ export function AssignmentPreview({ assignmentId }: AssignmentPreviewProps) {
             <div className="flex items-center gap-2 text-sm">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Due Date</p>
+                <p className="text-muted-foreground text-xs">Due Date</p>
                 <p className="font-medium">{new Date(assignment.dueDate).toLocaleDateString()}</p>
               </div>
             </div>
@@ -54,7 +54,7 @@ export function AssignmentPreview({ assignmentId }: AssignmentPreviewProps) {
             <div className="flex items-center gap-2 text-sm">
               <DocumentTextIcon className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Points</p>
+                <p className="text-muted-foreground text-xs">Points</p>
                 <p className="font-medium">{assignment.maxPoints}</p>
               </div>
             </div>
@@ -66,9 +66,9 @@ export function AssignmentPreview({ assignmentId }: AssignmentPreviewProps) {
         {/* Instructions */}
         {assignment.instructions && (
           <div>
-            <h4 className="text-sm font-semibold mb-2">Instructions</h4>
+            <h4 className="mb-2 font-semibold text-sm">Instructions</h4>
             <div className="prose prose-sm max-w-none">
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap text-muted-foreground text-sm">
                 {assignment.instructions}
               </p>
             </div>
@@ -77,7 +77,7 @@ export function AssignmentPreview({ assignmentId }: AssignmentPreviewProps) {
 
         {/* Submission Settings */}
         <div>
-          <h4 className="text-sm font-semibold mb-2">Submission Settings</h4>
+          <h4 className="mb-2 font-semibold text-sm">Submission Settings</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Badge variant="outline">{assignment.submissionType || "file"}</Badge>

@@ -58,7 +58,7 @@ export function LessonNavigation({ courseId, previous, next }: LessonNavigationP
         variant="outline"
         className={cn(
           "group relative flex-1 justify-start gap-3 px-4 py-3 transition-all",
-          "hover:bg-accent/50 hover:border-accent-foreground/20",
+          "hover:border-accent-foreground/20 hover:bg-accent/50",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "disabled:cursor-not-allowed disabled:opacity-40",
         )}
@@ -78,7 +78,7 @@ export function LessonNavigation({ courseId, previous, next }: LessonNavigationP
         />
         <span
           className={cn(
-            "font-medium truncate text-sm transition-colors",
+            "truncate font-medium text-sm transition-colors",
             previous ? "text-foreground group-hover:text-foreground/90" : "text-muted-foreground",
           )}
         >
@@ -92,7 +92,7 @@ export function LessonNavigation({ courseId, previous, next }: LessonNavigationP
         variant="outline"
         className={cn(
           "group relative flex-1 justify-between gap-3 px-4 py-3 transition-all",
-          "hover:bg-accent/50 hover:border-accent-foreground/20",
+          "hover:border-accent-foreground/20 hover:bg-accent/50",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "disabled:cursor-not-allowed disabled:opacity-40",
         )}
@@ -102,7 +102,7 @@ export function LessonNavigation({ courseId, previous, next }: LessonNavigationP
       >
         <span
           className={cn(
-            "font-medium truncate text-sm transition-colors flex-1 text-left min-w-0",
+            "min-w-0 flex-1 truncate text-left font-medium text-sm transition-colors",
             next ? "text-foreground group-hover:text-foreground/90" : "text-muted-foreground",
           )}
         >

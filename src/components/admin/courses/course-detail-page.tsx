@@ -1,13 +1,5 @@
 "use client"
 
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import { useNavigate, useParams } from "@tanstack/react-router"
-import { useQuery } from "convex/react"
-import { ArrowLeftIcon, Loader2 } from "lucide-react"
-import { useState } from "react"
-
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -18,6 +10,13 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
+import { useNavigate, useParams } from "@tanstack/react-router"
+import { useQuery } from "convex/react"
+import { ArrowLeftIcon, Loader2 } from "lucide-react"
+import { useState } from "react"
 import { DeleteDialog } from "./delete-dialog"
 import { CourseContentTab } from "./tabs/course-content-tab"
 import { CourseGradingTab } from "./tabs/course-grading-tab"
@@ -36,7 +35,7 @@ export function CourseDetailPage() {
 
   if (course === undefined) {
     return (
-      <div className="container mx-auto py-10">
+      <div>
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -52,7 +51,7 @@ export function CourseDetailPage() {
 
   if (!course) {
     return (
-      <div className="container mx-auto py-10">
+      <div>
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -71,16 +70,16 @@ export function CourseDetailPage() {
 
   return (
     <>
-      <div className="container mx-auto py-10">
+      <div>
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/a/courses" })}>
               <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{course.title}</h1>
+              <h1 className="font-bold text-3xl tracking-tight">{course.title}</h1>
               <p className="text-muted-foreground">{course.categoryName}</p>
             </div>
           </div>

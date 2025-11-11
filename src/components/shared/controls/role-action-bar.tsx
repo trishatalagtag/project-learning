@@ -1,11 +1,11 @@
 import type { Id } from "@/convex/_generated/dataModel"
 import { ROLE, type UserRole } from "@/lib/rbac/permissions"
 import type { LessonNavigation as LessonNavigationType } from "@/lib/types/navigation"
-import { LearnerActions } from "./learner-actions"
 import { LessonNavigation } from "../content/navigation/lesson-navigation"
 import { SaveCancelButtonGroup } from "./action-button-groups"
 import { AdminActions } from "./admin-actions"
 import { FacultyActions } from "./faculty-actions"
+import { LearnerActions } from "./learner-actions"
 
 interface NavigationWithModuleTitle extends LessonNavigationType {
   currentModuleTitle: string

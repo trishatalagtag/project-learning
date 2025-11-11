@@ -1,6 +1,6 @@
-import { CourseSidebar } from "@/components/shared/learning/course-sidebar";
-import { CourseSidebarMobileTrigger } from "@/components/shared/learning/course-sidebar-primitives";
 import { LoadingPage } from "@/components/shared/loading/loading-page";
+import { CourseSidebar } from "@/components/structure/course-sidebar";
+import { CourseSidebarMobileTrigger } from "@/components/structure/course-sidebar-primitives";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -8,7 +8,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "convex/react";
 
-import { courseParams } from "@/lib/hooks/use-route-params";
+import { courseParams } from "@/hooks/use-route-params";
 
 export const Route = createFileRoute("/_authenticated/c/$courseId")({
   params: zodValidator(courseParams),

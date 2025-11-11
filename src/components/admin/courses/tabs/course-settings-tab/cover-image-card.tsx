@@ -1,11 +1,10 @@
 "use client"
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { api } from "@/convex/_generated/api"
 import type { Course } from "@/lib/types/course"
 import { useQuery } from "convex/react"
 import { CoverImageUpload } from "../../cover-image-upload"
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface CoverImageCardProps {
   course: Course
@@ -14,8 +13,8 @@ interface CoverImageCardProps {
 export function CoverImageCard({ course }: CoverImageCardProps) {
   const coverImageUrl = course.coverImageId
     ? useQuery(api.shared.files.getFileUrl, {
-        fileId: course.coverImageId,
-      })
+      fileId: course.coverImageId,
+    })
     : null
 
   return (

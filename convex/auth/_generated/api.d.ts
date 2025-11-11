@@ -10,6 +10,8 @@
 
 import type * as adapter from "../adapter.js";
 import type * as auth from "../auth.js";
+import type * as structure from "../structure.js";
+import type * as triggers from "../triggers.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +30,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   adapter: typeof adapter;
   auth: typeof auth;
+  structure: typeof structure;
+  triggers: typeof triggers;
 }>;
 export type Mounts = {
   adapter: {
@@ -44,6 +48,7 @@ export type Mounts = {
                 emailVerified: boolean;
                 image?: null | string;
                 institution?: null | string;
+                isDeactivated?: null | boolean;
                 name: string;
                 role?: null | string;
                 updatedAt: number;
@@ -123,6 +128,7 @@ export type Mounts = {
                   | "role"
                   | "institution"
                   | "bio"
+                  | "isDeactivated"
                   | "_id";
                 operator?:
                   | "lt"
@@ -308,6 +314,7 @@ export type Mounts = {
                   | "role"
                   | "institution"
                   | "bio"
+                  | "isDeactivated"
                   | "_id";
                 operator?:
                   | "lt"
@@ -553,6 +560,7 @@ export type Mounts = {
                 emailVerified?: boolean;
                 image?: null | string;
                 institution?: null | string;
+                isDeactivated?: null | boolean;
                 name?: string;
                 role?: null | string;
                 updatedAt?: number;
@@ -571,6 +579,7 @@ export type Mounts = {
                   | "role"
                   | "institution"
                   | "bio"
+                  | "isDeactivated"
                   | "_id";
                 operator?:
                   | "lt"
@@ -785,6 +794,7 @@ export type Mounts = {
                 emailVerified?: boolean;
                 image?: null | string;
                 institution?: null | string;
+                isDeactivated?: null | boolean;
                 name?: string;
                 role?: null | string;
                 updatedAt?: number;
@@ -803,6 +813,7 @@ export type Mounts = {
                   | "role"
                   | "institution"
                   | "bio"
+                  | "isDeactivated"
                   | "_id";
                 operator?:
                   | "lt"

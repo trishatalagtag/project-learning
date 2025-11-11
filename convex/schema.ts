@@ -411,4 +411,12 @@ export default defineSchema({
     .index("by_course", ["courseId"])
     .index("by_author", ["authorId"])
     .index("by_pinned", ["isPinned"]),
+
+  // MIGRATIONS - Track which migrations have been run
+  migrations: defineTable({
+    migrationId: v.string(),
+    description: v.string(),
+    runAt: v.number(),
+  })
+    .index("by_migration_id", ["migrationId"]),
 });

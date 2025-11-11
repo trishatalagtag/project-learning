@@ -1,5 +1,5 @@
 import { CourseDetailPage } from "@/components/admin/courses/course-detail-page";
-import { courseParams } from "@/lib/hooks/use-route-params";
+import { courseParams } from "@/hooks/use-route-params";
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 

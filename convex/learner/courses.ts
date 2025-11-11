@@ -1,120 +1,118 @@
 import { v } from "convex/values";
-import { publicQuery } from "../lib/functions";
-import { learnerMutation, learnerQuery } from "../lib/functions";
-import { getUserByUserId } from "../lib/auth";
-import { listArgs, getPaginationDefaults, getSortDefaults } from "../lib/validators";
-import { Id } from "../_generated/dataModel";
 
-/**
- * Public list of courses (published only), optional category filter + pagination
- */
-export const listPublicCourses = publicQuery({
+import { mutation, query } from "../_generated/server";
+
+import { Id } from "../_generated/dataModel";
+import { getUserByUserId } from "../lib/auth";
+import { learnerMutation, publicQuery } from "../lib/functions";
+import { getPaginationDefaults, getSortDefaults, listArgs } from "../lib/validators";
+
+// Existing listPublicCourses - ENHANCED with instructor name
+export const listPublicCourses = query({
   args: {
-    ...listArgs,
+    limit: v.optional(v.number()),
+    offset: v.optional(v.number()),
+    search: v.optional(v.string()),
     categoryId: v.optional(v.id("categories")),
+    sortBy: v.optional(v.union(v.literal("title"), v.literal("createdAt"), v.literal("updatedAt"))),
+    sortOrder: v.optional(v.union(v.literal("asc"), v.literal("desc"))),
   },
   returns: v.object({
     courses: v.array(
       v.object({
         _id: v.id("courses"),
-        _creationTime: v.number(),
         title: v.string(),
         description: v.string(),
         categoryId: v.id("categories"),
         categoryName: v.string(),
         coverImageId: v.optional(v.id("_storage")),
+        coverImageUrl: v.union(v.string(), v.null()),
         isEnrollmentOpen: v.boolean(),
+        teacherId: v.optional(v.string()),
+        teacherName: v.union(v.string(), v.null()),
         createdAt: v.number(),
         updatedAt: v.number(),
       })
     ),
     total: v.number(),
-    hasMore: v.boolean(),
   }),
   handler: async (ctx, args) => {
-    const { limit, offset } = getPaginationDefaults(args);
+    const limit = args.limit ?? 12;
+    const offset = args.offset ?? 0;
 
-    // Start from published courses
-    let q = ctx.db.query("courses").withIndex("by_status", (q) => q.eq("status", "published"));
+    // Get all published courses
+    let coursesQuery = ctx.db
+      .query("courses")
+      .withIndex("by_status", (q) => q.eq("status", "published"));
 
-    // Narrow by category if provided (use index)
+    // Apply category filter
     if (args.categoryId) {
-      q = ctx.db.query("courses").withIndex("by_category", (q) => q.eq("categoryId", args.categoryId as Id<"categories">));
-      // still ensure published after collecting (since by_category doesn't enforce status)
-      const all = await q.collect();
-      const filtered = all.filter((c) => c.status === "published");
-      // optional search
-      const searched = args.search
-        ? filtered.filter(
-            (c) =>
-              c.title.toLowerCase().includes(args.search!.toLowerCase()) ||
-              c.description.toLowerCase().includes(args.search!.toLowerCase())
-          )
-        : filtered;
-
-      const { sortBy, sortOrder } = getSortDefaults(args);
-      const sorted = searched.sort((a: any, b: any) =>
-        sortOrder === "asc" ? (a[sortBy] ?? 0) - (b[sortBy] ?? 0) : (b[sortBy] ?? 0) - (a[sortBy] ?? 0)
-      );
-
-      const page = sorted.slice(offset, offset + limit);
-
-      // Enrich category name
-      const result = await Promise.all(
-        page.map(async (course) => {
-          const cat = await ctx.db.get(course.categoryId);
-          return {
-            _id: course._id,
-            _creationTime: course._creationTime,
-            title: course.title,
-            description: course.description,
-            categoryId: course.categoryId,
-            categoryName: cat?.name ?? "Unknown",
-            coverImageId: course.coverImageId,
-            isEnrollmentOpen: course.isEnrollmentOpen,
-            createdAt: course.createdAt,
-            updatedAt: course.updatedAt,
-          };
-        })
-      );
-
-      return {
-        courses: result,
-        total: sorted.length,
-        hasMore: offset + limit < sorted.length,
-      };
+      coursesQuery = ctx.db
+        .query("courses")
+        .withIndex("by_category", (q) => q.eq("categoryId", args.categoryId as Id<"categories">))
+        .filter((q) => q.eq(q.field("status"), "published"));
     }
 
-    // No category filter; collect published then search/sort/paginate
-    const published = await q.collect();
+    let allCourses = await coursesQuery.collect();
 
-    const searched = args.search
-      ? published.filter(
-          (c) =>
-            c.title.toLowerCase().includes(args.search!.toLowerCase()) ||
-            c.description.toLowerCase().includes(args.search!.toLowerCase())
-        )
-      : published;
+    // Apply search filter
+    if (args.search) {
+      const searchLower = args.search.toLowerCase();
+      allCourses = allCourses.filter(
+        (course) =>
+          course.title.toLowerCase().includes(searchLower) ||
+          course.description.toLowerCase().includes(searchLower)
+      );
+    }
 
-    const { sortBy, sortOrder } = getSortDefaults(args);
-    const sorted = searched.sort((a: any, b: any) =>
-      sortOrder === "asc" ? (a[sortBy] ?? 0) - (b[sortBy] ?? 0) : (b[sortBy] ?? 0) - (a[sortBy] ?? 0)
-    );
+    // Sort courses
+    const sortBy = args.sortBy ?? "createdAt";
+    const sortOrder = args.sortOrder ?? "desc";
 
-    const page = sorted.slice(offset, offset + limit);
+    allCourses.sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === "title") {
+        comparison = a.title.localeCompare(b.title);
+      } else if (sortBy === "createdAt") {
+        comparison = a.createdAt - b.createdAt;
+      } else if (sortBy === "updatedAt") {
+        comparison = a.updatedAt - b.updatedAt;
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
 
-    const result = await Promise.all(
-      page.map(async (course) => {
-        const cat = await ctx.db.get(course.categoryId);
+    const total = allCourses.length;
+    const paginatedCourses = allCourses.slice(offset, offset + limit);
+
+    // Enrich with category names, instructor names, and cover images
+    const enrichedCourses = await Promise.all(
+      paginatedCourses.map(async (course) => {
+        const category = await ctx.db.get(course.categoryId);
+        
+        // Get instructor name from Better Auth
+        let teacherName: string | null = null;
+        if (course.teacherId) {
+            const teacher = await getUserByUserId(ctx, course.teacherId);
+          teacherName = teacher?.name ?? null;
+        }
+
+        // Get cover image URL
+        let coverImageUrl: string | null = null;
+        if (course.coverImageId) {
+          coverImageUrl = await ctx.storage.getUrl(course.coverImageId);
+        }
+
         return {
           _id: course._id,
-          _creationTime: course._creationTime,
           title: course.title,
           description: course.description,
           categoryId: course.categoryId,
-          categoryName: cat?.name ?? "Unknown",
+          categoryName: category?.name ?? "Uncategorized",
           coverImageId: course.coverImageId,
+          coverImageUrl,
           isEnrollmentOpen: course.isEnrollmentOpen,
+          teacherId: course.teacherId,
+          teacherName,
           createdAt: course.createdAt,
           updatedAt: course.updatedAt,
         };
@@ -122,9 +120,212 @@ export const listPublicCourses = publicQuery({
     );
 
     return {
-      courses: result,
-      total: sorted.length,
-      hasMore: offset + limit < sorted.length,
+      courses: enrichedCourses,
+      total,
+    };
+  },
+});
+
+// NEW: Get recently added courses (for Featured section)
+export const getRecentlyAddedCourses = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("courses"),
+      title: v.string(),
+      description: v.string(),
+      categoryId: v.id("categories"),
+      categoryName: v.string(),
+      coverImageId: v.optional(v.id("_storage")),
+      coverImageUrl: v.union(v.string(), v.null()),
+      isEnrollmentOpen: v.boolean(),
+      teacherId: v.optional(v.string()),
+      teacherName: v.union(v.string(), v.null()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      isNew: v.boolean(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 3;
+
+    // Get published courses sorted by creation date (newest first)
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .order("desc")
+      .take(limit);
+
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+
+    // Enrich courses
+    const enrichedCourses = await Promise.all(
+      courses.map(async (course) => {
+        const category = await ctx.db.get(course.categoryId);
+
+        let teacherName: string | null = null;
+        if (course.teacherId) {
+          const teacher = await getUserByUserId(ctx, course.teacherId);
+          teacherName = teacher?.name ?? null;
+        }
+
+        let coverImageUrl: string | null = null;
+        if (course.coverImageId) {
+          coverImageUrl = await ctx.storage.getUrl(course.coverImageId);
+        }
+
+        return {
+          _id: course._id,
+          title: course.title,
+          description: course.description,
+          categoryId: course.categoryId,
+          categoryName: category?.name ?? "Uncategorized",
+          coverImageId: course.coverImageId,
+          coverImageUrl,
+          isEnrollmentOpen: course.isEnrollmentOpen,
+          teacherId: course.teacherId,
+          teacherName,
+          createdAt: course.createdAt,
+          updatedAt: course.updatedAt,
+          isNew: course.createdAt > thirtyDaysAgo,
+        };
+      })
+    );
+
+    return enrichedCourses;
+  },
+});
+
+// NEW: Get public course detail
+export const getPublicCourseDetail = query({
+  args: {
+    courseId: v.id("courses"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("courses"),
+      title: v.string(),
+      description: v.string(),
+      content: v.string(),
+      categoryId: v.id("categories"),
+      categoryName: v.string(),
+      coverImageId: v.optional(v.id("_storage")),
+      coverImageUrl: v.union(v.string(), v.null()),
+      isEnrollmentOpen: v.boolean(),
+      enrollmentCode: v.optional(v.string()),
+      teacherId: v.optional(v.string()),
+      teacherName: v.union(v.string(), v.null()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const course = await ctx.db.get(args.courseId);
+
+    if (!course || course.status !== "published") {
+      return null;
+    }
+
+    const category = await ctx.db.get(course.categoryId);
+
+    let teacherName: string | null = null;
+    if (course.teacherId) {
+      const teacher = await getUserByUserId(ctx, course.teacherId);
+      teacherName = teacher?.name ?? null;
+    }
+
+    let coverImageUrl: string | null = null;
+    if (course.coverImageId) {
+      coverImageUrl = await ctx.storage.getUrl(course.coverImageId);
+    }
+
+    return {
+      _id: course._id,
+      title: course.title,
+      description: course.description,
+      content: course.content,
+      categoryId: course.categoryId,
+      categoryName: category?.name ?? "Uncategorized",
+      coverImageId: course.coverImageId,
+      coverImageUrl,
+      isEnrollmentOpen: course.isEnrollmentOpen,
+      enrollmentCode: course.enrollmentCode,
+      teacherId: course.teacherId,
+      teacherName,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+    };
+  },
+});
+
+// NEW: Get public course modules with lesson count
+export const getPublicCourseModules = query({
+  args: {
+    courseId: v.id("courses"),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("modules"),
+      title: v.string(),
+      description: v.string(),
+      order: v.number(),
+      lessonCount: v.number(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    const modules = await ctx.db
+      .query("modules")
+      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
+      .filter((q) => q.eq(q.field("status"), "published"))
+      .collect();
+
+    const modulesWithCounts = await Promise.all(
+      modules.map(async (module) => {
+        const lessons = await ctx.db
+          .query("lessons")
+          .withIndex("by_module", (q) => q.eq("moduleId", module._id))
+          .filter((q) => q.eq(q.field("status"), "published"))
+          .collect();
+
+        return {
+          _id: module._id,
+          title: module.title,
+          description: module.description,
+          order: module.order,
+          lessonCount: lessons.length,
+        };
+      })
+    );
+
+    return modulesWithCounts.sort((a, b) => a.order - b.order);
+  },
+});
+
+// NEW: Get public stats for homepage
+export const getPublicStats = query({
+  args: {},
+  returns: v.object({
+    totalCourses: v.number(),
+    totalLearners: v.number(),
+  }),
+  handler: async (ctx) => {
+    const courses = await ctx.db
+      .query("courses")
+      .withIndex("by_status", (q) => q.eq("status", "published"))
+      .collect();
+
+    const enrollments = await ctx.db.query("enrollments").collect();
+
+    // Count unique learners
+    const uniqueLearners = new Set(enrollments.map((e) => e.userId));
+
+    return {
+      totalCourses: courses.length,
+      totalLearners: uniqueLearners.size,
     };
   },
 });
@@ -256,50 +457,106 @@ export const searchCourses = publicQuery({
   },
 });
 
-/**
- * Enroll in a course (published AND open enrollment)
- */
-export const enrollInCourse = learnerMutation({
-  args: { courseId: v.id("courses") },
-  returns: v.null(),
+// NEW: Check if user is enrolled in a course
+export const checkEnrollment = query({
+  args: {
+    userId: v.string(),
+    courseId: v.id("courses"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("enrollments"),
+      status: v.union(
+        v.literal("active"),
+        v.literal("completed"),
+        v.literal("dropped")
+      ),
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
-    const course = await ctx.db.get(args.courseId);
-    if (!course || course.status !== "published") {
-      throw new Error("Course not available");
-    }
-    if (!course.isEnrollmentOpen) {
-      throw new Error("Course enrollment is restricted");
-    }
-
-    // Check existing enrollment
-    const existing = await ctx.db
+    const enrollment = await ctx.db
       .query("enrollments")
       .withIndex("by_user_and_course", (q) =>
-        q.eq("userId", ctx.user.userId).eq("courseId", args.courseId)
+        q.eq("userId", args.userId).eq("courseId", args.courseId)
       )
-      .first();
+      .first()
 
-    const now = Date.now();
-
-    if (!existing) {
-      await ctx.db.insert("enrollments", {
-        userId: ctx.user.userId,
-        courseId: args.courseId,
-        status: "active",
-        enrolledAt: now,
-        completedAt: undefined,
-      });
-    } else if (existing.status !== "active") {
-      await ctx.db.patch(existing._id, {
-        status: "active",
-        enrolledAt: now,
-        completedAt: undefined,
-      });
+    if (!enrollment) {
+      return null
     }
 
-    return null;
+    return {
+      _id: enrollment._id,
+      status: enrollment.status,
+    }
   },
-});
+})
+
+// NEW: Enroll in a course
+export const enrollInCourse = mutation({
+  args: {
+    courseId: v.id("courses"),
+    enrollmentCode: v.optional(v.string()),
+  },
+  returns: v.id("enrollments"),
+  handler: async (ctx, args) => {
+    // Get authenticated user from Better Auth
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) {
+      throw new Error("Not authenticated")
+    }
+
+    const userId = identity.subject
+
+    // Check if course exists and is published
+    const course = await ctx.db.get(args.courseId)
+    if (!course || course.status !== "published") {
+      throw new Error("Course not found or not available")
+    }
+
+    // Check if enrollment is open
+    if (!course.isEnrollmentOpen) {
+      throw new Error("Enrollment is closed for this course")
+    }
+
+    // Verify enrollment code if required
+    if (course.enrollmentCode) {
+      if (!args.enrollmentCode || args.enrollmentCode !== course.enrollmentCode) {
+        throw new Error("Invalid enrollment code")
+      }
+    }
+
+    // Check if already enrolled
+    const existingEnrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("userId", userId).eq("courseId", args.courseId)
+      )
+      .first()
+
+    if (existingEnrollment) {
+      // If dropped, re-activate
+      if (existingEnrollment.status === "dropped") {
+        await ctx.db.patch(existingEnrollment._id, {
+          status: "active",
+        })
+        return existingEnrollment._id
+      }
+      throw new Error("Already enrolled in this course")
+    }
+
+    // Create enrollment
+    const enrollmentId = await ctx.db.insert("enrollments", {
+      userId,
+      courseId: args.courseId,
+      status: "active",
+      enrolledAt: Date.now(),
+    })
+
+    return enrollmentId
+  },
+})
 
 /**
  * Enroll with code (published course with matching code)

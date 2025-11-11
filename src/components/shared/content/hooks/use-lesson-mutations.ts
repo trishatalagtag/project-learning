@@ -1,7 +1,7 @@
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { useMutationWithToast } from "@/hooks/use-mutation-with-toast"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
-import { useMutationWithToast } from "@/lib/hooks/use-mutation-with-toast"
 
 export function useUpdateLesson() {
   return useMutationWithToast(api.faculty.lessons.updateLesson, {

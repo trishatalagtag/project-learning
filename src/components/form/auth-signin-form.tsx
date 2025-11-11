@@ -8,8 +8,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { authClient } from "@/lib/auth"
-import type { Mode, Role } from "@/models/schema"
+import { authClient } from "@/lib/auth/guards"
+import type { Mode, Role } from "@/lib/models/schema"
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -127,7 +127,7 @@ export function AuthSignInForm({ role, onSuccess, onSwitchMode, open }: AuthSign
           <button
             type="button"
             onClick={() => setShowForgotPassword(true)}
-            className="text-xs text-primary hover:underline"
+            className="text-primary text-xs hover:underline"
           >
             Forgot password?
           </button>

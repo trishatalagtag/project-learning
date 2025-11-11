@@ -1,22 +1,5 @@
 "use client"
 
-import {
-  ArrowPathIcon,
-  CheckIcon,
-  ClipboardDocumentIcon,
-  PencilIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
-import * as z from "zod"
-
-import { useCourseMutations } from "@/hooks/use-course-mutations"
-import type { Course } from "@/lib/types/course"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
@@ -30,6 +13,21 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { Switch } from "@/components/ui/switch"
+import { useCourseMutations } from "@/hooks/use-course-mutations"
+import type { Course } from "@/lib/types/course"
+import {
+  ArrowPathIcon,
+  CheckIcon,
+  ClipboardDocumentIcon,
+  PencilIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import * as z from "zod"
 
 const enrollmentCodeSchema = z.object({
   code: z.string().min(6, "Code must be at least 6 characters"),
@@ -118,7 +116,7 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
                               <Input {...field} autoFocus disabled={isSaving} />
                             </FormControl>
                             <FormMessage />
-                            {error && <p className="text-sm text-destructive">{error}</p>}
+                            {error && <p className="text-destructive text-sm">{error}</p>}
                           </FormItem>
                         )}
                       />
@@ -166,7 +164,7 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
                   <ItemTitle>Enrollment Code</ItemTitle>
                   <ItemDescription>
                     {course.enrollmentCode ? (
-                      <code className="rounded bg-muted px-2 py-1 text-sm font-mono">
+                      <code className="rounded bg-muted px-2 py-1 font-mono text-sm">
                         {course.enrollmentCode}
                       </code>
                     ) : (

@@ -1,23 +1,20 @@
 "use client"
 
-import { EllipsisHorizontalIcon, EyeIcon } from "@heroicons/react/24/outline"
-import type { ColumnDef } from "@tanstack/react-table"
-import type { FunctionReturnType } from "convex/server"
-import { formatDistanceToNow } from "date-fns"
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import type { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  AcademicCapIcon, EyeIcon,
+  FolderIcon,
+  UserIcon,
+  UsersIcon
+} from "@heroicons/react/24/outline"
+import type { ColumnDef } from "@tanstack/react-table"
+import type { FunctionReturnType } from "convex/server"
+import { formatDistanceToNow } from "date-fns"
 
 type CoursesListResponse = FunctionReturnType<typeof api.admin.courses.listAllCourses>
 type Course = CoursesListResponse["courses"][number]
@@ -50,22 +47,37 @@ export const createColumns = ({ onView }: ColumnsConfig): ColumnDef<Course>[] =>
   },
   {
     accessorKey: "title",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Course Title" />,
     cell: ({ row }) => (
-      <div className="font-medium max-w-[300px] truncate">{row.getValue("title")}</div>
+      <div className="flex max-w-[300px] items-center gap-2">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <AcademicCapIcon className="h-4 w-4" />
+        </div>
+        <span className="truncate font-medium">{row.getValue("title")}</span>
+      </div>
     ),
   },
   {
     accessorKey: "categoryName",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
-    cell: ({ row }) => <div>{row.getValue("categoryName") || "—"}</div>,
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2 text-sm">
+        <FolderIcon className="h-4 w-4 text-muted-foreground" />
+        <span>{row.getValue("categoryName") || "—"}</span>
+      </div>
+    ),
   },
   {
     accessorKey: "teacherName",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Teacher" />,
     cell: ({ row }) => (
-      <div className="text-sm">
-        {row.getValue("teacherName") || <span className="text-muted-foreground">Unassigned</span>}
+      <div className="flex items-center gap-2 text-sm">
+        <UserIcon className="h-4 w-4 text-muted-foreground" />
+        {row.getValue("teacherName") ? (
+          <span>{row.getValue("teacherName")}</span>
+        ) : (
+          <span className="text-muted-foreground">Unassigned</span>
+        )}
       </div>
     ),
   },
@@ -96,7 +108,10 @@ export const createColumns = ({ onView }: ColumnsConfig): ColumnDef<Course>[] =>
     accessorKey: "enrollmentCount",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Enrollments" />,
     cell: ({ row }) => (
-      <div className="text-right tabular-nums">{row.getValue("enrollmentCount")}</div>
+      <div className="flex items-center gap-2 text-sm">
+        <UsersIcon className="h-4 w-4 text-muted-foreground" />
+        <span className="font-medium tabular-nums">{row.getValue("enrollmentCount")}</span>
+      </div>
     ),
   },
   {
@@ -114,26 +129,20 @@ export const createColumns = ({ onView }: ColumnsConfig): ColumnDef<Course>[] =>
   {
     id: "actions",
     enableHiding: false,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Actions" />,
     cell: ({ row }) => {
       const course = row.original
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <EllipsisHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-            <DropdownMenuItem onClick={() => onView(course._id)}>
-              <EyeIcon className="mr-2 h-4 w-4" />
-              View & Manage
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onView(course._id)}
+          className="h-8"
+        >
+          <EyeIcon className="mr-2 h-4 w-4" />
+          View & Manage
+        </Button>
       )
     },
   },

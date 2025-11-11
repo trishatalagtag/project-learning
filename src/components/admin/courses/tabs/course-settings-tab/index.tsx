@@ -16,15 +16,15 @@ interface CourseSettingsTabProps {
 
 export function CourseSettingsTab({ course, onDelete }: CourseSettingsTabProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="space-y-6 lg:col-span-2">
         <CourseInfoCard course={course} />
         <CoverImageCard course={course} />
         <EnrollmentSettingsCard course={course} />
         <FacultyAssignmentCard course={course} />
       </div>
 
-      <div className="lg:col-span-1 space-y-6">
+      <div className="space-y-6 lg:col-span-1">
         <MetadataCard course={course} />
         <LifecycleCard course={course} />
         <DangerZoneCard course={course} onDelete={onDelete} />

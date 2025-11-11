@@ -21,5 +21,11 @@ export const Route = createFileRoute("/_authenticated/_admin/a/courses")({
   beforeLoad: () => ({
     breadcrumb: "Courses",
   }),
-  component: () => <Outlet />,
+  component: () => {
+    return (
+      <div className="container mx-auto">
+        <Outlet />
+      </div>
+    )
+  }
 });

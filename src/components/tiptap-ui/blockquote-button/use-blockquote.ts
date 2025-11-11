@@ -1,14 +1,12 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
-import type { Editor } from "@tiptap/react"
 import { NodeSelection, TextSelection } from "@tiptap/pm/state"
-
-// --- Hooks ---
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
-
+import type { Editor } from "@tiptap/react"
+import { useCallback, useEffect, useState } from "react"
 // --- Icons ---
 import { BlockquoteIcon } from "@/components/tiptap-icons/blockquote-icon"
+// --- Hooks ---
+import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 
 // --- UI Utils ---
 import {
@@ -17,7 +15,7 @@ import {
   isNodeTypeSelected,
   isValidPosition,
   selectionWithinConvertibleTypes,
-} from "@/lib/tiptap-utils"
+} from "@/lib/tiptap/tiptap-utils"
 
 export const BLOCKQUOTE_SHORTCUT_KEY = "mod+shift+b"
 

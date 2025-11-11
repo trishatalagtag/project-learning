@@ -1,12 +1,5 @@
 "use client"
 
-import { UserMinusIcon } from "@heroicons/react/24/outline"
-import { useQuery } from "convex/react"
-
-import { api } from "@/convex/_generated/api"
-import { useCourseMutations } from "@/hooks/use-course-mutations"
-import type { Course } from "@/lib/types/course"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item"
@@ -17,6 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { api } from "@/convex/_generated/api"
+import { useCourseMutations } from "@/hooks/use-course-mutations"
+import type { Course } from "@/lib/types/course"
+import { UserMinusIcon } from "@heroicons/react/24/outline"
+import { useQuery } from "convex/react"
 
 interface FacultyAssignmentCardProps {
   course: Course
@@ -70,7 +68,7 @@ export function FacultyAssignmentCard({ course }: FacultyAssignmentCardProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {faculty?.map((teacher) => (
-                      <SelectItem key={teacher.userId} value={teacher.userId}>
+                      <SelectItem key={teacher._id} value={teacher._id}>
                         {teacher.name}
                       </SelectItem>
                     ))}

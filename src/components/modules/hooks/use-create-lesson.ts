@@ -1,6 +1,6 @@
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
-import { useMutationWithToast } from "@/lib/hooks/use-mutation-with-toast"
+import { useMutationWithToast } from "@/hooks/use-mutation-with-toast"
 
 export function useCreateLesson(moduleId: Id<"modules">) {
   const { execute: createLesson, isPending: isCreating } = useMutationWithToast(

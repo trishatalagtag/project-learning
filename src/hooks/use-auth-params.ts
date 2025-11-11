@@ -1,4 +1,4 @@
-import { authenticateModes, platformRoles } from "@/models/schema"
+import { authenticateModes, platformRoles } from "@/lib/models/schema"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { z } from "zod"
 

@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useAuthParams } from "@/hooks/use-auth-params"
-import type { Mode, Role } from "@/models/schema"
+import type { Mode, Role } from "@/lib/models/schema"
 import { useCallback, useRef } from "react"
 
 function getTitle(mode: Mode, role: Role) {

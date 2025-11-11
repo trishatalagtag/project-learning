@@ -40,6 +40,8 @@ import type * as lib_functions from "../lib/functions.js";
 import type * as lib_status_validation from "../lib/status_validation.js";
 import type * as lib_types from "../lib/types.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as migrations_index from "../migrations/index.js";
+import type * as migrations_trigger from "../migrations/trigger.js";
 import type * as mock from "../mock.js";
 import type * as shared_announcements from "../shared/announcements.js";
 import type * as shared_categories from "../shared/categories.js";
@@ -93,6 +95,8 @@ declare const fullApi: ApiFromModules<{
   "lib/status_validation": typeof lib_status_validation;
   "lib/types": typeof lib_types;
   "lib/validators": typeof lib_validators;
+  "migrations/index": typeof migrations_index;
+  "migrations/trigger": typeof migrations_trigger;
   mock: typeof mock;
   "shared/announcements": typeof shared_announcements;
   "shared/categories": typeof shared_categories;
@@ -126,6 +130,7 @@ export declare const components: {
                   emailVerified: boolean;
                   image?: null | string;
                   institution?: null | string;
+                  isDeactivated?: null | boolean;
                   name: string;
                   role?: null | string;
                   updatedAt: number;
@@ -205,6 +210,7 @@ export declare const components: {
                     | "role"
                     | "institution"
                     | "bio"
+                    | "isDeactivated"
                     | "_id";
                   operator?:
                     | "lt"
@@ -390,6 +396,7 @@ export declare const components: {
                     | "role"
                     | "institution"
                     | "bio"
+                    | "isDeactivated"
                     | "_id";
                   operator?:
                     | "lt"
@@ -635,6 +642,7 @@ export declare const components: {
                   emailVerified?: boolean;
                   image?: null | string;
                   institution?: null | string;
+                  isDeactivated?: null | boolean;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -653,6 +661,7 @@ export declare const components: {
                     | "role"
                     | "institution"
                     | "bio"
+                    | "isDeactivated"
                     | "_id";
                   operator?:
                     | "lt"
@@ -867,6 +876,7 @@ export declare const components: {
                   emailVerified?: boolean;
                   image?: null | string;
                   institution?: null | string;
+                  isDeactivated?: null | boolean;
                   name?: string;
                   role?: null | string;
                   updatedAt?: number;
@@ -885,6 +895,7 @@ export declare const components: {
                     | "role"
                     | "institution"
                     | "bio"
+                    | "isDeactivated"
                     | "_id";
                   operator?:
                     | "lt"
