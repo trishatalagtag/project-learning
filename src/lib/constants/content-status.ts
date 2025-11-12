@@ -1,3 +1,4 @@
+import type { Doc } from "@/convex/_generated/dataModel"
 import {
   ArchiveBoxIcon,
   ArrowPathIcon,
@@ -16,7 +17,8 @@ export const CONTENT_STATUS = {
   ARCHIVED: "archived",
 } as const
 
-export type ContentStatus = (typeof CONTENT_STATUS)[keyof typeof CONTENT_STATUS]
+// Infer from backend schema - modules and lessons share the same status union
+export type ContentStatus = Doc<"modules">["status"] | Doc<"lessons">["status"] | "archived"
 
 export const STATUS_ICONS = {
   [CONTENT_STATUS.DRAFT]: DocumentTextIcon,

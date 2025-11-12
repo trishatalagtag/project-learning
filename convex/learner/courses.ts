@@ -4,6 +4,15 @@ import { mutation, query } from "../_generated/server";
 
 import { Id } from "../_generated/dataModel";
 import { getUserByUserId } from "../lib/auth";
+import {
+  enrichModulesWithLessonCounts,
+  listContentByParent,
+} from "../lib/content_retrieval";
+import { enrichCourse, enrichCourses } from "../lib/courses";
+import {
+  enrollUserInCourse,
+  unenrollFromCourse as unenrollLib
+} from "../lib/enrollment";
 import { learnerMutation, publicQuery } from "../lib/functions";
 import { getPaginationDefaults, getSortDefaults, listArgs } from "../lib/validators";
 
@@ -84,43 +93,24 @@ export const listPublicCourses = query({
     const total = allCourses.length;
     const paginatedCourses = allCourses.slice(offset, offset + limit);
 
-    // Enrich with category names, instructor names, and cover images
-    const enrichedCourses = await Promise.all(
-      paginatedCourses.map(async (course) => {
-        const category = await ctx.db.get(course.categoryId);
-        
-        // Get instructor name from Better Auth
-        let teacherName: string | null = null;
-        if (course.teacherId) {
-            const teacher = await getUserByUserId(ctx, course.teacherId);
-          teacherName = teacher?.name ?? null;
-        }
-
-        // Get cover image URL
-        let coverImageUrl: string | null = null;
-        if (course.coverImageId) {
-          coverImageUrl = await ctx.storage.getUrl(course.coverImageId);
-        }
-
-        return {
-          _id: course._id,
-          title: course.title,
-          description: course.description,
-          categoryId: course.categoryId,
-          categoryName: category?.name ?? "Uncategorized",
-          coverImageId: course.coverImageId,
-          coverImageUrl,
-          isEnrollmentOpen: course.isEnrollmentOpen,
-          teacherId: course.teacherId,
-          teacherName,
-          createdAt: course.createdAt,
-          updatedAt: course.updatedAt,
-        };
-      })
-    );
+    // Use shared enrichment helper (public level - minimal data)
+    const enrichedCourses = await enrichCourses(ctx, paginatedCourses, "public");
 
     return {
-      courses: enrichedCourses,
+      courses: enrichedCourses.map((course) => ({
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        categoryId: course.categoryId,
+        categoryName: course.categoryName ?? "Uncategorized",
+        coverImageId: course.coverImageId,
+        coverImageUrl: course.coverImageUrl,
+        isEnrollmentOpen: course.isEnrollmentOpen,
+        teacherId: course.teacherId,
+        teacherName: course.teacherName ?? null,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+      })),
       total,
     };
   },
@@ -277,31 +267,23 @@ export const getPublicCourseModules = query({
     })
   ),
   handler: async (ctx, args) => {
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .filter((q) => q.eq(q.field("status"), "published"))
-      .collect();
-
-    const modulesWithCounts = await Promise.all(
-      modules.map(async (module) => {
-        const lessons = await ctx.db
-          .query("lessons")
-          .withIndex("by_module", (q) => q.eq("moduleId", module._id))
-          .filter((q) => q.eq(q.field("status"), "published"))
-          .collect();
-
-        return {
-          _id: module._id,
-          title: module.title,
-          description: module.description,
-          order: module.order,
-          lessonCount: lessons.length,
-        };
-      })
+    const modules = await listContentByParent(
+      ctx,
+      "modules",
+      "courseId",
+      args.courseId,
+      ["published"]
     );
 
-    return modulesWithCounts.sort((a, b) => a.order - b.order);
+    const modulesWithCounts = await enrichModulesWithLessonCounts(ctx, modules);
+
+    return modulesWithCounts.map((module) => ({
+      _id: module._id,
+      title: module.title,
+      description: module.description,
+      order: module.order,
+      lessonCount: module.lessonCount,
+    }));
   },
 });
 
@@ -357,28 +339,22 @@ export const getCourseDetails = publicQuery({
     const course = await ctx.db.get(args.courseId);
     if (!course || course.status !== "published") return null;
 
-    const category = await ctx.db.get(course.categoryId);
-
-    let teacherName: string | undefined;
-    if (course.teacherId) {
-      const teacher = await getUserByUserId(ctx, course.teacherId);
-      teacherName = teacher?.name;
-    }
+    const enrichedCourse = await enrichCourse(ctx, course, "public");
 
     return {
       _id: course._id,
       _creationTime: course._creationTime,
-      title: course.title,
-      description: course.description,
-      content: course.content,
-      categoryId: course.categoryId,
-      categoryName: category?.name ?? "Unknown",
-      teacherId: course.teacherId,
-      teacherName,
+      title: enrichedCourse.title,
+      description: enrichedCourse.description,
+      content: enrichedCourse.content,
+      categoryId: enrichedCourse.categoryId,
+      categoryName: enrichedCourse.categoryName ?? "Unknown",
+      teacherId: enrichedCourse.teacherId,
+      teacherName: enrichedCourse.teacherName ?? undefined,
       coverImageId: course.coverImageId,
-      isEnrollmentOpen: course.isEnrollmentOpen,
-      createdAt: course.createdAt,
-      updatedAt: course.updatedAt,
+      isEnrollmentOpen: enrichedCourse.isEnrollmentOpen,
+      createdAt: enrichedCourse.createdAt,
+      updatedAt: enrichedCourse.updatedAt,
     };
   },
 });
@@ -418,10 +394,10 @@ export const searchCourses = publicQuery({
 
     const filtered = args.search
       ? published.filter(
-          (c) =>
-            c.title.toLowerCase().includes(args.search!.toLowerCase()) ||
-            c.description.toLowerCase().includes(args.search!.toLowerCase())
-        )
+        (c) =>
+          c.title.toLowerCase().includes(args.search!.toLowerCase()) ||
+          c.description.toLowerCase().includes(args.search!.toLowerCase())
+      )
       : published;
 
     const { sortBy, sortOrder } = getSortDefaults(args);
@@ -568,6 +544,7 @@ export const enrollWithCode = learnerMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    // Validate course and code match
     const course = await ctx.db.get(args.courseId);
     if (!course || course.status !== "published") {
       throw new Error("Course not available");
@@ -576,32 +553,8 @@ export const enrollWithCode = learnerMutation({
       throw new Error("Invalid enrollment code");
     }
 
-    // Proceed similarly to open enrollment
-    const existing = await ctx.db
-      .query("enrollments")
-      .withIndex("by_user_and_course", (q) =>
-        q.eq("userId", ctx.user.userId).eq("courseId", args.courseId)
-      )
-      .first();
-
-    const now = Date.now();
-
-    if (!existing) {
-      await ctx.db.insert("enrollments", {
-        userId: ctx.user.userId,
-        courseId: args.courseId,
-        status: "active",
-        enrolledAt: now,
-        completedAt: undefined,
-      });
-    } else if (existing.status !== "active") {
-      await ctx.db.patch(existing._id, {
-        status: "active",
-        enrolledAt: now,
-        completedAt: undefined,
-      });
-    }
-
+    // Use shared enrollment helper
+    await enrollUserInCourse(ctx, ctx.user.userId, args.courseId);
     return null;
   },
 });
@@ -613,22 +566,8 @@ export const unenrollFromCourse = learnerMutation({
   args: { courseId: v.id("courses") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query("enrollments")
-      .withIndex("by_user_and_course", (q) =>
-        q.eq("userId", ctx.user.userId).eq("courseId", args.courseId)
-      )
-      .first();
-
-    if (!existing || existing.status !== "active") {
-      // No-op if not enrolled or already not active
-      return null;
-    }
-
-    await ctx.db.patch(existing._id, {
-      status: "dropped",
-    });
-
+    // Use shared helper
+    await unenrollLib(ctx, ctx.user.userId, args.courseId);
     return null;
   },
 });

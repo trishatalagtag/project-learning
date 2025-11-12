@@ -3,10 +3,10 @@ import { createUserMap, getUserByUserId } from "../lib/auth";
 import { enrichCourses } from "../lib/courses";
 import { adminMutation, adminQuery } from "../lib/functions";
 import {
-  courseStatusFilter,
-  getPaginationDefaults,
-  getSortDefaults,
-  listArgs
+    courseStatusFilter,
+    getPaginationDefaults,
+    getSortDefaults,
+    listArgs
 } from "../lib/validators";
 
 /**
@@ -82,8 +82,8 @@ export const listAllCourses = adminQuery({
 
     const paginatedCourses = sortedCourses.slice(offset, offset + limit);
 
-    // Use optimized enrichment helper
-    const enrichedCourses = await enrichCourses(ctx, paginatedCourses);
+    // Use optimized enrichment helper with admin level
+    const enrichedCourses = await enrichCourses(ctx, paginatedCourses, "admin");
 
     return {
       courses: enrichedCourses,

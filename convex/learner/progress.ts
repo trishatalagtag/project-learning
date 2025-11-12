@@ -1,6 +1,11 @@
 import { v } from "convex/values";
-import { learnerMutation, learnerQuery } from "../lib/functions";
 import { Id } from "../_generated/dataModel";
+import { learnerMutation, learnerQuery } from "../lib/functions";
+import {
+  calculateAssignmentProgress,
+  calculateCoursePerformance,
+  calculateLessonProgress,
+} from "../lib/progress";
 
 
 export const getLessonProgressByCourse = learnerQuery({
@@ -12,42 +17,16 @@ export const getLessonProgressByCourse = learnerQuery({
     })
   ),
   handler: async (ctx, { courseId }) => {
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_course", (q) => q.eq("courseId", courseId))
-      .collect();
-
-    const lessonIds = (
-      await Promise.all(
-        modules.map((m) =>
-          ctx.db
-            .query("lessons")
-            .withIndex("by_module", (q) => q.eq("moduleId", m._id))
-            .collect()
-        )
-      )
-    )
-      .flat()
-      .map((l) => l._id);
-
-    // Get progress for all lessons
-    const progress = await Promise.all(
-      lessonIds.map(async (lessonId) => {
-        const record = await ctx.db
-          .query("lessonProgress")
-          .withIndex("by_user_and_lesson", (q) =>
-            q.eq("userId", ctx.user.userId).eq("lessonId", lessonId)
-          )
-          .first();
-
-        return {
-          lessonId,
-          completed: record?.completed || false,
-        };
-      })
+    const progress = await calculateLessonProgress(
+      ctx,
+      ctx.user.userId,
+      courseId
     );
 
-    return progress;
+    return progress.map((lesson) => ({
+      lessonId: lesson.lessonId,
+      completed: lesson.completed,
+    }));
   },
 });
 
@@ -70,81 +49,59 @@ export const getMyProgress = learnerQuery({
       .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
       .collect();
 
-    const activeCourses = enrollments.filter((e) => e.status === "active");
-    const completedCourses = enrollments.filter((e) => e.status === "completed");
+    const activeEnrollments = enrollments.filter((e) => e.status === "active");
+    const completedEnrollments = enrollments.filter((e) => e.status === "completed");
+    const relevantEnrollments = enrollments.filter((e) =>
+      e.status === "active" || e.status === "completed"
+    );
 
-    // Lessons completed
-    const allLessonProgress = await ctx.db
-      .query("lessonProgress")
-      .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
-      .collect();
-
-    const lessonsCompletedCount = allLessonProgress.filter((lp) => lp.completed).length;
-
-    // Batch modules and lessons for enrolled courses
-    const courseIds = activeCourses.map((e) => e.courseId);
-    const allModulesArrays = await Promise.all(
-      courseIds.map((courseId) =>
-        ctx.db
-          .query("modules")
-          .withIndex("by_course", (q) => q.eq("courseId", courseId))
-          .collect()
+    const performances = await Promise.all(
+      relevantEnrollments.map((enrollment) =>
+        calculateCoursePerformance(ctx, ctx.user.userId, enrollment.courseId)
       )
     );
-    const allModules = allModulesArrays.flat();
-    const moduleIds = allModules.map((m) => m._id);
-    const allLessonsArrays = await Promise.all(
-      moduleIds.map((moduleId) =>
-        ctx.db
-          .query("lessons")
-          .withIndex("by_module", (q) => q.eq("moduleId", moduleId))
-          .collect()
-      )
-    );
-    const totalLessons = allLessonsArrays.flat().length;
 
-    // Average quiz score
-    const quizAttempts = await ctx.db
-      .query("quizAttempts")
-      .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
-      .collect();
-    const scored = quizAttempts.filter((a) => a.submittedAt);
-    const avgQuiz =
-      scored.length > 0
-        ? scored.reduce((sum, a) => sum + a.percentage, 0) / scored.length
-        : undefined;
+    let totalLessons = 0;
+    let completedLessons = 0;
+    const quizScores: number[] = [];
+    const assignmentScores: number[] = [];
 
-    // Average assignment score (as percentage of max)
-    const submissions = await ctx.db
-      .query("assignmentSubmissions")
-      .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
-      .collect();
+    for (const performance of performances) {
+      totalLessons += performance.lessons.total;
+      completedLessons += performance.lessons.completed;
 
-    const graded = submissions.filter((s) => s.status === "graded" && s.grade !== undefined);
-
-    let avgAssignment: number | undefined;
-    if (graded.length > 0) {
-      const percents: number[] = [];
-      for (const s of graded) {
-        const assignment = await ctx.db.get(s.assignmentId);
-        if (assignment && s.grade !== undefined) {
-          percents.push((s.grade / assignment.maxPoints) * 100);
-        }
+      if (performance.quizzes.averageScore !== null) {
+        quizScores.push(performance.quizzes.averageScore);
       }
-      if (percents.length > 0) {
-        avgAssignment = percents.reduce((a, b) => a + b, 0) / percents.length;
+
+      if (performance.assignments.averageGrade !== null) {
+        assignmentScores.push(performance.assignments.averageGrade);
       }
     }
 
+    const averageQuizScore =
+      quizScores.length > 0
+        ? Math.round(
+          (quizScores.reduce((sum, score) => sum + score, 0) / quizScores.length) * 100
+        ) / 100
+        : undefined;
+
+    const averageAssignmentScore =
+      assignmentScores.length > 0
+        ? Math.round(
+          (assignmentScores.reduce((sum, score) => sum + score, 0) /
+            assignmentScores.length) *
+          100
+        ) / 100
+        : undefined;
+
     return {
-      coursesEnrolled: activeCourses.length,
-      coursesCompleted: completedCourses.length,
-      lessonsCompleted: lessonsCompletedCount,
+      coursesEnrolled: activeEnrollments.length,
+      coursesCompleted: completedEnrollments.length,
+      lessonsCompleted: completedLessons,
       totalLessons,
-      averageQuizScore: avgQuiz ? Math.round(avgQuiz * 100) / 100 : undefined,
-      averageAssignmentScore: avgAssignment
-        ? Math.round(avgAssignment * 100) / 100
-        : undefined,
+      averageQuizScore,
+      averageAssignmentScore,
     };
   },
 });
@@ -178,112 +135,30 @@ export const getCoursePerformance = learnerQuery({
       )
       .first();
     if (!enrollment || enrollment.status !== "active") return null;
+    const [performance, assignmentDetails] = await Promise.all([
+      calculateCoursePerformance(ctx, ctx.user.userId, args.courseId),
+      calculateAssignmentProgress(ctx, ctx.user.userId, args.courseId),
+    ]);
 
-    // Lessons
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .collect();
-    const moduleIds = modules.map((m) => m._id);
-    const allLessonsArrays = await Promise.all(
-      moduleIds.map((moduleId) =>
-        ctx.db
-          .query("lessons")
-          .withIndex("by_module", (q) => q.eq("moduleId", moduleId))
-          .collect()
-      )
-    );
-    const allLessons = allLessonsArrays.flat();
-    const totalLessons = allLessons.length;
-
-    const lessonIds = allLessons.map((l) => l._id);
-    const lessonProgressArray = await Promise.all(
-      lessonIds.map((lessonId) =>
-        ctx.db
-          .query("lessonProgress")
-          .withIndex("by_user_and_lesson", (q) =>
-            q.eq("userId", ctx.user.userId).eq("lessonId", lessonId)
-          )
-          .first()
-      )
-    );
-    const completedCount = lessonProgressArray.filter((lp) => lp?.completed).length;
-
-    // Quizzes
-    const quizzes = await ctx.db
-      .query("quizzes")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .filter((q) => q.eq(q.field("status"), "published"))
-      .collect();
-    const quizAttempts = await ctx.db
-      .query("quizAttempts")
-      .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
-      .collect();
-    const attemptsInCourse = quizAttempts.filter((a) =>
-      quizzes.some((qz) => qz._id === a.quizId)
-    );
-    const completedQuizzes = new Set(attemptsInCourse.map((a) => a.quizId)).size;
-    const avgQuiz =
-      attemptsInCourse.length > 0
-        ? attemptsInCourse.reduce((sum, a) => sum + a.percentage, 0) /
-          attemptsInCourse.length
-        : undefined;
-
-    // Assignments
-    const assignments = await ctx.db
-      .query("assignments")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .filter((q) => q.eq(q.field("status"), "published"))
-      .collect();
-    const submissions = await ctx.db
-      .query("assignmentSubmissions")
-      .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
-      .collect();
-    const submissionsInCourse = submissions.filter((s) =>
-      assignments.some((a) => a._id === s.assignmentId)
-    );
-    const submittedAssignments = submissionsInCourse.filter(
-      (s) => s.status === "submitted" || s.status === "graded"
-    ).length;
-    const gradedAssignments = submissionsInCourse.filter(
-      (s) => s.status === "graded"
-    );
-
-    let avgAssignment: number | undefined;
-    if (gradedAssignments.length > 0) {
-      const percents: number[] = [];
-      for (const s of gradedAssignments) {
-        const a = await ctx.db.get(s.assignmentId);
-        if (!a || s.grade === undefined) continue;
-        percents.push((s.grade / a.maxPoints) * 100);
-      }
-      if (percents.length > 0) {
-        avgAssignment = percents.reduce((a, b) => a + b, 0) / percents.length;
-      }
-    }
-
-    // Overall progress (simple average)
-    const lessonPct = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
-    const quizPct = quizzes.length > 0 ? (completedQuizzes / quizzes.length) * 100 : 0;
-    const assignmentPct =
-      assignments.length > 0 ? (submittedAssignments / assignments.length) * 100 : 0;
-    const overall =
-      (lessonPct + quizPct + assignmentPct) / 3;
+    const gradedAssignments = assignmentDetails.filter((entry) => entry.grade !== null).length;
+    const submittedAssignments = assignmentDetails.filter((entry) => entry.submitted).length;
 
     return {
       courseId: args.courseId,
-      totalLessons,
-      completedLessons: completedCount,
-      totalQuizzes: quizzes.length,
-      completedQuizzes,
-      averageQuizScore: avgQuiz ? Math.round(avgQuiz * 100) / 100 : undefined,
-      totalAssignments: assignments.length,
-      submittedAssignments,
-      gradedAssignments: gradedAssignments.length,
-      averageAssignmentScore: avgAssignment
-        ? Math.round(avgAssignment * 100) / 100
+      totalLessons: performance.lessons.total,
+      completedLessons: performance.lessons.completed,
+      totalQuizzes: performance.quizzes.total,
+      completedQuizzes: performance.quizzes.completed,
+      averageQuizScore: performance.quizzes.averageScore
+        ? Math.round(performance.quizzes.averageScore * 100) / 100
         : undefined,
-      overallProgress: Math.round(overall * 100) / 100,
+      totalAssignments: performance.assignments.total,
+      submittedAssignments,
+      gradedAssignments,
+      averageAssignmentScore: performance.assignments.averageGrade
+        ? Math.round(performance.assignments.averageGrade * 100) / 100
+        : undefined,
+      overallProgress: Math.round(performance.overallProgress * 100) / 100,
     };
   },
 });

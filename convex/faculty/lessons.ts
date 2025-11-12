@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { requireContentModifyPermission } from "../lib/auth";
+import { listContentByParent } from "../lib/content_retrieval";
 import { facultyMutation, facultyQuery } from "../lib/functions";
 
 /**
@@ -40,10 +41,8 @@ export const listLessonsByModule = facultyQuery({
       throw new Error("Access denied. You are not the assigned teacher for this course.");
     }
 
-    const lessons = await ctx.db
-      .query("lessons")
-      .withIndex("by_module", (q) => q.eq("moduleId", args.moduleId))
-      .collect();
+    // Use shared helper to get lessons
+    const lessons = await listContentByParent(ctx, "lessons", "moduleId", args.moduleId);
 
     // Enrich with attachment counts
     const enrichedLessons = await Promise.all(

@@ -56,7 +56,7 @@ function CourseOverviewPage() {
   const course = useQuery(api.faculty.courses.getCourseById, {
     courseId: courseId as Id<"courses">,
   });
-  const modules = useQuery(api.faculty.navigation.getModulesWithLessons, {
+  const modules = useQuery(api.shared.content.getModulesWithLessons, {
     courseId: courseId as Id<"courses">,
   });
 

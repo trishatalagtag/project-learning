@@ -76,7 +76,7 @@ function ModulePage() {
     moduleId: moduleId as Id<"modules">,
   });
   const modules = useQuery(
-    api.faculty.navigation.getModulesWithLessons,
+    api.shared.content.getModulesWithLessons,
     course ? { courseId: courseId as Id<"courses"> } : "skip"
   );
   const lessons = useQuery(

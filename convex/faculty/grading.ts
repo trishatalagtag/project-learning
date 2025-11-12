@@ -1,6 +1,10 @@
 import { v } from "convex/values";
 import { getUserByUserId, getUsersByUserIds } from "../lib/auth";
 import { facultyMutation, facultyQuery } from "../lib/functions";
+import {
+  gradeAssignmentSubmission as gradeSubmissionLib,
+  updateGrade as updateGradeLib,
+} from "../lib/grading";
 import { getPaginationDefaults, listArgs } from "../lib/validators";
 
 /**
@@ -280,28 +284,14 @@ export const gradeSubmission = facultyMutation({
       throw new Error("Access denied. You are not the assigned teacher for this course.");
     }
 
-    // Validate submission is submitted (not draft)
-    if (submission.status !== "submitted" && submission.status !== "graded") {
-      throw new Error("Can only grade submitted submissions");
-    }
-
-    // Validate grade is within range
-    if (args.grade < 0 || args.grade > assignment.maxPoints) {
-      throw new Error(
-        `Grade must be between 0 and ${assignment.maxPoints} (max points for this assignment)`
-      );
-    }
-
-    await ctx.db.patch(args.submissionId, {
-      grade: args.grade,
-      teacherFeedback: args.teacherFeedback,
-      status: "graded",
-      gradedAt: Date.now(),
-      gradedBy: ctx.user.userId ?? undefined,
-    });
-
-    // TODO: Update course performance stats for this learner
-    // This would recalculate their overall assignment average, etc.
+    // Use shared grading helper
+    await gradeSubmissionLib(
+      ctx,
+      args.submissionId,
+      args.grade,
+      args.teacherFeedback ?? "",
+      ctx.user.userId as string
+    );
 
     return null;
   },
@@ -342,31 +332,13 @@ export const updateGrade = facultyMutation({
       throw new Error("Access denied. You are not the assigned teacher for this course.");
     }
 
-    // Validate submission is graded
-    if (submission.status !== "graded") {
-      throw new Error("Can only update grades on graded submissions");
-    }
-
-    // Build update object
-    const updates: Record<string, any> = {};
-    if (args.grade !== undefined) {
-      // Validate grade is within range
-      if (args.grade < 0 || args.grade > assignment.maxPoints) {
-        throw new Error(
-          `Grade must be between 0 and ${assignment.maxPoints} (max points for this assignment)`
-        );
-      }
-      updates.grade = args.grade;
-    }
-    if (args.teacherFeedback !== undefined) {
-      updates.teacherFeedback = args.teacherFeedback;
-    }
-
-    if (Object.keys(updates).length > 0) {
-      updates.gradedAt = Date.now();
-      updates.gradedBy = ctx.user.userId;
-      await ctx.db.patch(args.submissionId, updates);
-    }
+    // Use shared update grade helper
+    await updateGradeLib(
+      ctx,
+      args.submissionId,
+      args.grade ?? submission.grade ?? 0,
+      args.teacherFeedback ?? submission.teacherFeedback ?? ""
+    );
 
     return null;
   },

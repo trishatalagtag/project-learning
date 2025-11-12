@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { getUserByUserId, requireCourseAccess } from "../lib/auth";
+import { requireCourseAccess } from "../lib/auth";
+import { enrichCourse, enrichCourses, generateEnrollmentCode } from "../lib/courses";
 import { facultyMutation, facultyQuery } from "../lib/functions";
 import {
   getPaginationDefaults,
@@ -83,40 +84,24 @@ export const getMyCourses = facultyQuery({
     // Apply pagination
     const paginatedCourses = sortedCourses.slice(offset, offset + limit);
 
-    // Enrich with additional data
-    const enrichedCourses = await Promise.all(
-      paginatedCourses.map(async (course) => {
-        const category = await ctx.db.get(course.categoryId);
-
-        const enrollments = await ctx.db
-          .query("enrollments")
-          .withIndex("by_course", (q) => q.eq("courseId", course._id))
-          .collect();
-
-        const modules = await ctx.db
-          .query("modules")
-          .withIndex("by_course", (q) => q.eq("courseId", course._id))
-          .collect();
-
-        return {
-          _id: course._id,
-          _creationTime: course._creationTime,
-          title: course.title,
-          description: course.description,
-          categoryId: course.categoryId,
-          categoryName: category?.name ?? "Unknown",
-          status: course.status,
-          enrollmentCount: enrollments.length,
-          moduleCount: modules.length,
-          isEnrollmentOpen: course.isEnrollmentOpen,
-          createdAt: course.createdAt,
-          updatedAt: course.updatedAt,
-        };
-      })
-    );
+    // Enrich with shared helper (faculty level includes enrollment/module counts)
+    const enrichedCourses = await enrichCourses(ctx, paginatedCourses, "faculty");
 
     return {
-      courses: enrichedCourses,
+      courses: enrichedCourses.map((course) => ({
+        _id: course._id,
+        _creationTime: course._creationTime,
+        title: course.title,
+        description: course.description,
+        categoryId: course.categoryId,
+        categoryName: course.categoryName ?? "Unknown",
+        status: course.status,
+        enrollmentCount: course.enrollmentCount ?? 0,
+        moduleCount: course.moduleCount ?? 0,
+        isEnrollmentOpen: course.isEnrollmentOpen,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+      })),
       total: sortedCourses.length,
       hasMore: offset + limit < sortedCourses.length,
     };
@@ -174,23 +159,7 @@ export const getCourseById = facultyQuery({
     // Check access using helper
     await requireCourseAccess(ctx, course);
 
-    const category = await ctx.db.get(course.categoryId);
-
-    let teacherName: string | undefined;
-    if (course.teacherId) {
-      const teacher = await getUserByUserId(ctx, course.teacherId);
-      teacherName = teacher?.name;
-    }
-
-    const enrollments = await ctx.db
-      .query("enrollments")
-      .withIndex("by_course", (q) => q.eq("courseId", course._id))
-      .collect();
-
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_course", (q) => q.eq("courseId", course._id))
-      .collect();
+    const enrichedCourse = await enrichCourse(ctx, course, "faculty") as any;
 
     return {
       _id: course._id,
@@ -199,16 +168,16 @@ export const getCourseById = facultyQuery({
       description: course.description,
       content: course.content,
       categoryId: course.categoryId,
-      categoryName: category?.name ?? "Unknown",
+      categoryName: enrichedCourse.categoryName ?? "Unknown",
       teacherId: course.teacherId,
-      teacherName,
+      teacherName: enrichedCourse.teacherName,
       coverImageId: course.coverImageId,
       status: course.status,
       enrollmentCode: course.enrollmentCode,
       isEnrollmentOpen: course.isEnrollmentOpen,
       gradingConfig: course.gradingConfig,
-      enrollmentCount: enrollments.length,
-      moduleCount: modules.length,
+      enrollmentCount: enrichedCourse.enrollmentCount ?? 0,
+      moduleCount: enrichedCourse.moduleCount ?? 0,
       createdAt: course.createdAt,
       updatedAt: course.updatedAt,
       createdBy: course.createdBy,
@@ -233,21 +202,17 @@ export const createCourse = facultyMutation({
   },
   returns: v.id("courses"),
   handler: async (ctx, args) => {
-    // Verify category exists
     const category = await ctx.db.get(args.categoryId);
     if (!category) {
       throw new Error("Category not found");
     }
 
-    // Generate enrollment code
-    const enrollmentCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const enrollmentCode = generateEnrollmentCode();
 
-    // Validate grading config if provided
     if (args.gradingConfig) {
       validateGradingConfig(args.gradingConfig);
     }
 
-    // Default grading config
     const defaultGradingConfig = {
       passingScore: 85,
       gradingMethod: "numerical" as const,
@@ -255,7 +220,6 @@ export const createCourse = facultyMutation({
 
     const now = Date.now();
 
-    // If admin, can create as approved. If faculty, starts as draft
     const initialStatus = ctx.user.role === "ADMIN" ? "approved" : "draft";
 
     const courseId = await ctx.db.insert("courses", {

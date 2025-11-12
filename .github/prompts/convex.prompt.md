@@ -1,5 +1,5 @@
 ---
-mode: agent
+mode: ask
 description: Convex coding guidelines. Also includes an example of how to properly use Convex.
 ---
 

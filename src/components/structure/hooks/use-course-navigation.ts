@@ -1,9 +1,6 @@
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { useQuery } from "convex/react"
-import type { FunctionReturnType } from "convex/server"
-
-type ModulesWithLessons = FunctionReturnType<typeof api.faculty.navigation.getModulesWithLessons>
 
 /**
  * Get course navigation from a lessonId
@@ -12,7 +9,7 @@ export function useCourseNavigation(lessonId: Id<"lessons">) {
   const lesson = useQuery(api.faculty.lessons.getLessonById, { lessonId })
 
   const modulesWithLessons = useQuery(
-    api.faculty.navigation.getModulesWithLessons,
+    api.shared.content.getModulesWithLessons,
     lesson ? { courseId: lesson.courseId } : "skip",
   )
 
@@ -32,7 +29,7 @@ export function useCourseNavigationByModule(moduleId: Id<"modules">) {
   const module = useQuery(api.faculty.modules.getModuleById, { moduleId })
 
   const modulesWithLessons = useQuery(
-    api.faculty.navigation.getModulesWithLessons,
+    api.shared.content.getModulesWithLessons,
     module ? { courseId: module.courseId } : "skip",
   )
 

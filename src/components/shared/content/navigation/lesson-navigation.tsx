@@ -1,22 +1,21 @@
+import { Button } from "@/components/ui/button"
+import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
 import type { Id } from "@/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
 import { useNavigate } from "@tanstack/react-router"
 
-import { Button } from "@/components/ui/button"
-import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
-
 interface LessonNavigationProps {
   courseId: Id<"courses">
   previous: {
-    lessonId: string
-    moduleId: string
+    lessonId: Id<"lessons">
+    moduleId: Id<"modules">
     lessonTitle: string
     moduleTitle: string
   } | null
   next: {
-    lessonId: string
-    moduleId: string
+    lessonId: Id<"lessons">
+    moduleId: Id<"modules">
     lessonTitle: string
     moduleTitle: string
   } | null
@@ -32,8 +31,8 @@ export function LessonNavigation({ courseId, previous, next }: LessonNavigationP
         to: "/c/$courseId/m/$moduleId/lessons/$lessonId",
         params: {
           courseId,
-          moduleId: previous.moduleId as Id<"modules">,
-          lessonId: previous.lessonId as Id<"lessons">,
+          moduleId: previous.moduleId,
+          lessonId: previous.lessonId,
         },
       })
     }
@@ -45,8 +44,8 @@ export function LessonNavigation({ courseId, previous, next }: LessonNavigationP
         to: "/c/$courseId/m/$moduleId/lessons/$lessonId",
         params: {
           courseId,
-          moduleId: next.moduleId as Id<"modules">,
-          lessonId: next.lessonId as Id<"lessons">,
+          moduleId: next.moduleId,
+          lessonId: next.lessonId,
         },
       })
     }

@@ -13,6 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import type { api } from "@/convex/_generated/api"
 import {
     CheckCircleIcon,
     EllipsisHorizontalIcon,
@@ -20,27 +21,13 @@ import {
     EyeIcon,
 } from "@heroicons/react/24/outline"
 import type { ColumnDef } from "@tanstack/react-table"
+import type { FunctionReturnType } from "convex/server"
 import { formatDistanceToNow } from "date-fns"
-
 import { RoleBadge } from "./shared/role-badge"
 import { UserAvatar } from "./shared/user-avatar"
 
-// This type matches the backend response
-export interface User {
-    _id: string // Auth component user ID
-    name: string
-    email: string
-    role: "ADMIN" | "FACULTY" | "LEARNER"
-    image?: string
-    institution?: string
-    bio?: string
-    emailVerified: boolean
-    isDeactivated: boolean
-    enrolledCoursesCount: number
-    createdCoursesCount?: number
-    createdAt: number
-    updatedAt: number
-}
+// Infer from backend - matches api.admin.users.listAllUsers response
+export type User = FunctionReturnType<typeof api.admin.users.listAllUsers>["users"][number]
 
 interface ColumnsConfig {
     onView: (userId: string) => void // userId is the auth component _id

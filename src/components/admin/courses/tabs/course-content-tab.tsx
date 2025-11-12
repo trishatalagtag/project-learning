@@ -68,9 +68,9 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
     courseId,
   })
 
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
+  const [expandedModules, setExpandedModules] = useState<Set<Id<"modules">>>(new Set())
 
-  const toggleModule = (moduleId: string) => {
+  const toggleModule = (moduleId: Id<"modules">) => {
     setExpandedModules((prev) => {
       const next = new Set(prev)
       if (next.has(moduleId)) {

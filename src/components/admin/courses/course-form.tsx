@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import {
   AcademicCapIcon,
   BookOpenIcon,
@@ -30,7 +31,8 @@ import {
 } from "@heroicons/react/24/outline"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "convex/react"
-import { useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
@@ -71,6 +73,14 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
   )
 
   const categories = useQuery(api.shared.categories.listAllCategories)
+  const normalizedCategories = useMemo(
+    () => (categories ? normalizeCategoryTree(categories) : []),
+    [categories],
+  )
+  const flatCategories = useMemo(
+    () => flattenCategoryTree(normalizedCategories),
+    [normalizedCategories],
+  )
   const faculty = useQuery(api.admin.users.listUsersByRole, { role: "FACULTY" })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -122,20 +132,6 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
       })
     }
   }, [course, mode, form, getCourseById])
-
-  // Flatten categories for dropdown
-  const flatCategories =
-    categories?.flatMap((cat) => [
-      { id: cat._id, name: cat.name, level: cat.level },
-      ...(cat.children || []).flatMap((child) => [
-        { id: child._id, name: child.name, level: child.level },
-        ...(child.children || []).map((grandchild) => ({
-          id: grandchild._id,
-          name: grandchild.name,
-          level: grandchild.level,
-        })),
-      ]),
-    ]) || []
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
@@ -265,13 +261,23 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {flatCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id} className="font-mono">
-                        {"\u00A0\u00A0".repeat(cat.level - 1)}
-                        {cat.level > 1 && "└─ "}
-                        {cat.name}
-                      </SelectItem>
-                    ))}
+                    {categories === undefined ? (
+                      <div className="flex items-center justify-center p-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : flatCategories.length === 0 ? (
+                      <div className="px-2 py-1.5 text-muted-foreground text-sm">
+                        No categories available
+                      </div>
+                    ) : (
+                      flatCategories.map((cat) => (
+                        <SelectItem key={cat._id} value={cat._id} className="font-mono">
+                          {"\u00A0\u00A0".repeat(Math.max(0, cat.level - 1))}
+                          {cat.level > 1 && "└─ "}
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 <FieldError>{errors.categoryId?.message}</FieldError>

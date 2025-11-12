@@ -19,6 +19,8 @@ import {
     KanbanItemHandle,
     KanbanOverlay
 } from "@/components/ui/sortable"
+import type { Doc, Id } from "@/convex/_generated/dataModel"
+import type { ContentStatus } from "@/lib/constants/content-status"
 import {
     ArrowPathIcon,
     BookOpenIcon,
@@ -35,15 +37,14 @@ import { MoreHorizontalIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import * as React from "react"
 
-type ContentItem = {
-    _id: string
-    title: string
-    description?: string
-    status: "draft" | "pending" | "changes_requested" | "approved" | "published"
-    createdAt: number
-    updatedAt: number
-    type: "module" | "lesson" | "quiz" | "assignment"
-}
+// Infer from backend schema - union of all content types
+// Accepts base Doc types or enriched types (with createdByName, etc.)
+// Using structural typing - any object that matches the required fields
+type ContentItem =
+    | (Doc<"modules"> & { type: "module" })
+    | (Doc<"lessons"> & { type: "lesson" })
+    | (Doc<"quizzes"> & { type: "quiz" })
+    | (Doc<"assignments"> & { type: "assignment" })
 
 const STATUS_COLUMNS = {
     pending: {
@@ -83,16 +84,16 @@ const CONTENT_TYPE_ICONS = {
     assignment: DocumentTextIcon,
 } as const
 
-// Add animation variants after the CONTENT_TYPE_ICONS constant
-const _containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.05,
-        },
-    },
-}
+// Animation variants (currently unused but kept for future use)
+// const _containerVariants = {
+//     hidden: { opacity: 0 },
+//     visible: {
+//         opacity: 1,
+//         transition: {
+//             staggerChildren: 0.05,
+//         },
+//     },
+// }
 
 const itemVariants = {
     hidden: { opacity: 0, y: 10 },
@@ -108,7 +109,7 @@ const itemVariants = {
 interface ContentCardProps {
     item: ContentItem
     onView?: (item: ContentItem) => void
-    onStatusChange?: (itemId: string, newStatus: string) => void
+    onStatusChange?: (itemId: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">, newStatus: ContentStatus) => void
     asHandle?: boolean
 }
 
@@ -117,9 +118,9 @@ function ContentCard({ item, onView, onStatusChange, asHandle }: ContentCardProp
     const daysPending = Math.floor((Date.now() - item.createdAt) / 86400000)
     const isOverdue = daysPending > 3
 
-    const handleStatusChange = (newStatus: string) => {
+    const handleStatusChange = (newStatus: ContentStatus) => {
         if (onStatusChange) {
-            onStatusChange(item._id, newStatus)
+            onStatusChange(item._id as Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">, newStatus)
         }
     }
 
@@ -233,7 +234,7 @@ function ContentCard({ item, onView, onStatusChange, asHandle }: ContentCardProp
 interface ContentKanbanViewProps {
     items: ContentItem[]
     onView?: (item: ContentItem) => void
-    onStatusChange?: (itemId: string, newStatus: string) => void
+    onStatusChange?: (itemId: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">, newStatus: ContentStatus) => void
     showDropTargets?: boolean // Show empty columns as drop targets
 }
 
@@ -261,7 +262,7 @@ export function ContentKanbanView({ items, onView, onStatusChange, showDropTarge
             if (!activeItem) return
 
             if (onStatusChange && activeContainer !== overContainer) {
-                onStatusChange(activeItem._id, overContainer)
+                onStatusChange(activeItem._id, overContainer as ContentStatus)
             }
         },
         [kanbanState, onStatusChange]

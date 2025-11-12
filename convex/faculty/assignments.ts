@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { facultyMutation, facultyQuery } from "../lib/functions";
+import { listContentByParent } from "../lib/content_retrieval";
 
 /**
  * List assignments in a course
@@ -48,15 +49,8 @@ export const listAssignmentsByCourse = facultyQuery({
       throw new Error("Access denied. You are not the assigned teacher for this course.");
     }
 
-    let assignments = await ctx.db
-      .query("assignments")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .collect();
-
-    // Apply status filter
-    if (args.status) {
-      assignments = assignments.filter((a) => a.status === args.status);
-    }
+    // Use shared helper to get assignments
+    let assignments = await listContentByParent(ctx, "assignments", "courseId", args.courseId, args.status ? [args.status] : undefined);
 
     // Enrich with linked content info and submission counts
     const enrichedAssignments = await Promise.all(

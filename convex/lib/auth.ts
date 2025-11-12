@@ -2,6 +2,7 @@ import { components } from "../_generated/api";
 import { Doc, Id } from "../_generated/dataModel";
 import { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import { authComponent } from "../auth";
+import { isUserEnrolledInCourse } from "./enrollment";
 import type { AdminUser, AuthenticatedUser, FacultyUser, LearnerUser } from "./types";
 
 export async function getCurrentAuthUser(
@@ -293,26 +294,23 @@ export async function isEnrolledInCourse(
   authUserId: string,
   courseId: Id<"courses">
 ): Promise<boolean> {
-  const enrollment = await ctx.db
-    .query("enrollments")
-    .withIndex("by_user_and_course", (q) =>
-      q.eq("userId", authUserId).eq("courseId", courseId)
-    )
-    .filter((q) => q.eq(q.field("status"), "active"))
-    .first();
-
-  return !!enrollment;
+  return await isUserEnrolledInCourse(ctx, authUserId, courseId);
 }
 
 export async function requireEnrollment(
   ctx: QueryCtx | MutationCtx,
-  authUserId: string,
   courseId: Id<"courses">
-): Promise<void> {
-  const isEnrolled = await isEnrolledInCourse(ctx, authUserId, courseId);
+): Promise<AuthenticatedUser> {
+  const user = await requireAuth(ctx);
+  const userId = user._id;
+  const isEnrolled = await isUserEnrolledInCourse(ctx, userId, courseId);
   if (!isEnrolled) {
     throw new Error("You are not enrolled in this course.");
   }
+  return {
+    ...user,
+    userId: user._id,
+  } as AuthenticatedUser;
 }
 
 export { getUserById as getUserByUserId, getUsersByIds as getUsersByUserIds };

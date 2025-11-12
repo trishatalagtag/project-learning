@@ -21,9 +21,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { useCategoryMutations } from "@/hooks/use-category-mutations"
+import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { FolderIcon } from "@heroicons/react/24/outline"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -70,7 +72,15 @@ export function CategoryFormDialog({
     category,
     onSuccess,
 }: CategoryFormDialogProps) {
-    const categories = useQuery(api.admin.categories.listCategories)
+    const categories = useQuery(api.shared.categories.listAllCategories)
+    const normalizedCategories = useMemo(
+        () => (categories ? normalizeCategoryTree(categories) : []),
+        [categories],
+    )
+    const flatCategories = useMemo(
+        () => flattenCategoryTree(normalizedCategories),
+        [normalizedCategories],
+    )
     const mutations = useCategoryMutations()
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -113,12 +123,12 @@ export function CategoryFormDialog({
 
     // Filter available parents based on level
     const availableParents = useMemo(() => {
-        if (!categories) return []
-        return categories.filter((cat) => {
+        if (flatCategories.length === 0) return []
+        return flatCategories.filter((cat) => {
             if (isEditMode && cat._id === category?._id) return false
             return cat.level === level - 1
         })
-    }, [categories, isEditMode, category?._id, level])
+    }, [flatCategories, isEditMode, category?._id, level])
 
     // Reset parent when level changes
     useEffect(() => {
@@ -234,18 +244,25 @@ export function CategoryFormDialog({
                                         <Select
                                             value={parentId || ""}
                                             onValueChange={(value) => form.setValue("parentId", value)}
+                                            disabled={categories === undefined}
                                         >
                                             <SelectTrigger id="parentId" aria-invalid={!!errors.parentId}>
                                                 <SelectValue placeholder="Select parent category" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {availableParents.length === 0 ? (
+                                                {categories === undefined ? (
+                                                    <div className="flex items-center justify-center px-2 py-1.5 text-muted-foreground text-sm">
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    </div>
+                                                ) : availableParents.length === 0 ? (
                                                     <div className="px-2 py-1.5 text-muted-foreground text-sm">
                                                         No parent categories available
                                                     </div>
                                                 ) : (
                                                     availableParents.map((parent) => (
                                                         <SelectItem key={parent._id} value={parent._id}>
+                                                            {"\u00A0\u00A0".repeat(parent.level - 1)}
+                                                            {parent.level > 1 && "└─ "}
                                                             {parent.name}
                                                         </SelectItem>
                                                     ))

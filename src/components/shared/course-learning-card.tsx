@@ -1,34 +1,18 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
+import type { FunctionReturnType } from "convex/server"
 import { ArrowRight } from "lucide-react"
 
-interface Module {
-  _id: Id<"modules">
-  title: string
-  description: string
-  order: number
-  status: "draft" | "pending" | "approved" | "published"
-  courseId: Id<"courses">
-  _creationTime: number
-  lessonCount: number
-  lessons: {
-    _id: Id<"lessons">
-    moduleId: Id<"modules">
-    title: string
-    description: string
-    order: number
-    status: "draft" | "pending" | "approved" | "published"
-    _creationTime: number
-  }[]
-}
+type ModuleWithLessons = FunctionReturnType<typeof api.shared.content.getModulesWithLessons>[number]
 
 interface CourseLearningCardProps {
   headerTitle?: string
   headerSubtitle?: string
-  modules: Module[]
+  modules: ModuleWithLessons[]
   onBeginCourse?: (moduleId: Id<"modules">) => void
 }
 

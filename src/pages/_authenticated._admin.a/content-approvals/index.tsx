@@ -56,6 +56,7 @@ import {
 import { EyeIcon } from "@heroicons/react/24/solid"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
+import type { FunctionReturnType } from "convex/server"
 import { formatDistanceToNow } from "date-fns"
 import { Loader2, MoreHorizontalIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
@@ -87,93 +88,98 @@ function ContentApprovalsPage() {
   const [selectedItems, setSelectedItems] = useState<
     Array<{
       contentType: "module" | "lesson" | "quiz" | "assignment"
-      contentId: string
+      contentId: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">
       title: string
     }>
   >([])
   const [previewItem, setPreviewItem] = useState<{
-    type: string
-    id: string
+    type: "module" | "lesson" | "quiz" | "assignment"
+    id: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">
     title: string
-    status: string
+    status: ContentStatus
   } | null>(null)
   const [requestChangesItem, setRequestChangesItem] = useState<{
-    contentId: string
+    contentId: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">
     contentType: "module" | "lesson" | "quiz" | "assignment"
     title: string
   } | null>(null)
   const [approveItem, setApproveItem] = useState<{
-    contentId: string
+    contentId: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">
     contentType: "module" | "lesson" | "quiz" | "assignment"
     title: string
   } | null>(null)
   const [publishItem, setPublishItem] = useState<{
-    contentId: string
+    contentId: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">
     contentType: "module" | "lesson" | "quiz" | "assignment"
     title: string
   } | null>(null)
 
   const counts = useQuery(api.admin.content.getAllContentCounts, {})
   const bulkApprove = useMutation(api.admin.content.bulkApproveContent)
+
+  // Infer types from backend response
+  type PendingContentResponse = FunctionReturnType<typeof api.admin.content.getAllPendingContent>
+  type EnrichedModule = PendingContentResponse["modules"][number] & { type: "module" }
+  type EnrichedLesson = PendingContentResponse["lessons"][number] & { type: "lesson" }
+  type EnrichedQuiz = PendingContentResponse["quizzes"][number] & { type: "quiz" }
+  type EnrichedAssignment = PendingContentResponse["assignments"][number] & { type: "assignment" }
+  type EnrichedContentItem = EnrichedModule | EnrichedLesson | EnrichedQuiz | EnrichedAssignment
+
+  // Type guard functions
+  const hasCourseId = (item: EnrichedContentItem): item is EnrichedModule | EnrichedQuiz | EnrichedAssignment => {
+    return item.type === "module" || item.type === "quiz" || item.type === "assignment"
+  }
+
   const updateStatus = useMutation(api.admin.content.updateContentStatus).withOptimisticUpdate(
     (localStore, args) => {
       // Optimistically update the pending content query by removing the item
       // since it will move to a different status and won't be in the pending list anymore
-      const currentData = localStore.getQuery(api.admin.content.getAllPendingContent, {
-        paginationOpts: { numItems: 100, cursor: null },
-        courseId: courseFilter !== "all" ? (courseFilter as Id<"courses">) : undefined,
-        createdBy: facultyFilter !== "all" ? facultyFilter : undefined,
-        startDate: dateRange.start,
-        endDate: dateRange.end,
-        sortBy,
-      })
+      const currentData = localStore.getQuery(api.admin.content.getAllPendingContent, {})
 
       if (currentData) {
-        // Remove the item from the pending list since it's being moved to a different status
-        const updatedPage = currentData.page.filter((item) => item._id !== args.contentId)
+        // Remove the item from the appropriate array based on content type
+        const removeFromArray = <T extends { _id: string }>(arr: T[], id: string) =>
+          arr.filter((item) => item._id !== id)
+
+        const updatedData = {
+          modules: args.contentType === "module" ? removeFromArray(currentData.modules, args.contentId) : currentData.modules,
+          lessons: args.contentType === "lesson" ? removeFromArray(currentData.lessons, args.contentId) : currentData.lessons,
+          quizzes: args.contentType === "quiz" ? removeFromArray(currentData.quizzes, args.contentId) : currentData.quizzes,
+          assignments: args.contentType === "assignment" ? removeFromArray(currentData.assignments, args.contentId) : currentData.assignments,
+        }
 
         localStore.setQuery(
           api.admin.content.getAllPendingContent,
-          {
-            paginationOpts: { numItems: 100, cursor: null },
-            courseId: courseFilter !== "all" ? (courseFilter as Id<"courses">) : undefined,
-            createdBy: facultyFilter !== "all" ? facultyFilter : undefined,
-            startDate: dateRange.start,
-            endDate: dateRange.end,
-            sortBy,
-          },
-          {
-            ...currentData,
-            page: updatedPage,
-          }
+          {},
+          updatedData
         )
       }
     }
   )
   const courses = useQuery(api.admin.courses.listAllCourses, { limit: 1000, offset: 0 })
   const faculty = useQuery(api.admin.users.listUsersByRole, { role: "FACULTY" })
-  const pendingContent = useQuery(api.admin.content.getAllPendingContent, {
-    paginationOpts: { numItems: 100, cursor: null },
-    courseId: courseFilter !== "all" ? (courseFilter as Id<"courses">) : undefined,
-    createdBy: facultyFilter !== "all" ? facultyFilter : undefined,
-    startDate: dateRange.start,
-    endDate: dateRange.end,
-    sortBy,
-  })
+  const pendingContent = useQuery(api.admin.content.getAllPendingContent, {})
 
   const isLoading = counts === undefined || pendingContent === undefined
 
-  const filteredContent = useMemo(() => {
+  const filteredContent = useMemo((): EnrichedContentItem[] => {
     if (!pendingContent) {
       return []
     }
 
-    const filtered = pendingContent.page.filter((item) => {
+    // Combine all content types into a single array with type discriminators
+    const allContent: EnrichedContentItem[] = [
+      ...pendingContent.modules.map((item) => ({ ...item, type: "module" as const })),
+      ...pendingContent.lessons.map((item) => ({ ...item, type: "lesson" as const })),
+      ...pendingContent.quizzes.map((item) => ({ ...item, type: "quiz" as const })),
+      ...pendingContent.assignments.map((item) => ({ ...item, type: "assignment" as const })),
+    ]
+
+    const filtered = allContent.filter((item) => {
       const matchesType = contentType === "all" || item.type === contentType
       const matchesSearch =
         search.trim().length === 0 ||
-        item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.courseName?.toLowerCase().includes(search.toLowerCase())
+        item.title.toLowerCase().includes(search.toLowerCase())
 
       return matchesType && matchesSearch
     })
@@ -204,7 +210,7 @@ function ContentApprovalsPage() {
     })
   }, [pendingContent, contentType, search, sortBy])
 
-  const handleSelectItem = (item: { type: string; _id: string; title: string }) => {
+  const handleSelectItem = (item: { type: "module" | "lesson" | "quiz" | "assignment"; _id: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">; title: string }) => {
     const exists = selectedItems.find((i) => i.contentId === item._id)
     if (exists) {
       setSelectedItems(selectedItems.filter((i) => i.contentId !== item._id))
@@ -242,13 +248,13 @@ function ContentApprovalsPage() {
     try {
       const result = await bulkApprove({ items: selectedItems })
 
-      if (result.successful > 0) {
-        toast.success(`Successfully approved ${result.successful} items`, { id: toastId })
+      if (result.succeeded > 0) {
+        toast.success(`Successfully approved ${result.succeeded} items`, { id: toastId })
       }
 
-      if (result.failed > 0) {
+      if (result.failed.length > 0) {
         toast.error(
-          `Failed to approve ${result.failed} items. ${result.errors.slice(0, 2).join("; ")}`,
+          `Failed to approve ${result.failed.length} items. ${result.failed.slice(0, 2).map(f => f.error).join("; ")}`,
           { id: toastId, duration: 6000 }
         )
       }
@@ -270,7 +276,7 @@ function ContentApprovalsPage() {
       await updateStatus({
         contentType: approveItem.contentType,
         contentId: approveItem.contentId,
-        newStatus: "approved",
+        action: "approve",
       })
       toast.success(`"${approveItem.title}" has been approved`)
       setApproveItem(null)
@@ -288,7 +294,7 @@ function ContentApprovalsPage() {
       await updateStatus({
         contentType: publishItem.contentType,
         contentId: publishItem.contentId,
-        newStatus: "published",
+        action: "publish",
       })
       toast.success(`"${publishItem.title}" has been published`)
       setPublishItem(null)
@@ -326,10 +332,10 @@ function ContentApprovalsPage() {
             <ClockIcon className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{counts.total.pending}</div>
+            <div className="font-bold text-2xl">{counts.pending.total}</div>
             <p className="text-muted-foreground text-xs">
-              {counts.modules.pending}M · {counts.lessons.pending}L ·{" "}
-              {counts.quizzes.pending}Q · {counts.assignments.pending}A
+              {counts.pending.modules}M · {counts.pending.lessons}L ·{" "}
+              {counts.pending.quizzes}Q · {counts.pending.assignments}A
             </p>
           </CardContent>
         </Card>
@@ -340,7 +346,7 @@ function ContentApprovalsPage() {
             <CheckCircleIcon className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{counts.total.approved}</div>
+            <div className="font-bold text-2xl">{counts.approved.total}</div>
             <p className="text-muted-foreground text-xs">Ready to publish</p>
           </CardContent>
         </Card>
@@ -351,7 +357,7 @@ function ContentApprovalsPage() {
             <XCircleIcon className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{counts.total.rejected}</div>
+            <div className="font-bold text-2xl">0</div>
             <p className="text-muted-foreground text-xs">Needs revision</p>
           </CardContent>
         </Card>
@@ -363,7 +369,7 @@ function ContentApprovalsPage() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">
-              {counts.total.pending + counts.total.approved + counts.total.rejected}
+              {counts.pending.total + counts.approved.total + counts.published.total}
             </div>
             <p className="text-muted-foreground text-xs">All content</p>
           </CardContent>
@@ -426,7 +432,7 @@ function ContentApprovalsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as "newest" | "oldest" | "title")}>
             <SelectTrigger className="w-full lg:w-[160px]">
               <SelectValue />
             </SelectTrigger>
@@ -582,7 +588,7 @@ function ContentApprovalsPage() {
       {filteredContent.length > 0 && (
         <div className="flex items-center justify-between text-muted-foreground text-sm">
           <div>
-            Showing {filteredContent.length} of {pendingContent.page.length} pending items
+            Showing {filteredContent.length} of {pendingContent.modules.length + pendingContent.lessons.length + pendingContent.quizzes.length + pendingContent.assignments.length} pending items
             {(courseFilter !== "all" || facultyFilter !== "all" || search) && " (filtered)"}
           </div>
           {filteredContent.some((item) => {
@@ -622,15 +628,7 @@ function ContentApprovalsPage() {
           </Card>
         ) : viewMode === "kanban" ? (
           <ContentKanbanView
-            items={filteredContent.map((item) => ({
-              _id: item._id,
-              title: item.title,
-              description: item.courseName,
-              status: item.status as "draft" | "pending" | "changes_requested" | "approved" | "published",
-              createdAt: item.createdAt,
-              updatedAt: item.updatedAt,
-              type: item.type as "module" | "lesson" | "quiz" | "assignment",
-            }))}
+            items={filteredContent}
             showDropTargets={true}
             onView={(item) => {
               setPreviewItem({
@@ -680,10 +678,23 @@ function ContentApprovalsPage() {
 
               // For other status changes, proceed directly
               try {
+                // Map status to action
+                const actionMap: Record<string, "approve" | "publish" | "reject" | "unpublish"> = {
+                  approved: "approve",
+                  published: "publish",
+                  changes_requested: "reject",
+                  draft: "unpublish",
+                }
+                const action = actionMap[newStatus]
+                if (!action) {
+                  toast.error(`Cannot update status to ${newStatus}`)
+                  return
+                }
                 await updateStatus({
                   contentType: item.type as "module" | "lesson" | "quiz" | "assignment",
                   contentId: itemId,
-                  newStatus: newStatus as "draft" | "pending" | "changes_requested" | "approved" | "published",
+                  action,
+                  ...(action === "reject" ? { reason: "Status changed" } : {}),
                 })
                 toast.success(`Status updated to ${newStatus}`)
               } catch (error) {
@@ -749,7 +760,8 @@ function ContentApprovalsPage() {
                           data-state={isSelected ? "selected" : undefined}
                           className={`cursor-pointer transition-colors hover:bg-muted/50 ${isOverdue ? "border-l-4 border-l-destructive bg-destructive/5" : ""}`}
                           onClick={() => {
-                            if (item.courseId) {
+                            // Get courseId - modules/quizzes/assignments have it directly, lessons don't
+                            if (hasCourseId(item)) {
                               navigate({
                                 to: "/a/courses/$courseId",
                                 params: { courseId: item.courseId },
@@ -779,24 +791,12 @@ function ContentApprovalsPage() {
                                     </Badge>
                                   )}
                                 </div>
-                                {item.moduleName && (
-                                  <div className="mt-1 flex items-center gap-1.5 text-muted-foreground text-xs sm:hidden">
-                                    <FolderIcon className="h-3.5 w-3.5" />
-                                    <span className="truncate">{item.moduleName}</span>
-                                  </div>
-                                )}
+                                {/* Module name not available in backend response */}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="hidden sm:table-cell">
-                            {item.courseName ? (
-                              <div className="flex items-center gap-2">
-                                <AcademicCapIcon className="h-4 w-4 text-muted-foreground" />
-                                <span className="truncate text-sm">{item.courseName}</span>
-                              </div>
-                            ) : (
-                              <span className="text-muted-foreground text-sm">—</span>
-                            )}
+                            <span className="text-muted-foreground text-sm">—</span>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
                             <Badge variant="outline" className="capitalize">
@@ -847,7 +847,8 @@ function ContentApprovalsPage() {
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation()
-                                        if (item.courseId) {
+                                        // Get courseId - modules/quizzes/assignments have it directly, lessons don't
+                                        if (hasCourseId(item)) {
                                           navigate({
                                             to: "/a/courses/$courseId",
                                             params: { courseId: item.courseId },
@@ -914,7 +915,7 @@ function ContentApprovalsPage() {
         )}
       </div>
 
-      {!pendingContent.isDone && (
+      {false && (
         <div className="flex justify-center">
           <Button variant="outline" disabled>
             Load More

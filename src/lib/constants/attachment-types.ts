@@ -1,3 +1,5 @@
+import type { Doc } from "@/convex/_generated/dataModel";
+
 export const ATTACHMENT_TYPE = {
   VIDEO: "video",
   QUIZ: "quiz",
@@ -6,7 +8,8 @@ export const ATTACHMENT_TYPE = {
   RESOURCE: "resource",
 } as const;
 
-export type AttachmentType = typeof ATTACHMENT_TYPE[keyof typeof ATTACHMENT_TYPE];
+// Infer from backend schema
+export type AttachmentType = Doc<"lessonAttachments">["type"];
 
 export const ATTACHMENT_TYPE_CONFIG: Record<
   AttachmentType,

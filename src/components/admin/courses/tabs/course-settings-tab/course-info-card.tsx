@@ -32,13 +32,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { useCourseMutations } from "@/hooks/use-course-mutations"
+import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import type { Course } from "@/lib/types/course"
 import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
@@ -60,7 +61,17 @@ interface CourseInfoCardProps {
 
 export function CourseInfoCard({ course }: CourseInfoCardProps) {
   const mutations = useCourseMutations(course._id)
-  const categories = useQuery(api.admin.categories.listCategories)
+  const categories = useQuery(api.shared.categories.listAllCategories)
+
+  const normalizedCategories = useMemo(
+    () => (categories ? normalizeCategoryTree(categories) : []),
+    [categories],
+  )
+
+  const flatCategories = useMemo(
+    () => flattenCategoryTree(normalizedCategories),
+    [normalizedCategories],
+  )
 
   const [editingField, setEditingField] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -382,7 +393,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                             value={field.value}
-                            disabled={isSaving || !categories}
+                            disabled={isSaving || categories === undefined}
                           >
                             <FormControl>
                               <SelectTrigger className="h-9">
@@ -390,12 +401,12 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {!categories ? (
+                              {categories === undefined ? (
                                 <div className="flex items-center justify-center p-2">
                                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                                 </div>
                               ) : (
-                                categories.map((cat) => (
+                                flatCategories.map((cat) => (
                                   <SelectItem key={cat._id} value={cat._id} className="font-mono">
                                     {getCategoryIndentation(cat.level)}
                                     {cat.level > 1 && "└─ "}

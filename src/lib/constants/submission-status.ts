@@ -1,11 +1,13 @@
+import type { Doc } from "@/convex/_generated/dataModel";
+
 export const SUBMISSION_STATUS = {
+  DRAFT: "draft",
   SUBMITTED: "submitted",
   GRADED: "graded",
-  RETURNED: "returned",
-  LATE: "late",
 } as const;
 
-export type SubmissionStatus = typeof SUBMISSION_STATUS[keyof typeof SUBMISSION_STATUS];
+// Infer from backend schema
+export type SubmissionStatus = Doc<"assignmentSubmissions">["status"];
 
 export const SUBMISSION_STATUS_CONFIG: Record<
   SubmissionStatus,
@@ -15,6 +17,11 @@ export const SUBMISSION_STATUS_CONFIG: Record<
     description: string;
   }
 > = {
+  [SUBMISSION_STATUS.DRAFT]: {
+    variant: "secondary",
+    label: "Draft",
+    description: "Assignment submission is in draft and not yet submitted",
+  },
   [SUBMISSION_STATUS.SUBMITTED]: {
     variant: "outline",
     label: "Submitted",
@@ -24,16 +31,6 @@ export const SUBMISSION_STATUS_CONFIG: Record<
     variant: "default",
     label: "Graded",
     description: "Assignment has been graded",
-  },
-  [SUBMISSION_STATUS.RETURNED]: {
-    variant: "secondary",
-    label: "Returned",
-    description: "Assignment has been returned to student",
-  },
-  [SUBMISSION_STATUS.LATE]: {
-    variant: "destructive",
-    label: "Late",
-    description: "Assignment was submitted after the deadline",
   },
 };
 

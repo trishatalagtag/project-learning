@@ -1,6 +1,9 @@
 import { Doc, Id } from "../_generated/dataModel";
 import { MutationCtx, QueryCtx } from "../_generated/server";
-import { createUserMap, getUserByUserId } from "./auth";
+import { getUserByUserId } from "./auth";
+import { getEnrollmentCount } from "./enrollment";
+
+type EnrichmentLevel = "public" | "faculty" | "admin";
 
 /**
  * Get parent course for a module
@@ -55,168 +58,239 @@ export async function getCourseForAssignment(
 }
 
 /**
- * Enrich a single course with related data
+ * Enrich a single course with related data based on visibility level.
  */
 export async function enrichCourse(
   ctx: QueryCtx,
-  course: Doc<"courses">
-): Promise<{
-  _id: Id<"courses">;
-  _creationTime: number;
-  title: string;
-  description: string;
-  categoryId: Id<"categories">;
-  categoryName: string;
-  teacherId?: string;
-  teacherName?: string;
-  status: string;
-  enrollmentCount: number;
-  moduleCount: number;
-  isEnrollmentOpen: boolean;
-  createdAt: number;
-  updatedAt: number;
-}> {
-    const [category, teacher, enrollments, modules] = await Promise.all([
-    ctx.db.get(course.categoryId),
-    course.teacherId ? getUserByUserId(ctx, course.teacherId) : null,
-    ctx.db
-      .query("enrollments")
-      .withIndex("by_course", (q) => q.eq("courseId", course._id))
-      .collect()
-      .then((items) => items.length),
+  course: Doc<"courses">,
+  level: EnrichmentLevel = "public"
+) {
+  const category = course.categoryId ? await ctx.db.get(course.categoryId) : null;
+
+  const teacher = course.teacherId
+    ? await getUserByUserId(ctx, course.teacherId)
+    : null;
+
+  const coverImageUrl = course.coverImageId
+    ? await ctx.storage.getUrl(course.coverImageId)
+    : null;
+
+  const baseEnrichment = {
+    ...course,
+    categoryName: category?.name ?? "Uncategorized",
+    teacherName: teacher?.name,
+    coverImageUrl,
+  };
+
+  if (level === "public") {
+    return {
+      _id: baseEnrichment._id,
+      _creationTime: baseEnrichment._creationTime,
+      title: baseEnrichment.title,
+      description: baseEnrichment.description,
+      content: baseEnrichment.content,
+      categoryId: baseEnrichment.categoryId,
+      categoryName: baseEnrichment.categoryName,
+      teacherId: baseEnrichment.teacherId,
+      teacherName: baseEnrichment.teacherName,
+      coverImageUrl: baseEnrichment.coverImageUrl,
+      status: baseEnrichment.status,
+      isEnrollmentOpen: baseEnrichment.isEnrollmentOpen,
+      createdAt: baseEnrichment.createdAt,
+      updatedAt: baseEnrichment.updatedAt,
+    };
+  }
+
+  const [enrollmentCount, moduleCount] = await Promise.all([
+    getEnrollmentCount(ctx, course._id, "active"),
     ctx.db
       .query("modules")
       .withIndex("by_course", (q) => q.eq("courseId", course._id))
       .collect()
-      .then((items) => items.length),
+      .then((modules) => modules.length),
   ]);
 
+  const facultyEnrichment = {
+    ...baseEnrichment,
+    enrollmentCount,
+    moduleCount,
+  };
+
+  // Faculty level
+  if (level === "faculty") {
+    return facultyEnrichment;
+  }
+
+  // Admin level: add creator information
+  const creator = course.createdBy
+    ? await getUserByUserId(ctx, course.createdBy)
+    : null;
+
   return {
-    _id: course._id,
-    _creationTime: course._creationTime,
-    title: course.title,
-    description: course.description,
-    categoryId: course.categoryId,
-    categoryName: category?.name ?? "Unknown",
-    teacherId: course.teacherId,
-    teacherName: teacher?.name,
-    status: course.status,
-    enrollmentCount: enrollments,
-    moduleCount: modules,
-    isEnrollmentOpen: course.isEnrollmentOpen,
-    createdAt: course.createdAt,
-    updatedAt: course.updatedAt,
+    ...facultyEnrichment,
+    createdByName: creator?.name,
   };
 }
 
 /**
- * Batch enrich courses (avoids N+1 queries)
+ * Batch enrich courses efficiently (batched queries).
  */
 export async function enrichCourses(
   ctx: QueryCtx,
-  courses: Doc<"courses">[]
-): Promise<
-  Array<{
-    _id: Id<"courses">;
-    _creationTime: number;
-    title: string;
-    description: string;
-    categoryId: Id<"categories">;
-    categoryName: string;
-    teacherId?: string;
-    teacherName?: string;
-    status: string;
-    enrollmentCount: number;
-    moduleCount: number;
-    isEnrollmentOpen: boolean;
-    createdAt: number;
-    updatedAt: number;
-  }>
-> {
+  courses: Doc<"courses">[],
+  level: EnrichmentLevel = "public"
+) {
   if (courses.length === 0) return [];
 
-  // Batch load all categories
+  // Batch fetch categories
   const categoryIds = [...new Set(courses.map((c) => c.categoryId))];
   const categories = await Promise.all(categoryIds.map((id) => ctx.db.get(id)));
   const categoryMap = new Map(
-    categories.filter(Boolean).map((c) => [c!._id, c!])
+    categories.filter((c) => c !== null).map((c) => [c!._id, c!])
   );
 
-  // Batch load all teachers
-  const teacherIds = [...new Set(courses.map((c) => c.teacherId).filter((id): id is string => !!id))];
-  const teacherMap = await createUserMap(ctx, teacherIds);
+  // Batch fetch teachers
+  const teacherIds = [
+    ...new Set(courses.map((c) => c.teacherId).filter((id) => id !== undefined)),
+  ];
+  const teachers = await Promise.all(
+    teacherIds.map((userId) => getUserByUserId(ctx, userId!))
+  );
+  const teacherMap = new Map(
+    teachers.filter((t) => t !== null).map((t) => [t!._id, t!])
+  );
 
-  // Batch load enrollments and modules for all courses (using collect().length for performance)
-  const courseIds = courses.map((c) => c._id);
-  const [enrollmentCounts, moduleCounts] = await Promise.all([
-    Promise.all(
-      courseIds.map((id) =>
-        ctx.db
-          .query("enrollments")
-          .withIndex("by_course", (q) => q.eq("courseId", id))
-          .collect()
-          .then((items) => items.length)
-      )
-    ),
-    Promise.all(
-      courseIds.map((id) =>
-        ctx.db
-          .query("modules")
-          .withIndex("by_course", (q) => q.eq("courseId", id))
-          .collect()
-          .then((items) => items.length)
-      )
-    ),
-  ]);
+  // Batch fetch cover images
+  const coverImageIds = courses
+    .map((c) => c.coverImageId)
+    .filter((id) => id !== undefined) as Id<"_storage">[];
+  const coverImageUrls = await Promise.all(
+    coverImageIds.map((id) => ctx.storage.getUrl(id))
+  );
+  const coverImageMap = new Map(
+    coverImageIds.map((id, idx) => [id, coverImageUrls[idx]])
+  );
 
-  // Map results
-  return courses.map((course, idx) => ({
-    _id: course._id,
-    _creationTime: course._creationTime,
-    title: course.title,
-    description: course.description,
-    categoryId: course.categoryId,
-    categoryName: categoryMap.get(course.categoryId)?.name ?? "Unknown",
-    teacherId: course.teacherId,
-    teacherName: course.teacherId ? teacherMap.get(course.teacherId)?.name : undefined,
-    status: course.status,
-    enrollmentCount: enrollmentCounts[idx],
-    moduleCount: moduleCounts[idx],
-    isEnrollmentOpen: course.isEnrollmentOpen,
-    createdAt: course.createdAt,
-    updatedAt: course.updatedAt,
-  }));
+  // For faculty/admin: get counts
+  let enrollmentCounts: Map<Id<"courses">, number> | undefined;
+  let moduleCounts: Map<Id<"courses">, number> | undefined;
+
+  if (level === "faculty" || level === "admin") {
+    const courseIds = courses.map((c) => c._id);
+
+    const [allEnrollments, allModules] = await Promise.all([
+      Promise.all(
+        courseIds.map((courseId) => getEnrollmentCount(ctx, courseId, "active"))
+      ),
+      Promise.all(
+        courseIds.map((courseId) =>
+          ctx.db
+            .query("modules")
+            .withIndex("by_course", (q) => q.eq("courseId", courseId))
+            .collect()
+        )
+      ),
+    ]);
+
+    enrollmentCounts = new Map(courseIds.map((id, idx) => [id, allEnrollments[idx]]));
+    moduleCounts = new Map(courseIds.map((id, idx) => [id, allModules[idx].length]));
+  }
+
+  // For admin: get creators
+  let creatorMap: Map<string, any> | undefined;
+  if (level === "admin") {
+    const creatorIds = [...new Set(courses.map((c) => c.createdBy))];
+    const creators = await Promise.all(
+      creatorIds.map((userId) => getUserByUserId(ctx, userId))
+    );
+    creatorMap = new Map(
+      creators.filter((c) => c !== null).map((c) => [c!._id, c!])
+    );
+  }
+
+  // Enrich each course
+  return courses.map((course) => {
+    const category = categoryMap.get(course.categoryId);
+    const teacher = course.teacherId ? teacherMap.get(course.teacherId) : undefined;
+    const coverImageUrl = course.coverImageId
+      ? coverImageMap.get(course.coverImageId) ?? null
+      : null;
+
+    const base: any = {
+      ...course,
+      categoryName: category?.name ?? "Uncategorized",
+      teacherName: teacher?.name,
+      coverImageUrl,
+    };
+
+    if (level === "public") {
+      return {
+        _id: base._id,
+        _creationTime: base._creationTime,
+        title: base.title,
+        description: base.description,
+        content: base.content,
+        categoryId: base.categoryId,
+        categoryName: base.categoryName,
+        teacherId: base.teacherId,
+        teacherName: base.teacherName,
+        coverImageUrl: base.coverImageUrl,
+        status: base.status,
+        isEnrollmentOpen: base.isEnrollmentOpen,
+        createdAt: base.createdAt,
+        updatedAt: base.updatedAt,
+      };
+    }
+
+    if (level === "faculty" || level === "admin") {
+      base.enrollmentCount = enrollmentCounts!.get(course._id) ?? 0;
+      base.moduleCount = moduleCounts!.get(course._id) ?? 0;
+    }
+
+    if (level === "admin") {
+      const creator = creatorMap!.get(course.createdBy);
+      base.createdByName = creator?.name;
+    }
+
+    // For admin level, explicitly return only validated fields (no content)
+    if (level === "admin") {
+      return {
+        _id: base._id,
+        _creationTime: base._creationTime,
+        title: base.title,
+        description: base.description,
+        categoryId: base.categoryId,
+        categoryName: base.categoryName,
+        teacherId: base.teacherId,
+        teacherName: base.teacherName,
+        status: base.status,
+        enrollmentCount: base.enrollmentCount,
+        moduleCount: base.moduleCount,
+        isEnrollmentOpen: base.isEnrollmentOpen,
+        createdAt: base.createdAt,
+        updatedAt: base.updatedAt,
+      };
+    }
+
+    // For faculty level, return base (which includes enrollmentCount and moduleCount)
+    return base;
+  });
 }
 
 /**
  * Generate unique enrollment code
  */
-export async function generateEnrollmentCode(
-  ctx: QueryCtx | MutationCtx
-): Promise<string> {
-  let attempts = 0;
-  const maxAttempts = 10;
-
-  while (attempts < maxAttempts) {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    const existing = await ctx.db
-      .query("courses")
-      .withIndex("by_enrollment_code", (q) => q.eq("enrollmentCode", code))
-      .first();
-
-    if (!existing) {
-      return code;
-    }
-
-    attempts++;
+export function generateEnrollmentCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-
-  throw new Error("Failed to generate unique enrollment code");
+  return code;
 }
 
 /**
- * Check if a course is available for enrollment
+ * Check if a course is available for enrollment (deprecated - use enrollment.ts)
  */
 export function isCourseAvailableForEnrollment(
   course: Doc<"courses">
@@ -228,7 +302,7 @@ export function isCourseAvailableForEnrollment(
 }
 
 /**
- * Get course progress for a user
+ * Get course progress for a user (deprecated - use progress.ts)
  */
 export async function getCourseProgress(
   ctx: QueryCtx,

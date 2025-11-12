@@ -70,7 +70,7 @@ export const adminSidebarConfig: SidebarConfig = {
             },
             {
               label: "Add User",
-              href: "/a/users/new",
+              href: "/a/users/create",
               icon: UserPlusIcon,
             },
           ],
@@ -93,6 +93,17 @@ export const adminSidebarConfig: SidebarConfig = {
               label: "Organize",
               href: "/a/categories/organize",
               icon: TagIcon,
+            },
+          ],
+        },
+        {
+          label: "Content",
+          icon: FolderIcon,
+          children: [
+            {
+              label: "Browse All Content",
+              href: "/a/content",
+              icon: ListBulletIcon,
             },
           ],
         },

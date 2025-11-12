@@ -23,7 +23,7 @@ function CourseLayout() {
     courseId: courseId as Id<"courses">
   });
   const modules = useQuery(
-    api.faculty.navigation.getModulesWithLessons,
+    api.shared.content.getModulesWithLessons,
     course ? { courseId: courseId as Id<"courses"> } : "skip"
   );
 

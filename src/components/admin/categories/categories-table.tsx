@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "@/convex/_generated/api"
+import { flattenCategoryTree, normalizeCategoryTree, type NormalizedCategoryNode } from "@/lib/categories"
 import {
     FolderIcon,
     MagnifyingGlassIcon,
@@ -41,10 +42,10 @@ import { useDebounce } from "@uidotdev/usehooks"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { CategoriesOrganizeView } from "./categories-organize-view"
 import { CategoryDeleteDialog } from "./category-delete-dialog"
 import { CategoryFormDialog } from "./category-form-dialog"
 import { type Category, createColumns } from "./columns"
-import { CategoriesOrganizeView } from "./categories-organize-view"
 
 export function CategoriesTable() {
     const navigate = useNavigate()
@@ -77,17 +78,14 @@ export function CategoriesTable() {
     const [deletingCategory, setDeletingCategory] = useState<Category | null>(null)
     const [isFormOpen, setIsFormOpen] = useState(false)
 
-    const categories = useQuery(api.admin.categories.listCategories)
-    const orderedCategories = useMemo(
-        () =>
-            categories
-                ? [...categories].sort((a, b) => {
-                    if (a.level !== b.level) return a.level - b.level
-                    return a.order - b.order
-                })
-                : [],
+    const categories = useQuery(api.shared.categories.listAllCategories)
+
+    const normalizedTree = useMemo(
+        () => (categories ? normalizeCategoryTree(categories) : []),
         [categories],
     )
+
+    const orderedCategories = useMemo(() => flattenCategoryTree(normalizedTree), [normalizedTree])
 
     const updateSearch = (updates: Partial<typeof search>) => {
         navigate({
@@ -98,9 +96,9 @@ export function CategoriesTable() {
     }
 
     const filteredData = useMemo(() => {
-        if (!categories) return []
+        if (normalizedTree.length === 0) return []
 
-        let filtered = [...orderedCategories]
+        let filtered: NormalizedCategoryNode[] = [...orderedCategories]
 
         // Search filter
         if (debouncedSearch) {
@@ -133,9 +131,9 @@ export function CategoriesTable() {
                 return sortOrder === "asc" ? a.order - b.order : b.order - a.order
             }
             if (sortBy === "courseCount") {
-                return sortOrder === "asc"
-                    ? a.courseCount - b.courseCount
-                    : b.courseCount - a.courseCount
+                const aCount = a.courseCount ?? 0
+                const bCount = b.courseCount ?? 0
+                return sortOrder === "asc" ? aCount - bCount : bCount - aCount
             }
             if (sortBy === "createdAt") {
                 return sortOrder === "asc"
@@ -146,7 +144,7 @@ export function CategoriesTable() {
         })
 
         return filtered
-    }, [categories, debouncedSearch, level, sortBy, sortOrder])
+    }, [orderedCategories, debouncedSearch, level, sortBy, sortOrder])
 
     const paginatedData = useMemo(() => {
         const start = pageIndex * pageSize
@@ -215,7 +213,7 @@ export function CategoriesTable() {
         )
     }
 
-    if (categories.length === 0) {
+    if (normalizedTree.length === 0) {
         return (
             <div className="container mx-auto py-10">
                 <Empty>

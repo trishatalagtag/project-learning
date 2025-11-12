@@ -1,5 +1,9 @@
 import { v } from "convex/values";
+import { getUsersByUserIds } from "../lib/auth";
 import { facultyQuery } from "../lib/functions";
+import {
+  calculateCoursePerformance
+} from "../lib/progress";
 
 /**
  * Get overall course progress for all learners
@@ -45,114 +49,17 @@ export const getCourseProgress = facultyQuery({
       .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
       .collect();
 
-    // Get course content counts
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .collect();
+    // Build progress for each learner using shared helper
+    const enrollmentUserIds = enrollments.map((e) => e.userId);
+    const users = await getUsersByUserIds(ctx, enrollmentUserIds);
+    const userMap = new Map(users.filter(Boolean).map((u: any) => [u.userId, u]));
 
-    let totalLessons = 0;
-    for (const module of modules) {
-      const lessons = await ctx.db
-        .query("lessons")
-        .withIndex("by_module", (q) => q.eq("moduleId", module._id))
-        .collect();
-      totalLessons += lessons.length;
-    }
-
-    const quizzes = await ctx.db
-      .query("quizzes")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .filter((q) => q.eq(q.field("status"), "published"))
-      .collect();
-
-    const assignments = await ctx.db
-      .query("assignments")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .filter((q) => q.eq(q.field("status"), "published"))
-      .collect();
-
-    // Build progress for each learner
     const progressData = await Promise.all(
       enrollments.map(async (enrollment) => {
-        const user = await ctx.db
-          .query("users" as any)
-          .filter((q: any) => q.eq(q.field("_id"), enrollment.userId))
-          .first();
+        const user = userMap.get(enrollment.userId);
 
-        // Get lesson progress
-        const lessonProgress = await ctx.db
-          .query("lessonProgress")
-          .withIndex("by_user", (q) => q.eq("userId", enrollment.userId))
-          .filter((q) => q.eq(q.field("completed"), true))
-          .collect();
-
-        // Get quiz attempts
-        const quizAttempts = await ctx.db
-          .query("quizAttempts")
-          .withIndex("by_user", (q) => q.eq("userId", enrollment.userId))
-          .collect();
-
-        // Filter quiz attempts to only those for this course's quizzes
-        const courseQuizIds = quizzes.map((q) => q._id);
-        const courseQuizAttempts = quizAttempts.filter((a) =>
-          courseQuizIds.includes(a.quizId)
-        );
-
-        // Get unique quizzes attempted
-        const attemptedQuizIds = new Set(courseQuizAttempts.map((a) => a.quizId));
-
-        // Calculate average quiz score
-        let averageQuizScore: number | undefined;
-        if (courseQuizAttempts.length > 0) {
-          const totalScore = courseQuizAttempts.reduce((sum, a) => sum + a.percentage, 0);
-          averageQuizScore = totalScore / courseQuizAttempts.length;
-        }
-
-        // Get assignment submissions
-        const submissions = await ctx.db
-          .query("assignmentSubmissions")
-          .withIndex("by_user", (q) => q.eq("userId", enrollment.userId))
-          .collect();
-
-        // Filter submissions to only those for this course's assignments
-        const courseAssignmentIds = assignments.map((a) => a._id);
-        const courseSubmissions = submissions.filter((s) =>
-          courseAssignmentIds.includes(s.assignmentId)
-        );
-
-        const submittedSubmissions = courseSubmissions.filter(
-          (s) => s.status === "submitted" || s.status === "graded"
-        );
-        const gradedSubmissions = courseSubmissions.filter((s) => s.status === "graded");
-
-        // Calculate average assignment score
-        let averageAssignmentScore: number | undefined;
-        if (gradedSubmissions.length > 0) {
-          // Need to get max points for each assignment to calculate percentages
-          const scores = await Promise.all(
-            gradedSubmissions.map(async (s) => {
-              const assignment = await ctx.db.get(s.assignmentId);
-              if (!assignment || s.grade === undefined) return 0;
-              return (s.grade / assignment.maxPoints) * 100;
-            })
-          );
-          const totalScore = scores.reduce((sum, score) => sum + score, 0);
-          averageAssignmentScore = totalScore / scores.length;
-        }
-
-        // Calculate overall progress (simple average of lesson, quiz, assignment progress)
-        const lessonPercentage =
-          totalLessons > 0 ? (lessonProgress.length / totalLessons) * 100 : 0;
-        const quizPercentage =
-          quizzes.length > 0 ? (attemptedQuizIds.size / quizzes.length) * 100 : 0;
-        const assignmentPercentage =
-          assignments.length > 0
-            ? (submittedSubmissions.length / assignments.length) * 100
-            : 0;
-
-        const overallProgress =
-          (lessonPercentage + quizPercentage + assignmentPercentage) / 3;
+        // Use shared progress calculation helper
+        const performance = await calculateCoursePerformance(ctx, enrollment.userId, args.courseId);
 
         return {
           userId: enrollment.userId,
@@ -160,21 +67,21 @@ export const getCourseProgress = facultyQuery({
           userEmail: user?.email ?? "Unknown",
           enrolledAt: enrollment.enrolledAt,
           enrollmentStatus: enrollment.status,
-          completedLessons: lessonProgress.length,
-          totalLessons,
-          lessonProgress: Math.round(lessonPercentage * 100) / 100,
-          completedQuizzes: attemptedQuizIds.size,
-          totalQuizzes: quizzes.length,
-          averageQuizScore: averageQuizScore
-            ? Math.round(averageQuizScore * 100) / 100
+          completedLessons: performance.lessons.completed,
+          totalLessons: performance.lessons.total,
+          lessonProgress: Math.round(performance.lessons.completionPercentage * 100) / 100,
+          completedQuizzes: performance.quizzes.completed,
+          totalQuizzes: performance.quizzes.total,
+          averageQuizScore: performance.quizzes.averageScore
+            ? Math.round(performance.quizzes.averageScore * 100) / 100
             : undefined,
-          submittedAssignments: submittedSubmissions.length,
-          totalAssignments: assignments.length,
-          gradedAssignments: gradedSubmissions.length,
-          averageAssignmentScore: averageAssignmentScore
-            ? Math.round(averageAssignmentScore * 100) / 100
+          submittedAssignments: performance.assignments.completed,
+          totalAssignments: performance.assignments.total,
+          gradedAssignments: performance.assignments.completed,
+          averageAssignmentScore: performance.assignments.averageGrade
+            ? Math.round(performance.assignments.averageGrade * 100) / 100
             : undefined,
-          overallProgress: Math.round(overallProgress * 100) / 100,
+          overallProgress: Math.round(performance.overallProgress * 100) / 100,
         };
       })
     );

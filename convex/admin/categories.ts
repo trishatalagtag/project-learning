@@ -1,63 +1,5 @@
 import { v } from "convex/values";
-import { adminMutation, adminQuery } from "../lib/functions";
-
-/**
- * List all categories
- * Admin only
- */
-export const listCategories = adminQuery({
-  args: {},
-  returns: v.array(
-    v.object({
-      _id: v.id("categories"),
-      _creationTime: v.number(),
-      name: v.string(),
-      description: v.string(),
-      level: v.number(),
-      order: v.number(),
-      parentId: v.optional(v.id("categories")),
-      parentName: v.optional(v.string()),
-      courseCount: v.number(),
-      createdAt: v.number(),
-    })
-  ),
-  handler: async (ctx) => {
-    const categories = await ctx.db.query("categories").collect();
-
-    const enrichedCategories = await Promise.all(
-      categories.map(async (category) => {
-        let parentName: string | undefined;
-        if (category.parentId) {
-          const parent = await ctx.db.get(category.parentId);
-          parentName = parent?.name;
-        }
-
-        const courses = await ctx.db
-          .query("courses")
-          .withIndex("by_category", (q) => q.eq("categoryId", category._id))
-          .collect();
-
-        return {
-          _id: category._id,
-          _creationTime: category._creationTime,
-          name: category.name,
-          description: category.description,
-          level: category.level,
-          order: category.order,
-          parentId: category.parentId,
-          parentName,
-          courseCount: courses.length,
-          createdAt: category.createdAt,
-        };
-      })
-    );
-
-    return enrichedCategories.sort((a, b) => {
-      if (a.level !== b.level) return a.level - b.level;
-      return a.order - b.order;
-    });
-  },
-});
+import { adminMutation } from "../lib/functions";
 
 /**
  * Create new category
@@ -140,7 +82,7 @@ async function cascadeChildrenLevel(
 
   for (const child of children) {
     const childNewLevel = child.level - oldLevel + newLevel;
-    
+
     if (childNewLevel < 1 || childNewLevel > 3) {
       continue;
     }

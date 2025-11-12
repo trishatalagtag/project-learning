@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/table"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import { cn } from "@/lib/utils"
 import {
@@ -96,7 +97,17 @@ export function CoursesTable() {
   const debouncedSearch = useDebounce(q, 300)
 
   // Fetch categories for filter
-  const categories = useQuery(api.admin.categories.listCategories)
+  const categories = useQuery(api.shared.categories.listAllCategories)
+
+  const normalizedCategories = useMemo(
+    () => (categories ? normalizeCategoryTree(categories) : []),
+    [categories],
+  )
+
+  const flatCategories = useMemo(
+    () => flattenCategoryTree(normalizedCategories),
+    [normalizedCategories],
+  )
 
   // Fetch faculty for filter
   const faculty = useQuery(api.admin.users.listUsersByRole, {
@@ -311,13 +322,19 @@ export function CoursesTable() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat._id} value={cat._id}>
-                  {"\u00A0\u00A0".repeat(cat.level - 1)}
-                  {cat.level > 1 && "└─ "}
-                  {cat.name}
-                </SelectItem>
-              ))}
+              {categories === undefined ? (
+                <div className="flex items-center justify-center p-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                flatCategories.map((cat) => (
+                  <SelectItem key={cat._id} value={cat._id}>
+                    {"\u00A0\u00A0".repeat(cat.level - 1)}
+                    {cat.level > 1 && "└─ "}
+                    {cat.name}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
 

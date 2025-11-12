@@ -28,14 +28,21 @@ import { Route as AuthenticatedAdminACoursesRouteImport } from './pages/_authent
 import { Route as AuthenticatedAdminAContentApprovalsRouteImport } from './pages/_authenticated._admin.a/content-approvals'
 import { Route as AuthenticatedAdminAUsersIndexRouteImport } from './pages/_authenticated._admin.a/users/index'
 import { Route as AuthenticatedAdminACoursesIndexRouteImport } from './pages/_authenticated._admin.a/courses/index'
+import { Route as AuthenticatedAdminAContentIndexRouteImport } from './pages/_authenticated._admin.a/content/index'
 import { Route as AuthenticatedAdminAContentApprovalsIndexRouteImport } from './pages/_authenticated._admin.a/content-approvals/index'
 import { Route as AuthenticatedAdminACategoriesIndexRouteImport } from './pages/_authenticated._admin.a/categories/index'
+import { Route as AuthenticatedAdminAAnalyticsIndexRouteImport } from './pages/_authenticated._admin.a/analytics/index'
+import { Route as AuthenticatedAdminAUsersCreateRouteImport } from './pages/_authenticated._admin.a/users/create'
 import { Route as AuthenticatedAdminAUsersUserIdRouteImport } from './pages/_authenticated._admin.a/users/$userId'
 import { Route as AuthenticatedAdminACoursesNewRouteImport } from './pages/_authenticated._admin.a/courses/new'
 import { Route as AuthenticatedAdminACoursesCourseIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId'
 import { Route as AuthenticatedAdminACategoriesOrganizeRouteImport } from './pages/_authenticated._admin.a/categories/organize'
 import { Route as AuthenticatedAdminACategoriesNewRouteImport } from './pages/_authenticated._admin.a/categories/new'
+import { Route as AuthenticatedAdminAAnalyticsReportsRouteImport } from './pages/_authenticated._admin.a/analytics/reports'
+import { Route as AuthenticatedAdminAAnalyticsEnrollmentsRouteImport } from './pages/_authenticated._admin.a/analytics/enrollments'
+import { Route as AuthenticatedAdminAAnalyticsCoursesRouteImport } from './pages/_authenticated._admin.a/analytics/courses'
 import { Route as AuthenticatedCCourseIdMModuleIdIndexRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.index'
+import { Route as AuthenticatedAdminAContentContentTypeContentIdRouteImport } from './pages/_authenticated._admin.a/content/$contentType.$contentId'
 import { Route as AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.lessons.$lessonId'
 
 const PublicRoute = PublicRouteImport.update({
@@ -138,6 +145,12 @@ const AuthenticatedAdminACoursesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminACoursesRoute,
   } as any)
+const AuthenticatedAdminAContentIndexRoute =
+  AuthenticatedAdminAContentIndexRouteImport.update({
+    id: '/content/',
+    path: '/content/',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
 const AuthenticatedAdminAContentApprovalsIndexRoute =
   AuthenticatedAdminAContentApprovalsIndexRouteImport.update({
     id: '/',
@@ -149,6 +162,18 @@ const AuthenticatedAdminACategoriesIndexRoute =
     id: '/categories/',
     path: '/categories/',
     getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminAAnalyticsIndexRoute =
+  AuthenticatedAdminAAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminAUsersCreateRoute =
+  AuthenticatedAdminAUsersCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => AuthenticatedAdminAUsersRoute,
   } as any)
 const AuthenticatedAdminAUsersUserIdRoute =
   AuthenticatedAdminAUsersUserIdRouteImport.update({
@@ -180,11 +205,35 @@ const AuthenticatedAdminACategoriesNewRoute =
     path: '/categories/new',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
+const AuthenticatedAdminAAnalyticsReportsRoute =
+  AuthenticatedAdminAAnalyticsReportsRouteImport.update({
+    id: '/analytics/reports',
+    path: '/analytics/reports',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminAAnalyticsEnrollmentsRoute =
+  AuthenticatedAdminAAnalyticsEnrollmentsRouteImport.update({
+    id: '/analytics/enrollments',
+    path: '/analytics/enrollments',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminAAnalyticsCoursesRoute =
+  AuthenticatedAdminAAnalyticsCoursesRouteImport.update({
+    id: '/analytics/courses',
+    path: '/analytics/courses',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
 const AuthenticatedCCourseIdMModuleIdIndexRoute =
   AuthenticatedCCourseIdMModuleIdIndexRouteImport.update({
     id: '/m/$moduleId/',
     path: '/m/$moduleId/',
     getParentRoute: () => AuthenticatedCCourseIdRoute,
+  } as any)
+const AuthenticatedAdminAContentContentTypeContentIdRoute =
+  AuthenticatedAdminAContentContentTypeContentIdRouteImport.update({
+    id: '/content/$contentType/$contentId',
+    path: '/content/$contentType/$contentId',
+    getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
 const AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute =
   AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport.update({
@@ -209,15 +258,22 @@ export interface FileRoutesByFullPath {
   '/a/users': typeof AuthenticatedAdminAUsersRouteWithChildren
   '/a/': typeof AuthenticatedAdminAIndexRoute
   '/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
+  '/a/analytics/courses': typeof AuthenticatedAdminAAnalyticsCoursesRoute
+  '/a/analytics/enrollments': typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  '/a/analytics/reports': typeof AuthenticatedAdminAAnalyticsReportsRoute
   '/a/categories/new': typeof AuthenticatedAdminACategoriesNewRoute
   '/a/categories/organize': typeof AuthenticatedAdminACategoriesOrganizeRoute
   '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
   '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
   '/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
+  '/a/users/create': typeof AuthenticatedAdminAUsersCreateRoute
+  '/a/analytics': typeof AuthenticatedAdminAAnalyticsIndexRoute
   '/a/categories': typeof AuthenticatedAdminACategoriesIndexRoute
   '/a/content-approvals/': typeof AuthenticatedAdminAContentApprovalsIndexRoute
+  '/a/content': typeof AuthenticatedAdminAContentIndexRoute
   '/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
   '/a/users/': typeof AuthenticatedAdminAUsersIndexRoute
+  '/a/content/$contentType/$contentId': typeof AuthenticatedAdminAContentContentTypeContentIdRoute
   '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
@@ -232,15 +288,22 @@ export interface FileRoutesByTo {
   '/courses': typeof PublicCoursesIndexRoute
   '/a': typeof AuthenticatedAdminAIndexRoute
   '/c/$courseId': typeof AuthenticatedCCourseIdIndexRoute
+  '/a/analytics/courses': typeof AuthenticatedAdminAAnalyticsCoursesRoute
+  '/a/analytics/enrollments': typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  '/a/analytics/reports': typeof AuthenticatedAdminAAnalyticsReportsRoute
   '/a/categories/new': typeof AuthenticatedAdminACategoriesNewRoute
   '/a/categories/organize': typeof AuthenticatedAdminACategoriesOrganizeRoute
   '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
   '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
   '/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
+  '/a/users/create': typeof AuthenticatedAdminAUsersCreateRoute
+  '/a/analytics': typeof AuthenticatedAdminAAnalyticsIndexRoute
   '/a/categories': typeof AuthenticatedAdminACategoriesIndexRoute
   '/a/content-approvals': typeof AuthenticatedAdminAContentApprovalsIndexRoute
+  '/a/content': typeof AuthenticatedAdminAContentIndexRoute
   '/a/courses': typeof AuthenticatedAdminACoursesIndexRoute
   '/a/users': typeof AuthenticatedAdminAUsersIndexRoute
+  '/a/content/$contentType/$contentId': typeof AuthenticatedAdminAContentContentTypeContentIdRoute
   '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
@@ -263,15 +326,22 @@ export interface FileRoutesById {
   '/_authenticated/_admin/a/users': typeof AuthenticatedAdminAUsersRouteWithChildren
   '/_authenticated/_admin/a/': typeof AuthenticatedAdminAIndexRoute
   '/_authenticated/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
+  '/_authenticated/_admin/a/analytics/courses': typeof AuthenticatedAdminAAnalyticsCoursesRoute
+  '/_authenticated/_admin/a/analytics/enrollments': typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  '/_authenticated/_admin/a/analytics/reports': typeof AuthenticatedAdminAAnalyticsReportsRoute
   '/_authenticated/_admin/a/categories/new': typeof AuthenticatedAdminACategoriesNewRoute
   '/_authenticated/_admin/a/categories/organize': typeof AuthenticatedAdminACategoriesOrganizeRoute
   '/_authenticated/_admin/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
   '/_authenticated/_admin/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
   '/_authenticated/_admin/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
+  '/_authenticated/_admin/a/users/create': typeof AuthenticatedAdminAUsersCreateRoute
+  '/_authenticated/_admin/a/analytics/': typeof AuthenticatedAdminAAnalyticsIndexRoute
   '/_authenticated/_admin/a/categories/': typeof AuthenticatedAdminACategoriesIndexRoute
   '/_authenticated/_admin/a/content-approvals/': typeof AuthenticatedAdminAContentApprovalsIndexRoute
+  '/_authenticated/_admin/a/content/': typeof AuthenticatedAdminAContentIndexRoute
   '/_authenticated/_admin/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
   '/_authenticated/_admin/a/users/': typeof AuthenticatedAdminAUsersIndexRoute
+  '/_authenticated/_admin/a/content/$contentType/$contentId': typeof AuthenticatedAdminAContentContentTypeContentIdRoute
   '/_authenticated/c/$courseId/m/$moduleId/': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
   '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
 }
@@ -293,15 +363,22 @@ export interface FileRouteTypes {
     | '/a/users'
     | '/a/'
     | '/c/$courseId/'
+    | '/a/analytics/courses'
+    | '/a/analytics/enrollments'
+    | '/a/analytics/reports'
     | '/a/categories/new'
     | '/a/categories/organize'
     | '/a/courses/$courseId'
     | '/a/courses/new'
     | '/a/users/$userId'
+    | '/a/users/create'
+    | '/a/analytics'
     | '/a/categories'
     | '/a/content-approvals/'
+    | '/a/content'
     | '/a/courses/'
     | '/a/users/'
+    | '/a/content/$contentType/$contentId'
     | '/c/$courseId/m/$moduleId'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
   fileRoutesByTo: FileRoutesByTo
@@ -316,15 +393,22 @@ export interface FileRouteTypes {
     | '/courses'
     | '/a'
     | '/c/$courseId'
+    | '/a/analytics/courses'
+    | '/a/analytics/enrollments'
+    | '/a/analytics/reports'
     | '/a/categories/new'
     | '/a/categories/organize'
     | '/a/courses/$courseId'
     | '/a/courses/new'
     | '/a/users/$userId'
+    | '/a/users/create'
+    | '/a/analytics'
     | '/a/categories'
     | '/a/content-approvals'
+    | '/a/content'
     | '/a/courses'
     | '/a/users'
+    | '/a/content/$contentType/$contentId'
     | '/c/$courseId/m/$moduleId'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
   id:
@@ -346,15 +430,22 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/a/users'
     | '/_authenticated/_admin/a/'
     | '/_authenticated/c/$courseId/'
+    | '/_authenticated/_admin/a/analytics/courses'
+    | '/_authenticated/_admin/a/analytics/enrollments'
+    | '/_authenticated/_admin/a/analytics/reports'
     | '/_authenticated/_admin/a/categories/new'
     | '/_authenticated/_admin/a/categories/organize'
     | '/_authenticated/_admin/a/courses/$courseId'
     | '/_authenticated/_admin/a/courses/new'
     | '/_authenticated/_admin/a/users/$userId'
+    | '/_authenticated/_admin/a/users/create'
+    | '/_authenticated/_admin/a/analytics/'
     | '/_authenticated/_admin/a/categories/'
     | '/_authenticated/_admin/a/content-approvals/'
+    | '/_authenticated/_admin/a/content/'
     | '/_authenticated/_admin/a/courses/'
     | '/_authenticated/_admin/a/users/'
+    | '/_authenticated/_admin/a/content/$contentType/$contentId'
     | '/_authenticated/c/$courseId/m/$moduleId/'
     | '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId'
   fileRoutesById: FileRoutesById
@@ -499,6 +590,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminACoursesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminACoursesRoute
     }
+    '/_authenticated/_admin/a/content/': {
+      id: '/_authenticated/_admin/a/content/'
+      path: '/content'
+      fullPath: '/a/content'
+      preLoaderRoute: typeof AuthenticatedAdminAContentIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
     '/_authenticated/_admin/a/content-approvals/': {
       id: '/_authenticated/_admin/a/content-approvals/'
       path: '/'
@@ -512,6 +610,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/a/categories'
       preLoaderRoute: typeof AuthenticatedAdminACategoriesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/analytics/': {
+      id: '/_authenticated/_admin/a/analytics/'
+      path: '/analytics'
+      fullPath: '/a/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAAnalyticsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/users/create': {
+      id: '/_authenticated/_admin/a/users/create'
+      path: '/create'
+      fullPath: '/a/users/create'
+      preLoaderRoute: typeof AuthenticatedAdminAUsersCreateRouteImport
+      parentRoute: typeof AuthenticatedAdminAUsersRoute
     }
     '/_authenticated/_admin/a/users/$userId': {
       id: '/_authenticated/_admin/a/users/$userId'
@@ -548,12 +660,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminACategoriesNewRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
+    '/_authenticated/_admin/a/analytics/reports': {
+      id: '/_authenticated/_admin/a/analytics/reports'
+      path: '/analytics/reports'
+      fullPath: '/a/analytics/reports'
+      preLoaderRoute: typeof AuthenticatedAdminAAnalyticsReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/analytics/enrollments': {
+      id: '/_authenticated/_admin/a/analytics/enrollments'
+      path: '/analytics/enrollments'
+      fullPath: '/a/analytics/enrollments'
+      preLoaderRoute: typeof AuthenticatedAdminAAnalyticsEnrollmentsRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/analytics/courses': {
+      id: '/_authenticated/_admin/a/analytics/courses'
+      path: '/analytics/courses'
+      fullPath: '/a/analytics/courses'
+      preLoaderRoute: typeof AuthenticatedAdminAAnalyticsCoursesRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
     '/_authenticated/c/$courseId/m/$moduleId/': {
       id: '/_authenticated/c/$courseId/m/$moduleId/'
       path: '/m/$moduleId'
       fullPath: '/c/$courseId/m/$moduleId'
       preLoaderRoute: typeof AuthenticatedCCourseIdMModuleIdIndexRouteImport
       parentRoute: typeof AuthenticatedCCourseIdRoute
+    }
+    '/_authenticated/_admin/a/content/$contentType/$contentId': {
+      id: '/_authenticated/_admin/a/content/$contentType/$contentId'
+      path: '/content/$contentType/$contentId'
+      fullPath: '/a/content/$contentType/$contentId'
+      preLoaderRoute: typeof AuthenticatedAdminAContentContentTypeContentIdRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
     }
     '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId': {
       id: '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId'
@@ -601,12 +741,14 @@ const AuthenticatedAdminACoursesRouteWithChildren =
 
 interface AuthenticatedAdminAUsersRouteChildren {
   AuthenticatedAdminAUsersUserIdRoute: typeof AuthenticatedAdminAUsersUserIdRoute
+  AuthenticatedAdminAUsersCreateRoute: typeof AuthenticatedAdminAUsersCreateRoute
   AuthenticatedAdminAUsersIndexRoute: typeof AuthenticatedAdminAUsersIndexRoute
 }
 
 const AuthenticatedAdminAUsersRouteChildren: AuthenticatedAdminAUsersRouteChildren =
   {
     AuthenticatedAdminAUsersUserIdRoute: AuthenticatedAdminAUsersUserIdRoute,
+    AuthenticatedAdminAUsersCreateRoute: AuthenticatedAdminAUsersCreateRoute,
     AuthenticatedAdminAUsersIndexRoute: AuthenticatedAdminAUsersIndexRoute,
   }
 
@@ -620,9 +762,15 @@ interface AuthenticatedAdminARouteChildren {
   AuthenticatedAdminACoursesRoute: typeof AuthenticatedAdminACoursesRouteWithChildren
   AuthenticatedAdminAUsersRoute: typeof AuthenticatedAdminAUsersRouteWithChildren
   AuthenticatedAdminAIndexRoute: typeof AuthenticatedAdminAIndexRoute
+  AuthenticatedAdminAAnalyticsCoursesRoute: typeof AuthenticatedAdminAAnalyticsCoursesRoute
+  AuthenticatedAdminAAnalyticsEnrollmentsRoute: typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  AuthenticatedAdminAAnalyticsReportsRoute: typeof AuthenticatedAdminAAnalyticsReportsRoute
   AuthenticatedAdminACategoriesNewRoute: typeof AuthenticatedAdminACategoriesNewRoute
   AuthenticatedAdminACategoriesOrganizeRoute: typeof AuthenticatedAdminACategoriesOrganizeRoute
+  AuthenticatedAdminAAnalyticsIndexRoute: typeof AuthenticatedAdminAAnalyticsIndexRoute
   AuthenticatedAdminACategoriesIndexRoute: typeof AuthenticatedAdminACategoriesIndexRoute
+  AuthenticatedAdminAContentIndexRoute: typeof AuthenticatedAdminAContentIndexRoute
+  AuthenticatedAdminAContentContentTypeContentIdRoute: typeof AuthenticatedAdminAContentContentTypeContentIdRoute
 }
 
 const AuthenticatedAdminARouteChildren: AuthenticatedAdminARouteChildren = {
@@ -631,11 +779,22 @@ const AuthenticatedAdminARouteChildren: AuthenticatedAdminARouteChildren = {
   AuthenticatedAdminACoursesRoute: AuthenticatedAdminACoursesRouteWithChildren,
   AuthenticatedAdminAUsersRoute: AuthenticatedAdminAUsersRouteWithChildren,
   AuthenticatedAdminAIndexRoute: AuthenticatedAdminAIndexRoute,
+  AuthenticatedAdminAAnalyticsCoursesRoute:
+    AuthenticatedAdminAAnalyticsCoursesRoute,
+  AuthenticatedAdminAAnalyticsEnrollmentsRoute:
+    AuthenticatedAdminAAnalyticsEnrollmentsRoute,
+  AuthenticatedAdminAAnalyticsReportsRoute:
+    AuthenticatedAdminAAnalyticsReportsRoute,
   AuthenticatedAdminACategoriesNewRoute: AuthenticatedAdminACategoriesNewRoute,
   AuthenticatedAdminACategoriesOrganizeRoute:
     AuthenticatedAdminACategoriesOrganizeRoute,
+  AuthenticatedAdminAAnalyticsIndexRoute:
+    AuthenticatedAdminAAnalyticsIndexRoute,
   AuthenticatedAdminACategoriesIndexRoute:
     AuthenticatedAdminACategoriesIndexRoute,
+  AuthenticatedAdminAContentIndexRoute: AuthenticatedAdminAContentIndexRoute,
+  AuthenticatedAdminAContentContentTypeContentIdRoute:
+    AuthenticatedAdminAContentContentTypeContentIdRoute,
 }
 
 const AuthenticatedAdminARouteWithChildren =

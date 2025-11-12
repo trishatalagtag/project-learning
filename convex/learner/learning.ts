@@ -1,4 +1,9 @@
 import { v } from "convex/values";
+import { getContentById, getContentTree } from "../lib/content_retrieval";
+import {
+  getEnrolledCourses as getEnrolledEnrollments,
+  isUserEnrolledInCourse,
+} from "../lib/enrollment";
 import { learnerQuery } from "../lib/functions";
 
 /**
@@ -18,17 +23,17 @@ export const getEnrolledCourses = learnerQuery({
     })
   ),
   handler: async (ctx) => {
-    const enrollments = await ctx.db
-      .query("enrollments")
-      .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
-      .collect();
+    const activeEnrollments = await getEnrolledEnrollments(
+      ctx,
+      ctx.user.userId,
+      "active"
+    );
 
-    const active = enrollments.filter((e) => e.status === "active");
-
-    const result = await Promise.all(
-      active.map(async (e) => {
-        const course = await ctx.db.get(e.courseId);
+    const courses = await Promise.all(
+      activeEnrollments.map(async (enrollment) => {
+        const course = await ctx.db.get(enrollment.courseId);
         if (!course) return null;
+
         return {
           courseId: course._id,
           title: course.title,
@@ -36,12 +41,12 @@ export const getEnrolledCourses = learnerQuery({
           coverImageId: course.coverImageId,
           status: course.status,
           isEnrollmentOpen: course.isEnrollmentOpen,
-          enrolledAt: e.enrolledAt,
+          enrolledAt: enrollment.enrolledAt,
         };
       })
     );
 
-    return result.filter(Boolean) as any;
+    return courses.filter(Boolean) as any;
   },
 });
 
@@ -87,92 +92,62 @@ export const getCourseContent = learnerQuery({
     v.null()
   ),
   handler: async (ctx, args) => {
-    // Ensure enrolled
-    const enrollment = await ctx.db
-      .query("enrollments")
-      .withIndex("by_user_and_course", (q) =>
-        q.eq("userId", ctx.user.userId).eq("courseId", args.courseId)
-      )
-      .first();
+    const enrolled = await isUserEnrolledInCourse(
+      ctx,
+      ctx.user.userId,
+      args.courseId
+    );
 
-    if (!enrollment || enrollment.status !== "active") return null;
+    if (!enrolled) return null;
 
     const course = await ctx.db.get(args.courseId);
     if (!course) return null;
 
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .collect();
+    const modules = await getContentTree(ctx, args.courseId, ["published"], true);
 
-    const modulesWithLessons = await Promise.all(
-      modules
-        .sort((a, b) => a.order - b.order)
-        .map(async (mod) => {
-          const lessons = await ctx.db
-            .query("lessons")
-            .withIndex("by_module", (q) => q.eq("moduleId", mod._id))
-            .collect();
+    const normalizedModules = modules.map((module) => ({
+      moduleId: module._id,
+      title: module.title,
+      order: module.order,
+      lessons: module.lessons.map((lesson: any) => ({
+        lessonId: lesson._id,
+        title: lesson.title,
+        order: lesson.order,
+        attachments: (lesson.attachments ?? [])
+          .sort((a: any, b: any) => a.order - b.order)
+          .map((att: any) => {
+            if (att.type === "quiz") {
+              return {
+                type: "quiz" as const,
+                title: undefined,
+                id: att.quizId as unknown as string,
+                order: att.order,
+              };
+            }
 
-          const lessonsWithAttachments = await Promise.all(
-            lessons
-              .sort((a, b) => a.order - b.order)
-              .map(async (lesson) => {
-                const attachments = await ctx.db
-                  .query("lessonAttachments")
-                  .withIndex("by_lesson", (q) => q.eq("lessonId", lesson._id))
-                  .collect();
+            if (att.type === "assignment") {
+              return {
+                type: "assignment" as const,
+                title: undefined,
+                id: att.assignmentId as unknown as string,
+                order: att.order,
+              };
+            }
 
-                const normalized = attachments
-                  .sort((a, b) => a.order - b.order)
-                  .map((att) => {
-                    if (att.type === "quiz") {
-                      return {
-                        type: "quiz" as const,
-                        title: undefined,
-                        id: att.quizId as unknown as string,
-                        order: att.order,
-                      };
-                    }
-                    if (att.type === "assignment") {
-                      return {
-                        type: "assignment" as const,
-                        title: undefined,
-                        id: att.assignmentId as unknown as string,
-                        order: att.order,
-                      };
-                    }
-                    // video/resource/guide: use attachment _id and title
-                    return {
-                      type: att.type,
-                      title: (att as any).title,
-                      id: att._id as unknown as string,
-                      order: att.order,
-                    };
-                  });
-
-                return {
-                  lessonId: lesson._id,
-                  title: lesson.title,
-                  order: lesson.order,
-                  attachments: normalized,
-                };
-              })
-          );
-
-          return {
-            moduleId: mod._id,
-            title: mod.title,
-            order: mod.order,
-            lessons: lessonsWithAttachments,
-          };
-        })
-    );
+            return {
+              type: att.type,
+              title: att.title,
+              id: att._id as unknown as string,
+              order: att.order,
+            };
+          }),
+      })),
+    }));
 
     return {
       courseId: course._id,
       title: course.title,
-      modules: modulesWithLessons,
+      modules: normalizedModules,
     };
   },
 });
@@ -236,18 +211,17 @@ export const getLessonContent = learnerQuery({
     v.null()
   ),
   handler: async (ctx, args) => {
-    const lesson = await ctx.db.get(args.lessonId);
+    const lesson = await getContentById(ctx, "lessons", args.lessonId, ["published"]);
     if (!lesson) return null;
 
-    const module = await ctx.db.get(lesson.moduleId);
+    const module = await getContentById(ctx, "modules", lesson.moduleId, ["published"]);
     if (!module) return null;
-    const enrolled = await ctx.db
-      .query("enrollments")
-      .withIndex("by_user_and_course", (q) =>
-        q.eq("userId", ctx.user.userId).eq("courseId", module.courseId)
-      )
-      .first();
-    if (!enrolled || enrolled.status !== "active") return null;
+    const enrolled = await isUserEnrolledInCourse(
+      ctx,
+      ctx.user.userId,
+      module.courseId
+    );
+    if (!enrolled) return null;
 
     const attachments = await ctx.db
       .query("lessonAttachments")
@@ -352,13 +326,12 @@ export const getGuideWithSteps = learnerQuery({
     if (!module) return null;
 
     // Ensure enrolled
-    const enrolled = await ctx.db
-      .query("enrollments")
-      .withIndex("by_user_and_course", (q) =>
-        q.eq("userId", ctx.user.userId).eq("courseId", module.courseId)
-      )
-      .first();
-    if (!enrolled || enrolled.status !== "active") return null;
+    const enrolled = await isUserEnrolledInCourse(
+      ctx,
+      ctx.user.userId,
+      module.courseId
+    );
+    if (!enrolled) return null;
 
     const steps = await ctx.db
       .query("guideSteps")

@@ -6,97 +6,71 @@ import { Sortable, SortableItem, SortableItemHandle } from "@/components/ui/sort
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { useCategoryMutations } from "@/hooks/use-category-mutations"
+import { normalizeCategoryTree, type NormalizedCategoryNode } from "@/lib/categories"
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { FolderIcon, PlusIcon } from "@heroicons/react/24/outline"
 import { useMutation, useQuery } from "convex/react"
-import type { FunctionReturnType } from "convex/server"
 import { GripVertical, Loader2 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { CategoryFormDialog } from "./category-form-dialog"
 import { CategoryMoveDialog } from "./category-move-dialog"
 
-type AdminCategory = FunctionReturnType<typeof api.admin.categories.listCategories>[number]
-
-type CategoryNode = AdminCategory & {
-    children: CategoryNode[]
-}
-
-function buildCategoryTree(categories: AdminCategory[]): CategoryNode[] {
-    const level1 = categories
-        .filter((category) => category.level === 1)
-        .sort((a, b) => a.order - b.order)
-
-    const level2 = categories
-        .filter((category) => category.level === 2)
-        .sort((a, b) => a.order - b.order)
-
-    const level3 = categories
-        .filter((category) => category.level === 3)
-        .sort((a, b) => a.order - b.order)
-
-    return level1.map((parent) => ({
-        ...parent,
-        children: level2
-            .filter((child) => child.parentId === parent._id)
-            .map((child) => ({
-                ...child,
-                children: level3.filter((grandchild) => grandchild.parentId === child._id).map((grandchild) => ({
-                    ...grandchild,
-                    children: [],
-                })),
-            })),
-    }))
-}
+type CategoryNode = NormalizedCategoryNode
 
 interface CategoriesOrganizeViewProps {
     onCreateCategory?: () => void
 }
 
 export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeViewProps) {
-    const categories = useQuery(api.admin.categories.listCategories)
+    const categories = useQuery(api.shared.categories.listAllCategories)
     const updateCategoryOrder = useMutation(api.admin.categories.updateCategory).withOptimisticUpdate(
         (localStore, args) => {
             if (!args || typeof args !== "object" || args === null || args.order === undefined) return
 
-            const existing = localStore.getQuery(api.admin.categories.listCategories, {})
+            const existing = localStore.getQuery(api.shared.categories.listAllCategories, {})
             if (!existing) return
 
             const updated = existing.map((category) =>
                 category._id === args.categoryId ? { ...category, order: args.order as number } : category,
             )
 
-            localStore.setQuery(api.admin.categories.listCategories, {}, updated)
+            localStore.setQuery(api.shared.categories.listAllCategories, {}, updated)
         },
     )
 
     const mutations = useCategoryMutations()
-    const [tree, setTree] = useState<CategoryNode[]>([])
+    const [tree, setTree] = useState<NormalizedCategoryNode[]>([])
     const [isSaving, setIsSaving] = useState(false)
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [moveDialog, setMoveDialog] = useState<{
-        category: CategoryNode
+        category: NormalizedCategoryNode
         newLevel: number
         newParentId: Id<"categories"> | null
     } | null>(null)
-    const [draggedCategory, setDraggedCategory] = useState<CategoryNode | null>(null)
+    const [draggedCategory, setDraggedCategory] = useState<NormalizedCategoryNode | null>(null)
     const levelMapRef = useRef<Map<string, number>>(new Map())
+
+    const formatCourseCount = (count?: number) => {
+        const value = count ?? 0
+        return `${value} ${value === 1 ? "course" : "courses"}`
+    }
 
     useEffect(() => {
         if (categories) {
-            const newTree = buildCategoryTree(categories)
-            setTree(newTree)
+            const normalized = normalizeCategoryTree(categories)
+            setTree(normalized)
 
             levelMapRef.current.clear()
-            newTree.forEach((group) => {
-                levelMapRef.current.set(group._id, 1)
-                group.children.forEach((child) => {
-                    levelMapRef.current.set(child._id, 2)
-                    child.children.forEach((grandchild) => {
-                        levelMapRef.current.set(grandchild._id, 3)
-                    })
+            const setLevels = (nodes: NormalizedCategoryNode[], level: number) => {
+                nodes.forEach((node) => {
+                    levelMapRef.current.set(node._id, level)
+                    if (node.children.length > 0) {
+                        setLevels(node.children, level + 1)
+                    }
                 })
-            })
+            }
+            setLevels(normalized, 1)
         }
     }, [categories])
 
@@ -373,7 +347,7 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
                                         </CardTitle>
                                     </div>
                                     <span className="rounded-full bg-muted px-3 py-1 text-muted-foreground text-xs">
-                                        Level 1 · {group.courseCount} {group.courseCount === 1 ? "course" : "courses"}
+                                        Level 1 · {formatCourseCount(group.courseCount)}
                                     </span>
                                 </div>
                             </CardHeader>
@@ -405,7 +379,7 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
                                                             <div>
                                                                 <p className="font-medium text-sm">{child.name}</p>
                                                                 <p className="text-muted-foreground text-xs">
-                                                                    Level 2 · {child.courseCount} {child.courseCount === 1 ? "course" : "courses"}
+                                                                    Level 2 · {formatCourseCount(child.courseCount)}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -437,8 +411,7 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
                                                                             </SortableItemHandle>
                                                                             <span className="font-medium">{grandchild.name}</span>
                                                                             <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
-                                                                                Level 3 · {grandchild.courseCount}{" "}
-                                                                                {grandchild.courseCount === 1 ? "course" : "courses"}
+                                                                                Level 3 · {formatCourseCount(grandchild.courseCount)}
                                                                             </span>
                                                                         </div>
                                                                     </SortableItem>

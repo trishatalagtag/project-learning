@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { requireContentModifyPermission } from "../lib/auth";
+import { enrichModulesWithLessonCounts, listContentByParent } from "../lib/content_retrieval";
 import { facultyMutation, facultyQuery } from "../lib/functions";
 
 /**
@@ -34,36 +35,28 @@ export const listModulesByCourse = facultyQuery({
       throw new Error("Access denied. You are not the assigned teacher for this course.");
     }
 
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .collect();
+    // Use shared helper to get modules
+    const modules = await listContentByParent(ctx, "modules", "courseId", args.courseId);
 
-    // Enrich with lesson counts
-    const enrichedModules = await Promise.all(
-      modules.map(async (module) => {
-        const lessons = await ctx.db
-          .query("lessons")
-          .withIndex("by_module", (q) => q.eq("moduleId", module._id))
-          .collect();
+    // Enrich with lesson counts via shared helper
+    const enrichedModules = await enrichModulesWithLessonCounts(ctx, modules);
 
-        return {
-          _id: module._id,
-          _creationTime: module._creationTime,
-          courseId: module.courseId,
-          title: module.title,
-          description: module.description,
-          order: module.order,
-          status: module.status,
-          lessonCount: lessons.length,
-          createdAt: module.createdAt,
-          updatedAt: module.updatedAt,
-        };
-      })
-    );
+    // Map to expected return format
+    const result = enrichedModules.map((module) => ({
+      _id: module._id,
+      _creationTime: module._creationTime,
+      courseId: module.courseId,
+      title: module.title,
+      description: module.description,
+      order: module.order,
+      status: module.status,
+      lessonCount: module.lessonCount,
+      createdAt: module.createdAt,
+      updatedAt: module.updatedAt,
+    }));
 
     // Sort by order
-    return enrichedModules.sort((a, b) => a.order - b.order);
+    return result.sort((a, b) => a.order - b.order);
   },
 });
 
@@ -109,6 +102,7 @@ export const getModuleById = facultyQuery({
       throw new Error("Access denied. You are not the assigned teacher for this course.");
     }
 
+    // Get lessons count
     const lessons = await ctx.db
       .query("lessons")
       .withIndex("by_module", (q) => q.eq("moduleId", module._id))

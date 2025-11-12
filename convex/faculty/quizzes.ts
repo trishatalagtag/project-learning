@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { listContentByParent } from "../lib/content_retrieval";
 import { facultyMutation, facultyQuery } from "../lib/functions";
 
 /**
@@ -48,15 +49,8 @@ export const listQuizzesByCourse = facultyQuery({
       throw new Error("Access denied. You are not the assigned teacher for this course.");
     }
 
-    let quizzes = await ctx.db
-      .query("quizzes")
-      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
-      .collect();
-
-    // Apply status filter
-    if (args.status) {
-      quizzes = quizzes.filter((q) => q.status === args.status);
-    }
+    // Use shared helper to get quizzes
+    let quizzes = await listContentByParent(ctx, "quizzes", "courseId", args.courseId, args.status ? [args.status] : undefined);
 
     // Enrich with linked content info and question counts
     const enrichedQuizzes = await Promise.all(

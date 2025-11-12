@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { api } from "@/convex/_generated/api"
+import type { NormalizedCategoryNode } from "@/lib/categories"
 import {
     EllipsisHorizontalIcon,
     FolderIcon,
@@ -20,11 +20,9 @@ import {
     TrashIcon,
 } from "@heroicons/react/24/outline"
 import type { ColumnDef } from "@tanstack/react-table"
-import type { FunctionReturnType } from "convex/server"
 import { formatDistanceToNow } from "date-fns"
 
-type CategoriesListResponse = FunctionReturnType<typeof api.admin.categories.listCategories>
-type Category = CategoriesListResponse[number]
+type Category = NormalizedCategoryNode
 
 interface ColumnsConfig {
     onEdit: (category: Category) => void
@@ -113,7 +111,7 @@ export const createColumns = ({
             accessorKey: "courseCount",
             header: ({ column }) => <DataTableColumnHeader column={column} title="Courses" />,
             cell: ({ row }) => {
-                const count = row.getValue("courseCount") as number
+                const count = (row.getValue("courseCount") as number | undefined) ?? 0
                 return (
                     <div className="font-medium tabular-nums">
                         {count}

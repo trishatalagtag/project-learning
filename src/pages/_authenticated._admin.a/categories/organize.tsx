@@ -12,68 +12,39 @@ import {
 import { Sortable, SortableItem, SortableItemHandle } from "@/components/ui/sortable"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { normalizeCategoryTree, type NormalizedCategoryNode } from "@/lib/categories"
 import { ArrowLeftIcon, FolderIcon } from "@heroicons/react/24/outline"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
-import type { FunctionReturnType } from "convex/server"
 import { GripVertical, Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 export const Route = createFileRoute("/_authenticated/_admin/a/categories/organize")({
   component: OrganizeCategoriesPage,
 })
 
-type AdminCategory = FunctionReturnType<typeof api.admin.categories.listCategories>[number]
-
-type CategoryNode = AdminCategory & {
-  children: CategoryNode[]
-}
-
-function buildCategoryTree(categories: AdminCategory[]): CategoryNode[] {
-  const level1 = categories
-    .filter((category) => category.level === 1)
-    .sort((a, b) => a.order - b.order)
-
-  const level2 = categories
-    .filter((category) => category.level === 2)
-    .sort((a, b) => a.order - b.order)
-
-  const level3 = categories
-    .filter((category) => category.level === 3)
-    .sort((a, b) => a.order - b.order)
-
-  return level1.map((parent) => ({
-    ...parent,
-    children: level2
-      .filter((child) => child.parentId === parent._id)
-      .map((child) => ({
-        ...child,
-        children: level3
-          .filter((grandchild) => grandchild.parentId === child._id)
-          .map((grandchild) => ({
-            ...grandchild,
-            children: [],
-          })),
-      })),
-  }))
-}
+type CategoryNode = NormalizedCategoryNode
 
 function OrganizeCategoriesPage() {
   const navigate = useNavigate()
-  const categories = useQuery(api.admin.categories.listCategories)
+  const categories = useQuery(api.shared.categories.listAllCategories)
+  const normalizedTree = useMemo(
+    () => (categories ? normalizeCategoryTree(categories) : []),
+    [categories],
+  )
   const updateCategoryOrder = useMutation(api.admin.categories.updateCategory).withOptimisticUpdate(
     (localStore, args) => {
       if (!args || typeof args !== "object" || args === null || args.order === undefined) return
 
-      const existing = localStore.getQuery(api.admin.categories.listCategories, {})
+      const existing = localStore.getQuery(api.shared.categories.listAllCategories, {})
       if (!existing) return
 
       const updated = existing.map((category) =>
         category._id === args.categoryId ? { ...category, order: args.order as number } : category,
       )
 
-      localStore.setQuery(api.admin.categories.listCategories, {}, updated)
+      localStore.setQuery(api.shared.categories.listAllCategories, {}, updated)
     },
   )
 
@@ -82,12 +53,12 @@ function OrganizeCategoriesPage() {
 
   useEffect(() => {
     if (categories) {
-      setTree(buildCategoryTree(categories))
+      setTree(normalizedTree)
     }
-  }, [categories])
+  }, [categories, normalizedTree])
 
   const isLoading = categories === undefined
-  const isEmpty = (categories?.length ?? 0) === 0
+  const isEmpty = normalizedTree.length === 0
 
   const persistOrders = async (nodes: CategoryNode[], message: string) => {
     setIsSaving(true)

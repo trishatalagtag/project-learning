@@ -1,6 +1,6 @@
 import type { Doc } from "../_generated/dataModel";
 
-export type ContentStatus = "draft" | "pending" | "approved" | "published" | "archived";
+export type ContentStatus = "draft" | "pending" | "changes_requested" | "approved" | "published";
 
 /**
  * Status hierarchy from lowest to highest
@@ -11,7 +11,6 @@ const STATUS_HIERARCHY: ContentStatus[] = [
   "pending",
   "approved",
   "published",
-  "archived",
 ];
 
 /**
@@ -107,9 +106,9 @@ export function getStatusDisplayName(status: ContentStatus): string {
   const names: Record<ContentStatus, string> = {
     draft: "Draft",
     pending: "Ready for Review",
+    changes_requested: "Changes Requested",
     approved: "Approved",
     published: "Published",
-    archived: "Archived",
   };
   return names[status];
 }

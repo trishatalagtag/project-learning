@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { cn } from "@/lib/utils"
 import { AcademicCapIcon, BookOpenIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/solid"
 import { createFileRoute } from "@tanstack/react-router"
@@ -53,7 +54,15 @@ function CoursesPage() {
     sortOrder: searchParams.sortOrder,
   })
 
-  const categories = useQuery(api.learner.categories.listCategories, {})
+  const categories = useQuery(api.shared.categories.listAllCategories, {})
+  const normalizedCategories = useMemo(
+    () => (categories ? normalizeCategoryTree(categories) : []),
+    [categories],
+  )
+  const flatCategories = useMemo(
+    () => flattenCategoryTree(normalizedCategories),
+    [normalizedCategories],
+  )
 
   const filteredCourses =
     result?.courses && searchParams.enrollmentOpen !== undefined
@@ -132,20 +141,27 @@ function CoursesPage() {
           >
             All Categories
           </Badge>
-          {categories?.map((cat) => (
-            <Badge
-              key={cat._id}
-              variant={
-                searchParams.categoryId === (cat._id as unknown as string) ? "default" : "outline"
-              }
-              className="cursor-pointer select-none"
-              onClick={() => applySearchParam("categoryId", cat._id as unknown as string)}
-              role="button"
-              tabIndex={0}
-            >
-              {cat.name}
+          {categories === undefined ? (
+            <Badge variant="outline" className="cursor-default">
+              Loading...
             </Badge>
-          ))}
+          ) : (
+            flatCategories.map((cat) => (
+              <Badge
+                key={cat._id}
+                variant={
+                  searchParams.categoryId === (cat._id as unknown as string) ? "default" : "outline"
+                }
+                className="cursor-pointer select-none"
+                onClick={() => applySearchParam("categoryId", cat._id as unknown as string)}
+                role="button"
+                tabIndex={0}
+              >
+                {cat.level > 1 && `${"\u00A0".repeat((cat.level - 1) * 2)}└─ `}
+                {cat.name}
+              </Badge>
+            ))
+          )}
         </div>
 
         {/* Search, Filters, and View Toggle */}
