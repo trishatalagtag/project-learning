@@ -23,7 +23,7 @@ function _RouteComponent() {
       <SidebarInset>
         <div className="flex min-h-screen flex-col">
           <AdminBreadcrumbHeader />
-          <div className="flex-1 p-4 md:p-6 lg:p-8">
+          <div className="flex-1">
             <Outlet />
           </div>
         </div>

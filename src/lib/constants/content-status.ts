@@ -6,7 +6,7 @@ import {
   ClockIcon,
   DocumentTextIcon,
   GlobeAltIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 
 export const CONTENT_STATUS = {
   DRAFT: "draft",

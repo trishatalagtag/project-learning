@@ -58,7 +58,7 @@ import {
   SparklesIcon,
   UserIcon,
   UsersIcon
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import {
   flexRender,
@@ -71,7 +71,8 @@ import { useDebounce } from "@uidotdev/usehooks"
 import { useQuery } from "convex/react"
 import { formatDistanceToNow } from "date-fns"
 import { AlertCircle, Loader2 } from "lucide-react"
-import React, { useEffect, useMemo, useState } from "react"
+import type React from "react"
+import { useEffect, useMemo, useState } from "react"
 import { type Course, createColumns } from "./columns"
 
 export function CoursesTable() {
@@ -236,7 +237,7 @@ export function CoursesTable() {
   // Error state
   if (coursesData === null || categories === null || faculty === null) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -260,7 +261,7 @@ export function CoursesTable() {
   // Empty state (no filters applied)
   if (data.length === 0 && !q && status === "all" && !categoryId && !teacherId) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -320,337 +321,339 @@ export function CoursesTable() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-bold text-3xl tracking-tight">Courses</h1>
-          <p className="text-muted-foreground">Manage your course catalog and enrollments</p>
-        </div>
-        <Button onClick={() => navigate({ to: "/a/courses/new" })} className="sm:ml-auto">
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Create Course
-        </Button>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Search */}
-          <div className="relative w-full min-w-[200px] sm:max-w-sm sm:flex-1">
-            <MagnifyingGlassIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search courses..."
-              value={q}
-              onChange={(e) => updateSearch({ q: e.target.value, pageIndex: 0 })}
-              className="h-9 pl-8"
-              disabled={isLoading}
-            />
-          </div>
-
-          {/* Status Filter */}
-          <Select
-            value={status}
-            onValueChange={(value) =>
-              updateSearch({
-                status: value as any,
-                pageIndex: 0,
-              })
-            }
-            disabled={isLoading}
-          >
-            <SelectTrigger className="h-9 w-full sm:w-[140px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">Filter by Status</SelectLabel>
-                <SelectItem value="all">
-                  <span className="flex items-center gap-2">
-                    <UsersIcon className="h-4 w-4 opacity-60" />
-                    <span>All statuses</span>
-                  </span>
-                </SelectItem>
-                <SelectItem value={CONTENT_STATUS.DRAFT}>
-                  <span className="flex items-center gap-2">
-                    {getStatusIcon("draft")}
-                    <span>Draft</span>
-                  </span>
-                </SelectItem>
-                <SelectItem value={CONTENT_STATUS.PENDING}>
-                  <span className="flex items-center gap-2">
-                    {getStatusIcon("pending")}
-                    <span>Pending</span>
-                  </span>
-                </SelectItem>
-                <SelectItem value={CONTENT_STATUS.APPROVED}>
-                  <span className="flex items-center gap-2">
-                    {getStatusIcon("approved")}
-                    <span>Approved</span>
-                  </span>
-                </SelectItem>
-                <SelectItem value={CONTENT_STATUS.PUBLISHED}>
-                  <span className="flex items-center gap-2">
-                    {getStatusIcon("published")}
-                    <span>Published</span>
-                  </span>
-                </SelectItem>
-                <SelectItem value="archived">
-                  <span className="flex items-center gap-2">
-                    {getStatusIcon("archived")}
-                    <span>Archived</span>
-                  </span>
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          {/* Category Filter */}
-          <Select
-            value={categoryId || "all"}
-            onValueChange={(value) =>
-              updateSearch({
-                categoryId: value === "all" ? "" : value,
-                pageIndex: 0,
-              })
-            }
-            disabled={isLoading}
-          >
-            <SelectTrigger className="h-9 w-full sm:w-[160px]">
-              <SelectValue
-                placeholder="Category"
-              >
-                {categoryId ? (
-                  <span className="flex items-center gap-2">
-                    <FolderIcon className="h-4 w-4 opacity-60" />
-                    <span className="truncate">{getCategoryName(categoryId)}</span>
-                  </span>
-                ) : null}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">All Categories</SelectLabel>
-                <SelectItem value="all">
-                  <span className="flex items-center gap-2">
-                    <FolderIcon className="h-4 w-4 opacity-60" />
-                    <span>All categories</span>
-                  </span>
-                </SelectItem>
-              </SelectGroup>
-              {categories === undefined ? (
-                <div className="flex items-center justify-center p-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <SelectGroup>
-                  <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">Available Categories</SelectLabel>
-                  {flatCategories.map((cat) => (
-                    <SelectItem key={cat._id} value={cat._id}>
-                      <span className="flex items-center gap-2">
-                        <FolderIcon className="h-4 w-4 opacity-60" />
-                        <span>
-                          {"\u00A0\u00A0".repeat(cat.level - 1)}
-                          {cat.level > 1 && "└─ "}
-                          {cat.name}
-                        </span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              )}
-            </SelectContent>
-          </Select>
-
-          {/* Teacher Filter */}
-          <Select
-            value={teacherId || "all"}
-            onValueChange={(value) =>
-              updateSearch({
-                teacherId: value === "all" ? "" : value,
-                pageIndex: 0,
-              })
-            }
-            disabled={isLoading}
-          >
-            <SelectTrigger className="h-9 w-full sm:w-[180px]">
-              <SelectValue placeholder="Teacher" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">Select a teacher</SelectLabel>
-                <SelectItem value="all">
-                  <span className="flex items-center gap-2">
-                    <UsersIcon className="h-4 w-4 opacity-60" />
-                    <span>All teachers</span>
-                  </span>
-                </SelectItem>
-                {(faculty || []).map((teacher) => {
-                  const initials = getAvatarFallback(teacher.name)
-                  return (
-                    <SelectItem key={teacher._id} value={teacher._id}>
-                      <span className="flex items-center gap-2">
-                        <Avatar className="h-5 w-5">
-                          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                        </Avatar>
-                        <span>{teacher.name}</span>
-                      </span>
-                    </SelectItem>
-                  )
-                })}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <div className="hidden sm:ml-auto md:block">
-            <DataTableViewOptions table={table} />
-          </div>
-        </div>
-
-        {/* Results info */}
-        <div className="flex items-center justify-between text-muted-foreground text-sm">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            Showing {pageIndex * pageSize + 1}-{Math.min((pageIndex + 1) * pageSize, totalCourses)}{" "}
-            of {totalCourses} courses
+            <h1 className="font-bold text-3xl tracking-tight">Courses</h1>
+            <p className="text-muted-foreground">Manage your course catalog and enrollments</p>
+          </div>
+          <Button onClick={() => navigate({ to: "/a/courses/new" })} className="sm:ml-auto">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Create Course
+          </Button>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Search */}
+            <div className="relative w-full min-w-[200px] sm:max-w-sm sm:flex-1">
+              <MagnifyingGlassIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search courses..."
+                value={q}
+                onChange={(e) => updateSearch({ q: e.target.value, pageIndex: 0 })}
+                className="h-9 pl-8"
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Status Filter */}
+            <Select
+              value={status}
+              onValueChange={(value) =>
+                updateSearch({
+                  status: value as any,
+                  pageIndex: 0,
+                })
+              }
+              disabled={isLoading}
+            >
+              <SelectTrigger className="h-9 w-full sm:w-[140px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel className="py-1 font-normal text-muted-foreground text-xs">Filter by Status</SelectLabel>
+                  <SelectItem value="all">
+                    <span className="flex items-center gap-2">
+                      <UsersIcon className="h-4 w-4 opacity-60" />
+                      <span>All statuses</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value={CONTENT_STATUS.DRAFT}>
+                    <span className="flex items-center gap-2">
+                      {getStatusIcon("draft")}
+                      <span>Draft</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value={CONTENT_STATUS.PENDING}>
+                    <span className="flex items-center gap-2">
+                      {getStatusIcon("pending")}
+                      <span>Pending</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value={CONTENT_STATUS.APPROVED}>
+                    <span className="flex items-center gap-2">
+                      {getStatusIcon("approved")}
+                      <span>Approved</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value={CONTENT_STATUS.PUBLISHED}>
+                    <span className="flex items-center gap-2">
+                      {getStatusIcon("published")}
+                      <span>Published</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="archived">
+                    <span className="flex items-center gap-2">
+                      {getStatusIcon("archived")}
+                      <span>Archived</span>
+                    </span>
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {/* Category Filter */}
+            <Select
+              value={categoryId || "all"}
+              onValueChange={(value) =>
+                updateSearch({
+                  categoryId: value === "all" ? "" : value,
+                  pageIndex: 0,
+                })
+              }
+              disabled={isLoading}
+            >
+              <SelectTrigger className="h-9 w-full sm:w-[160px]">
+                <SelectValue
+                  placeholder="Category"
+                >
+                  {categoryId ? (
+                    <span className="flex items-center gap-2">
+                      <FolderIcon className="h-4 w-4 opacity-60" />
+                      <span className="truncate">{getCategoryName(categoryId)}</span>
+                    </span>
+                  ) : null}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel className="py-1 font-normal text-muted-foreground text-xs">All Categories</SelectLabel>
+                  <SelectItem value="all">
+                    <span className="flex items-center gap-2">
+                      <FolderIcon className="h-4 w-4 opacity-60" />
+                      <span>All categories</span>
+                    </span>
+                  </SelectItem>
+                </SelectGroup>
+                {categories === undefined ? (
+                  <div className="flex items-center justify-center p-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <SelectGroup>
+                    <SelectLabel className="py-1 font-normal text-muted-foreground text-xs">Available Categories</SelectLabel>
+                    {flatCategories.map((cat) => (
+                      <SelectItem key={cat._id} value={cat._id}>
+                        <span className="flex items-center gap-2">
+                          <FolderIcon className="h-4 w-4 opacity-60" />
+                          <span>
+                            {"\u00A0\u00A0".repeat(cat.level - 1)}
+                            {cat.level > 1 && "└─ "}
+                            {cat.name}
+                          </span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+              </SelectContent>
+            </Select>
+
+            {/* Teacher Filter */}
+            <Select
+              value={teacherId || "all"}
+              onValueChange={(value) =>
+                updateSearch({
+                  teacherId: value === "all" ? "" : value,
+                  pageIndex: 0,
+                })
+              }
+              disabled={isLoading}
+            >
+              <SelectTrigger className="h-9 w-full sm:w-[180px]">
+                <SelectValue placeholder="Teacher" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel className="py-1 font-normal text-muted-foreground text-xs">Select a teacher</SelectLabel>
+                  <SelectItem value="all">
+                    <span className="flex items-center gap-2">
+                      <UsersIcon className="h-4 w-4 opacity-60" />
+                      <span>All teachers</span>
+                    </span>
+                  </SelectItem>
+                  {(faculty || []).map((teacher) => {
+                    const initials = getAvatarFallback(teacher.name)
+                    return (
+                      <SelectItem key={teacher._id} value={teacher._id}>
+                        <span className="flex items-center gap-2">
+                          <Avatar className="h-5 w-5">
+                            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                          </Avatar>
+                          <span>{teacher.name}</span>
+                        </span>
+                      </SelectItem>
+                    )
+                  })}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <div className="hidden sm:ml-auto md:block">
+              <DataTableViewOptions table={table} />
+            </div>
+          </div>
+
+          {/* Results info */}
+          <div className="flex items-center justify-between text-muted-foreground text-sm">
+            <div>
+              Showing {pageIndex * pageSize + 1}-{Math.min((pageIndex + 1) * pageSize, totalCourses)}{" "}
+              of {totalCourses} courses
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile List View */}
-      <div className="md:hidden">
-        {isLoading && hasInitialized ? (
-          <CoursesTableContentSkeleton />
-        ) : data.length > 0 ? (
-          <ItemGroup className="space-y-0">
-            {data.map((course: Course, index) => {
-              const isFirst = index === 0
-              const isLast = index === data.length - 1
-              const isOnly = data.length === 1
+        {/* Mobile List View */}
+        <div className="md:hidden">
+          {isLoading && hasInitialized ? (
+            <CoursesTableContentSkeleton />
+          ) : data.length > 0 ? (
+            <ItemGroup className="space-y-0">
+              {data.map((course: Course, index) => {
+                const isFirst = index === 0
+                const isLast = index === data.length - 1
+                const isOnly = data.length === 1
 
-              return (
-                <Item
-                  key={course._id}
-                  variant="outline"
-                  className={cn(
-                    "cursor-pointer transition-colors hover:bg-accent/50",
-                    // Single item - fully rounded
-                    isOnly && "rounded-lg",
-                    // First item - rounded top only, no bottom border
-                    isFirst && !isOnly && "rounded-t-lg rounded-b-none border-b-0",
-                    // Last item - rounded bottom only
-                    isLast && !isOnly && "rounded-t-none rounded-b-lg",
-                    // Middle items - no rounding, no bottom border
-                    !isFirst && !isLast && "rounded-none border-b-0"
-                  )}
-                  onClick={() => handleView(course._id)}
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <AcademicCapIcon className="h-5 w-5" />
-                  </div>
-
-                  <ItemContent className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <ItemTitle className="line-clamp-1">{course.title}</ItemTitle>
-                      <Badge
-                        variant={getStatusVariant(course.status)}
-                        className="shrink-0 capitalize"
-                      >
-                        {course.status}
-                      </Badge>
+                return (
+                  <Item
+                    key={course._id}
+                    variant="outline"
+                    className={cn(
+                      "cursor-pointer transition-colors hover:bg-accent/50",
+                      // Single item - fully rounded
+                      isOnly && "rounded-lg",
+                      // First item - rounded top only, no bottom border
+                      isFirst && !isOnly && "rounded-t-lg rounded-b-none border-b-0",
+                      // Last item - rounded bottom only
+                      isLast && !isOnly && "rounded-t-none rounded-b-lg",
+                      // Middle items - no rounding, no bottom border
+                      !isFirst && !isLast && "rounded-none border-b-0"
+                    )}
+                    onClick={() => handleView(course._id)}
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <AcademicCapIcon className="h-5 w-5" />
                     </div>
 
-                    <ItemDescription className="mt-1 space-y-1">
-                      <div className="flex items-center gap-4 text-xs">
-                        {course.categoryName && (
-                          <span className="flex items-center gap-1">
-                            <FolderIcon className="h-3.5 w-3.5" />
-                            {course.categoryName}
-                          </span>
-                        )}
-                        {course.teacherName && (
-                          <span className="flex items-center gap-1">
-                            <UserIcon className="h-3.5 w-3.5" />
-                            {course.teacherName}
-                          </span>
-                        )}
+                    <ItemContent className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <ItemTitle className="line-clamp-1">{course.title}</ItemTitle>
+                        <Badge
+                          variant={getStatusVariant(course.status)}
+                          className="shrink-0 capitalize"
+                        >
+                          {course.status}
+                        </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-xs">
-                        <span className="flex items-center gap-1">
-                          <UsersIcon className="h-3.5 w-3.5" />
-                          {course.enrollmentCount} enrolled
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <BookOpenIcon className="h-3.5 w-3.5" />
-                          {course.moduleCount} modules
-                        </span>
-                        <span>
-                          Updated {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}
-                        </span>
-                      </div>
-                    </ItemDescription>
-                  </ItemContent>
 
-                  <ItemActions className="shrink-0">
-                    <ChevronRightIcon className="h-5 w-5 text-muted-foreground" />
-                  </ItemActions>
-                </Item>
-              )
-            })}
-          </ItemGroup>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-12 text-center text-muted-foreground">
-            <ExclamationTriangleIcon className="h-8 w-8" />
-            <p>No courses found{q && ` matching "${q}"`}</p>
-          </div>
-        )}
-      </div>
+                      <ItemDescription className="mt-1 space-y-1">
+                        <div className="flex items-center gap-4 text-xs">
+                          {course.categoryName && (
+                            <span className="flex items-center gap-1">
+                              <FolderIcon className="h-3.5 w-3.5" />
+                              {course.categoryName}
+                            </span>
+                          )}
+                          {course.teacherName && (
+                            <span className="flex items-center gap-1">
+                              <UserIcon className="h-3.5 w-3.5" />
+                              {course.teacherName}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className="flex items-center gap-1">
+                            <UsersIcon className="h-3.5 w-3.5" />
+                            {course.enrollmentCount} enrolled
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <BookOpenIcon className="h-3.5 w-3.5" />
+                            {course.moduleCount} modules
+                          </span>
+                          <span>
+                            Updated {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}
+                          </span>
+                        </div>
+                      </ItemDescription>
+                    </ItemContent>
 
-      {/* Desktop Table View */}
-      <div className="hidden rounded-md border md:block">
-        {isLoading && hasInitialized ? (
-          <CoursesTableContentSkeleton />
-        ) : (
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+                    <ItemActions className="shrink-0">
+                      <ChevronRightIcon className="h-5 w-5 text-muted-foreground" />
+                    </ItemActions>
+                  </Item>
+                )
+              })}
+            </ItemGroup>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-12 text-center text-muted-foreground">
+              <ExclamationTriangleIcon className="h-8 w-8" />
+              <p>No courses found{q && ` matching "${q}"`}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden rounded-md border md:block">
+          {isLoading && hasInitialized ? (
+            <CoursesTableContentSkeleton />
+          ) : (
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                      <ExclamationTriangleIcon className="h-8 w-8" />
-                      <p>No courses found{q && ` matching "${q}"`}</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <ExclamationTriangleIcon className="h-8 w-8" />
+                        <p>No courses found{q && ` matching "${q}"`}</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </div>
 
-      <DataTablePagination table={table} />
+        <DataTablePagination table={table} />
+      </div>
     </div>
   )
 }

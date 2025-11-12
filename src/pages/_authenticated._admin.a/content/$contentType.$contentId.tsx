@@ -13,7 +13,7 @@ import {
     ClockIcon,
     ExclamationCircleIcon,
     XCircleIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { formatDistanceToNow } from "date-fns"
@@ -63,7 +63,7 @@ function ContentDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="container mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
         )
@@ -71,13 +71,13 @@ function ContentDetailPage() {
 
     if (!content && !isLoading) {
         return (
-            <div className="container mx-auto py-8">
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
-                        <p className="text-lg font-medium">Content not found</p>
+                        <p className="font-medium text-lg">Content not found</p>
                         <Link to="/a/content">
                             <Button className="mt-4" variant="outline">
-                                <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                                <ArrowLeftIcon className="mr-2 h-4 w-4" />
                                 Back to Content Browser
                             </Button>
                         </Link>
@@ -88,18 +88,18 @@ function ContentDetailPage() {
     }
 
     return (
-        <div className="container mx-auto space-y-6 py-8">
+        <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div className="space-y-1">
                     <Link to="/a/content">
                         <Button variant="ghost" size="sm" className="mb-2">
-                            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                            <ArrowLeftIcon className="mr-2 h-4 w-4" />
                             Back to Content Browser
                         </Button>
                     </Link>
-                    <h1 className="text-3xl font-bold tracking-tight">{content?.title || "Content Details"}</h1>
-                    <div className="flex items-center gap-2 mt-2">
+                    <h1 className="font-bold text-3xl tracking-tight">{content?.title || "Content Details"}</h1>
+                    <div className="mt-2 flex items-center gap-2">
                         <Badge variant="outline" className="capitalize">
                             {contentType}
                         </Badge>
@@ -110,7 +110,7 @@ function ContentDetailPage() {
 
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Main Content */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="space-y-6 lg:col-span-2">
                     {/* Content Details */}
                     <Card>
                         <CardHeader>
@@ -118,14 +118,14 @@ function ContentDetailPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <label className="text-sm font-medium text-muted-foreground">Title</label>
-                                <p className="text-base mt-1">{content?.title}</p>
+                                <label className="font-medium text-muted-foreground text-sm">Title</label>
+                                <p className="mt-1 text-base">{content?.title}</p>
                             </div>
 
                             {content?.description && (
                                 <div>
-                                    <label className="text-sm font-medium text-muted-foreground">Description</label>
-                                    <p className="text-base mt-1">{content.description}</p>
+                                    <label className="font-medium text-muted-foreground text-sm">Description</label>
+                                    <p className="mt-1 text-base">{content.description}</p>
                                 </div>
                             )}
 
@@ -133,12 +133,12 @@ function ContentDetailPage() {
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label className="text-sm font-medium text-muted-foreground">Created By</label>
-                                    <p className="text-base mt-1">{content?.createdByName || "Unknown"}</p>
+                                    <label className="font-medium text-muted-foreground text-sm">Created By</label>
+                                    <p className="mt-1 text-base">{content?.createdByName || "Unknown"}</p>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium text-muted-foreground">Created</label>
-                                    <p className="text-base mt-1">
+                                    <label className="font-medium text-muted-foreground text-sm">Created</label>
+                                    <p className="mt-1 text-base">
                                         {content?.createdAt
                                             ? formatDistanceToNow(new Date(content.createdAt), { addSuffix: true })
                                             : "Unknown"}
@@ -172,12 +172,12 @@ function ContentDetailPage() {
                                             <div key={log._id} className="relative">
                                                 {/* Timeline line */}
                                                 {index < approvalHistory.length - 1 && (
-                                                    <div className="absolute left-4 top-10 bottom-0 w-0.5 bg-border" />
+                                                    <div className="absolute top-10 bottom-0 left-4 w-0.5 bg-border" />
                                                 )}
 
                                                 <div className="flex gap-3">
                                                     {/* Icon */}
-                                                    <div className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center ${colorClass}`}>
+                                                    <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border ${colorClass}`}>
                                                         <Icon className="h-4 w-4" />
                                                     </div>
 
@@ -185,20 +185,20 @@ function ContentDetailPage() {
                                                     <div className="flex-1 space-y-1 pb-4">
                                                         <div className="flex items-start justify-between">
                                                             <div>
-                                                                <p className="text-sm font-medium capitalize">
+                                                                <p className="font-medium text-sm capitalize">
                                                                     {action.replace(/_/g, " ")}
                                                                 </p>
-                                                                <p className="text-xs text-muted-foreground">
+                                                                <p className="text-muted-foreground text-xs">
                                                                     {log.performedByName || "System"}
                                                                 </p>
                                                             </div>
-                                                            <span className="text-xs text-muted-foreground">
+                                                            <span className="text-muted-foreground text-xs">
                                                                 {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                                                             </span>
                                                         </div>
 
                                                         {log.notes && (
-                                                            <p className="text-sm text-muted-foreground bg-muted px-3 py-2 rounded-md mt-2">
+                                                            <p className="mt-2 rounded-md bg-muted px-3 py-2 text-muted-foreground text-sm">
                                                                 {log.notes}
                                                             </p>
                                                         )}
@@ -210,8 +210,8 @@ function ContentDetailPage() {
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                                    <ClockIcon className="h-12 w-12 text-muted-foreground mb-3" />
-                                    <p className="text-sm text-muted-foreground">
+                                    <ClockIcon className="mb-3 h-12 w-12 text-muted-foreground" />
+                                    <p className="text-muted-foreground text-sm">
                                         No approval history available
                                     </p>
                                 </div>

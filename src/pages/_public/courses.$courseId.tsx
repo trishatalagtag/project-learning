@@ -27,13 +27,12 @@ import { useAuthParams } from "@/hooks/use-auth-params"
 import { authClient, getDashboardUrlByRole } from "@/lib/auth/guards"
 import { ROLE, type UserRole } from "@/lib/rbac/permissions"
 import { useUserRole } from "@/lib/rbac/use-user-role"
-import { DocumentTextIcon } from "@heroicons/react/24/outline"
 import {
   AcademicCapIcon,
   ArrowLeftIcon,
   BookOpenIcon,
   CheckCircleIcon,
-  ClockIcon,
+  ClockIcon, DocumentTextIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"

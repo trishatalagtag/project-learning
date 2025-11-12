@@ -19,7 +19,7 @@ import {
     EllipsisHorizontalIcon,
     ExclamationCircleIcon,
     EyeIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { FunctionReturnType } from "convex/server"
 import { formatDistanceToNow } from "date-fns"

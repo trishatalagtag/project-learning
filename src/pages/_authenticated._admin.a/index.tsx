@@ -56,7 +56,7 @@ function DashboardPage() {
 
   if (statsError) {
     return (
-      <div className="space-y-6 p-6">
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <div>
           <h1 className="font-bold text-3xl tracking-tight">Admin Dashboard</h1>
           <p className="mt-2 text-muted-foreground">
@@ -78,7 +78,7 @@ function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6 lg:p-8">
       {/* Header */}
       <div>
         <h1 className="font-bold text-3xl tracking-tight">Admin Dashboard</h1>
@@ -278,7 +278,7 @@ function DashboardPage() {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-8 p-6">
+    <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6 lg:p-8">
       {/* Header Skeleton */}
       <div>
         <Skeleton className="mb-2 h-9 w-64" />

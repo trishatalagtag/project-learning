@@ -1,5 +1,5 @@
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { ShieldExclamationIcon } from "@heroicons/react/24/outline"
+import { ShieldExclamationIcon } from "@heroicons/react/24/solid"
 
 interface AccessDeniedProps {
   message?: string

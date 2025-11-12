@@ -19,11 +19,10 @@ import {
   BookOpenIcon,
   CheckCircleIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
+  ChevronRightIcon, ClipboardDocumentListIcon,
   DocumentTextIcon,
-  ExclamationCircleIcon
-} from "@heroicons/react/24/outline"
-import { ClipboardDocumentListIcon, PencilIcon } from "@heroicons/react/24/solid"
+  ExclamationCircleIcon, PencilIcon
+} from "@heroicons/react/24/solid"
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"

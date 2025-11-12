@@ -29,7 +29,7 @@ import {
     PlusIcon,
     Squares2X2Icon,
     TableCellsIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import {
     flexRender,
@@ -199,7 +199,7 @@ export function CategoriesTable() {
 
     if (categories === undefined) {
         return (
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
                 <Empty>
                     <EmptyHeader>
                         <EmptyMedia variant="icon">
@@ -215,7 +215,7 @@ export function CategoriesTable() {
 
     if (normalizedTree.length === 0) {
         return (
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
                 <Empty>
                     <EmptyHeader>
                         <EmptyMedia variant="icon">
@@ -236,160 +236,162 @@ export function CategoriesTable() {
     }
 
     return (
-        <div className="space-y-4">
-            {/* Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="font-bold text-3xl tracking-tight">Categories</h1>
-                    <p className="text-muted-foreground">Manage course categories and hierarchy</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <ToggleGroup
-                        type="single"
-                        value={view}
-                        onValueChange={(value) => {
-                            if (value) {
-                                updateSearch({ view: value as "table" | "organize" })
-                            }
-                        }}
-                        variant="outline"
-                        size="sm"
-                    >
-                        <ToggleGroupItem value="table" aria-label="Table view">
-                            <TableCellsIcon className="h-4 w-4" />
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="organize" aria-label="Organize view">
-                            <Squares2X2Icon className="h-4 w-4" />
-                        </ToggleGroupItem>
-                    </ToggleGroup>
-                    {view === "table" && (
-                        <Button onClick={handleCreate}>
-                            <PlusIcon className="mr-2 h-4 w-4" />
-                            Create Category
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            {view === "table" ? (
-                <>
-                    {/* Filters */}
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-wrap items-center gap-2">
-                            {/* Search */}
-                            <div className="relative w-full min-w-[200px] sm:max-w-sm sm:flex-1">
-                                <MagnifyingGlassIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search categories..."
-                                    value={q}
-                                    onChange={(e) => updateSearch({ q: e.target.value, pageIndex: 0 })}
-                                    className="h-9 pl-8"
-                                />
-                            </div>
-
-                            {/* Level Filter */}
-                            <select
-                                value={level}
-                                onChange={(e) => updateSearch({ level: e.target.value, pageIndex: 0 })}
-                                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            >
-                                <option value="all">All levels</option>
-                                <option value="1">Level 1</option>
-                                <option value="2">Level 2</option>
-                                <option value="3">Level 3</option>
-                            </select>
-
-                            {/* Sort */}
-                            <select
-                                value={`${sortBy}-${sortOrder}`}
-                                onChange={(e) => {
-                                    const [newSortBy, newSortOrder] = e.target.value.split("-")
-                                    updateSearch({
-                                        sortBy: newSortBy,
-                                        sortOrder: newSortOrder as "asc" | "desc",
-                                    })
-                                }}
-                                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            >
-                                <option value="level-asc">Level (Asc)</option>
-                                <option value="level-desc">Level (Desc)</option>
-                                <option value="name-asc">Name (A-Z)</option>
-                                <option value="name-desc">Name (Z-A)</option>
-                                <option value="courseCount-desc">Most Courses</option>
-                                <option value="createdAt-desc">Newest</option>
-                            </select>
-
-                            <DataTableViewOptions table={table} />
-                        </div>
+        <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+            <div className="space-y-4">
+                {/* Header */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 className="font-bold text-3xl tracking-tight">Categories</h1>
+                        <p className="text-muted-foreground">Manage course categories and hierarchy</p>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <ToggleGroup
+                            type="single"
+                            value={view}
+                            onValueChange={(value) => {
+                                if (value) {
+                                    updateSearch({ view: value as "table" | "organize" })
+                                }
+                            }}
+                            variant="outline"
+                            size="sm"
+                        >
+                            <ToggleGroupItem value="table" aria-label="Table view">
+                                <TableCellsIcon className="h-4 w-4" />
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="organize" aria-label="Organize view">
+                                <Squares2X2Icon className="h-4 w-4" />
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                        {view === "table" && (
+                            <Button onClick={handleCreate}>
+                                <PlusIcon className="mr-2 h-4 w-4" />
+                                Create Category
+                            </Button>
+                        )}
+                    </div>
+                </div>
 
-                    {/* Table */}
-                    <div className="rounded-md border">
-                        <Table>
-                            <TableHeader>
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(header.column.columnDef.header, header.getContext())}
-                                            </TableHead>
-                                        ))}
-                                    </TableRow>
-                                ))}
-                            </TableHeader>
-                            <TableBody>
-                                {table.getRowModel().rows?.length ? (
-                                    table.getRowModel().rows.map((row) => (
-                                        <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id}>
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </TableCell>
+                {view === "table" ? (
+                    <>
+                        {/* Filters */}
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                                {/* Search */}
+                                <div className="relative w-full min-w-[200px] sm:max-w-sm sm:flex-1">
+                                    <MagnifyingGlassIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search categories..."
+                                        value={q}
+                                        onChange={(e) => updateSearch({ q: e.target.value, pageIndex: 0 })}
+                                        className="h-9 pl-8"
+                                    />
+                                </div>
+
+                                {/* Level Filter */}
+                                <select
+                                    value={level}
+                                    onChange={(e) => updateSearch({ level: e.target.value, pageIndex: 0 })}
+                                    className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
+                                    <option value="all">All levels</option>
+                                    <option value="1">Level 1</option>
+                                    <option value="2">Level 2</option>
+                                    <option value="3">Level 3</option>
+                                </select>
+
+                                {/* Sort */}
+                                <select
+                                    value={`${sortBy}-${sortOrder}`}
+                                    onChange={(e) => {
+                                        const [newSortBy, newSortOrder] = e.target.value.split("-")
+                                        updateSearch({
+                                            sortBy: newSortBy,
+                                            sortOrder: newSortOrder as "asc" | "desc",
+                                        })
+                                    }}
+                                    className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
+                                    <option value="level-asc">Level (Asc)</option>
+                                    <option value="level-desc">Level (Desc)</option>
+                                    <option value="name-asc">Name (A-Z)</option>
+                                    <option value="name-desc">Name (Z-A)</option>
+                                    <option value="courseCount-desc">Most Courses</option>
+                                    <option value="createdAt-desc">Newest</option>
+                                </select>
+
+                                <DataTableViewOptions table={table} />
+                            </div>
+                        </div>
+
+                        {/* Table */}
+                        <div className="rounded-md border">
+                            <Table>
+                                <TableHeader>
+                                    {table.getHeaderGroups().map((headerGroup) => (
+                                        <TableRow key={headerGroup.id}>
+                                            {headerGroup.headers.map((header) => (
+                                                <TableHead key={header.id}>
+                                                    {header.isPlaceholder
+                                                        ? null
+                                                        : flexRender(header.column.columnDef.header, header.getContext())}
+                                                </TableHead>
                                             ))}
                                         </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={columns.length} className="h-24 text-center">
-                                            <Empty>
-                                                <EmptyHeader>
-                                                    <EmptyTitle>No results</EmptyTitle>
-                                                    <EmptyDescription>
-                                                        No categories found matching your filters.
-                                                    </EmptyDescription>
-                                                </EmptyHeader>
-                                            </Empty>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                    ))}
+                                </TableHeader>
+                                <TableBody>
+                                    {table.getRowModel().rows?.length ? (
+                                        table.getRowModel().rows.map((row) => (
+                                            <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                                                {row.getVisibleCells().map((cell) => (
+                                                    <TableCell key={cell.id}>
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={columns.length} className="h-24 text-center">
+                                                <Empty>
+                                                    <EmptyHeader>
+                                                        <EmptyTitle>No results</EmptyTitle>
+                                                        <EmptyDescription>
+                                                            No categories found matching your filters.
+                                                        </EmptyDescription>
+                                                    </EmptyHeader>
+                                                </Empty>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
 
-                    {/* Pagination */}
-                    <DataTablePagination table={table} />
-                </>
-            ) : (
-                <CategoriesOrganizeView onCreateCategory={handleCreate} />
-            )}
+                        {/* Pagination */}
+                        <DataTablePagination table={table} />
+                    </>
+                ) : (
+                    <CategoriesOrganizeView onCreateCategory={handleCreate} />
+                )}
 
-            {/* Dialogs */}
-            <CategoryFormDialog
-                open={isFormOpen}
-                onOpenChange={setIsFormOpen}
-                category={editingCategory}
-                onSuccess={handleFormSuccess}
-            />
-            {deletingCategory && (
-                <CategoryDeleteDialog
-                    open={!!deletingCategory}
-                    onOpenChange={(open) => !open && setDeletingCategory(null)}
-                    category={deletingCategory}
-                    onSuccess={handleDeleteSuccess}
+                {/* Dialogs */}
+                <CategoryFormDialog
+                    open={isFormOpen}
+                    onOpenChange={setIsFormOpen}
+                    category={editingCategory}
+                    onSuccess={handleFormSuccess}
                 />
-            )}
+                {deletingCategory && (
+                    <CategoryDeleteDialog
+                        open={!!deletingCategory}
+                        onOpenChange={(open) => !open && setDeletingCategory(null)}
+                        category={deletingCategory}
+                        onSuccess={handleDeleteSuccess}
+                    />
+                )}
+            </div>
         </div>
     )
 }

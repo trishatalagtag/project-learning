@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "@/convex/_generated/api"
-import { ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/outline"
+import { ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/solid"
 import { useMutation } from "convex/react"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"

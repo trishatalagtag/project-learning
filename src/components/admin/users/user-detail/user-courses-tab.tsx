@@ -6,7 +6,7 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from "@/components/ui/empty"
-import { DocumentTextIcon } from "@heroicons/react/24/outline"
+import { DocumentTextIcon } from "@heroicons/react/24/solid"
 
 interface UserCoursesTabProps {
     userId: string

@@ -1,22 +1,18 @@
 import {
-  AcademicCapIcon as AcademicCapOutlineIcon,
-  ChartPieIcon,
-  CheckCircleIcon,
-  ListBulletIcon,
-  PlusIcon,
-  TagIcon,
-  UserPlusIcon,
-} from "@heroicons/react/24/outline"
-import {
   AcademicCapIcon,
   ArrowRightStartOnRectangleIcon,
   ChartBarIcon,
+  ChartPieIcon,
+  CheckCircleIcon,
   Cog6ToothIcon,
-  FolderIcon,
-  HomeIcon,
+  DocumentTextIcon, HomeIcon,
   LifebuoyIcon,
+  ListBulletIcon,
+  PlusIcon,
   ShieldCheckIcon,
-  UsersIcon,
+  TagIcon,
+  UserPlusIcon,
+  UsersIcon
 } from "@heroicons/react/24/solid"
 import type { SidebarConfig } from "./config"
 
@@ -77,7 +73,7 @@ export const adminSidebarConfig: SidebarConfig = {
         },
         {
           label: "Categories",
-          icon: FolderIcon,
+          icon: TagIcon,
           children: [
             {
               label: "All Categories",
@@ -98,7 +94,7 @@ export const adminSidebarConfig: SidebarConfig = {
         },
         {
           label: "Content",
-          icon: FolderIcon,
+          icon: DocumentTextIcon,
           children: [
             {
               label: "Browse All Content",
@@ -139,7 +135,7 @@ export const adminSidebarConfig: SidebarConfig = {
             {
               label: "Performance",
               href: "/a/analytics/courses",
-              icon: AcademicCapOutlineIcon,
+              icon: AcademicCapIcon,
             },
           ],
         },

@@ -46,14 +46,13 @@ import {
   ClipboardDocumentListIcon,
   ClockIcon,
   DocumentTextIcon,
-  ExclamationCircleIcon,
+  ExclamationCircleIcon, EyeIcon,
   FolderIcon,
   GlobeAltIcon,
   MagnifyingGlassIcon,
   ShieldCheckIcon,
   XCircleIcon
-} from "@heroicons/react/24/outline"
-import { EyeIcon } from "@heroicons/react/24/solid"
+} from "@heroicons/react/24/solid"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
@@ -307,7 +306,7 @@ function ContentApprovalsPage() {
 
   if (isLoading || !counts || !pendingContent) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           <p className="text-muted-foreground text-sm">Loading approvals...</p>
@@ -317,7 +316,7 @@ function ContentApprovalsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       <div>
         <h1 className="font-bold text-3xl tracking-tight">Content Approvals</h1>
         <p className="text-muted-foreground">

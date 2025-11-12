@@ -31,7 +31,7 @@ import {
     EyeIcon,
     FolderIcon,
     GlobeAltIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { formatDistanceToNow } from "date-fns"
 import { MoreHorizontalIcon } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"

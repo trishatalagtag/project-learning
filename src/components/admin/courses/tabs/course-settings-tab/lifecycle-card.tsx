@@ -27,7 +27,7 @@ import {
   CheckCircleIcon,
   RocketLaunchIcon,
   XCircleIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 

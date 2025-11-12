@@ -1,9 +1,5 @@
 "use client"
 
-import type { Id } from "@/convex/_generated/dataModel"
-import { CheckCircleIcon, EyeIcon, XCircleIcon } from "@heroicons/react/24/outline"
-import { Loader2 } from "lucide-react"
-
 import { LessonViewer } from "@/components/shared/content/lesson-viewer"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import type { Id } from "@/convex/_generated/dataModel"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
+import { CheckCircleIcon, EyeIcon, XCircleIcon } from "@heroicons/react/24/solid"
+import { Loader2 } from "lucide-react"
 
 import { useContentApproval } from "./hooks/use-content-approval"
 import { RejectContentDialog } from "./reject-content-dialog"

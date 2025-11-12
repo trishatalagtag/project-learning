@@ -27,10 +27,6 @@ export const Route = createFileRoute("/_authenticated/_admin/a/users")({
         breadcrumb: "Users",
     }),
     component: () => {
-        return (
-            <div className="container mx-auto">
-                <Outlet />
-            </div>
-        )
+        return <Outlet />
     }
 });

@@ -1,4 +1,4 @@
-import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/outline"
+import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/solid"
 import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"

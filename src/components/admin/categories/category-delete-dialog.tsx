@@ -11,7 +11,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useCategoryMutations } from "@/hooks/use-category-mutations"
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline"
+import { ExclamationTriangleIcon } from "@heroicons/react/24/solid"
 import { useState } from "react"
 import type { Category } from "./columns"
 

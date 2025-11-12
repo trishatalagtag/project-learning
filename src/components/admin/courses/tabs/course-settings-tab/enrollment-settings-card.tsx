@@ -21,7 +21,7 @@ import {
   ClipboardDocumentIcon,
   PencilIcon,
   XMarkIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -74,6 +74,14 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
     if (course.enrollmentCode) {
       navigator.clipboard.writeText(course.enrollmentCode)
       toast.success("Enrollment code copied to clipboard")
+    }
+  }
+
+  const handleRegenerateCode = async () => {
+    const newCode = Math.random().toString(36).substring(2, 10).toUpperCase()
+    const result = await mutations.updateCode(newCode)
+    if (result.success) {
+      toast.success("Enrollment code regenerated")
     }
   }
 
@@ -177,6 +185,9 @@ export function EnrollmentSettingsCard({ course }: EnrollmentSettingsCardProps) 
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={handleCopyCode}>
                         <ClipboardDocumentIcon className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleRegenerateCode}>
+                        <ArrowPathIcon className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => setEditingCode(true)}>
                         <PencilIcon className="h-4 w-4" />

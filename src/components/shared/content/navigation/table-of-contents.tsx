@@ -2,8 +2,8 @@
 
 import type { TocAnchor } from "@/lib/tiptap/extensions"
 import { cn } from "@/lib/utils"
+import { DocumentTextIcon } from "@heroicons/react/24/solid"
 import { useEffect, useRef } from "react"
-import { DocumentTextIcon } from "@heroicons/react/24/outline"
 
 interface TableOfContentsProps {
   anchors: TocAnchor[]
@@ -34,7 +34,7 @@ export function TableOfContents({ anchors, onAnchorClick, title }: TableOfConten
 
     // Auto-scroll if needed
     if (isAboveViewport || isBelowViewport) {
-      ;(activeAnchor as HTMLElement).scrollIntoView({
+      ; (activeAnchor as HTMLElement).scrollIntoView({
         behavior: "smooth",
         block: "nearest",
         inline: "nearest",

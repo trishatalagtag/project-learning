@@ -1,4 +1,4 @@
-import { ChartBarIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon } from "@heroicons/react/24/solid";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -49,9 +49,9 @@ function EnrollmentTrendsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Enrollment Trends</h1>
+        <h1 className="font-bold text-3xl tracking-tight">Enrollment Trends</h1>
         <p className="mt-2 text-muted-foreground">
           Track enrollment and completion trends over time
         </p>

@@ -18,7 +18,7 @@ import {
     FolderIcon,
     PencilIcon,
     TrashIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import type { ColumnDef } from "@tanstack/react-table"
 import { formatDistanceToNow } from "date-fns"
 

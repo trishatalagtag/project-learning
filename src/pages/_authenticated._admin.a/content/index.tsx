@@ -16,11 +16,10 @@ import { api } from "@/convex/_generated/api"
 import {
     BookOpenIcon,
     ClipboardDocumentListIcon,
-    DocumentTextIcon,
+    DocumentTextIcon, EyeIcon,
     FolderIcon,
-    MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline"
-import { EyeIcon } from "@heroicons/react/24/solid"
+    MagnifyingGlassIcon
+} from "@heroicons/react/24/solid"
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { formatDistanceToNow } from "date-fns"
@@ -123,12 +122,12 @@ function ContentBrowserPage() {
     const Icon = CONTENT_TYPE_ICONS[contentType]
 
     return (
-        <div className="container mx-auto space-y-6 py-8">
+        <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Content Management</h1>
-                    <p className="text-muted-foreground mt-2">
+                    <h1 className="font-bold text-3xl tracking-tight">Content Management</h1>
+                    <p className="mt-2 text-muted-foreground">
                         Browse and manage all content across courses, modules, lessons, quizzes, and assignments
                     </p>
                 </div>
@@ -138,12 +137,12 @@ function ContentBrowserPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+                        <CardTitle className="font-medium text-sm">Total Items</CardTitle>
                         <Icon className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{content.length}</div>
-                        <p className="text-xs text-muted-foreground">
+                        <div className="font-bold text-2xl">{content.length}</div>
+                        <p className="text-muted-foreground text-xs">
                             {contentType}s in {status} status
                         </p>
                     </CardContent>
@@ -160,7 +159,7 @@ function ContentBrowserPage() {
                     <div className="grid gap-4 md:grid-cols-4">
                         {/* Content Type Filter */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Content Type</label>
+                            <label className="font-medium text-sm">Content Type</label>
                             <Select value={contentType} onValueChange={(value) => handleContentTypeChange(value as ContentTypeFilter)}>
                                 <SelectTrigger>
                                     <SelectValue />
@@ -176,7 +175,7 @@ function ContentBrowserPage() {
 
                         {/* Status Filter */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Status</label>
+                            <label className="font-medium text-sm">Status</label>
                             <Select value={status} onValueChange={(value) => handleStatusChange(value as StatusFilter)}>
                                 <SelectTrigger>
                                     <SelectValue />
@@ -191,9 +190,9 @@ function ContentBrowserPage() {
 
                         {/* Search */}
                         <div className="space-y-2 md:col-span-2">
-                            <label className="text-sm font-medium">Search</label>
+                            <label className="font-medium text-sm">Search</label>
                             <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <MagnifyingGlassIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Search by title..."
                                     value={search}
@@ -227,9 +226,9 @@ function ContentBrowserPage() {
                         </div>
                     ) : filteredContent.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <Icon className="h-12 w-12 text-muted-foreground mb-4" />
-                            <p className="text-lg font-medium">No content found</p>
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <Icon className="mb-4 h-12 w-12 text-muted-foreground" />
+                            <p className="font-medium text-lg">No content found</p>
+                            <p className="mt-1 text-muted-foreground text-sm">
                                 Try adjusting your filters or search query
                             </p>
                         </div>
@@ -259,7 +258,7 @@ function ContentBrowserPage() {
                                                         <div className="flex flex-col">
                                                             <span>{item.title}</span>
                                                             {item.description && (
-                                                                <span className="text-xs text-muted-foreground line-clamp-1 mt-1">
+                                                                <span className="mt-1 line-clamp-1 text-muted-foreground text-xs">
                                                                     {item.description}
                                                                 </span>
                                                             )}
@@ -274,7 +273,7 @@ function ContentBrowserPage() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <span className="text-sm text-muted-foreground">
+                                                        <span className="text-muted-foreground text-sm">
                                                             {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
                                                         </span>
                                                     </TableCell>
@@ -287,7 +286,7 @@ function ContentBrowserPage() {
                                                             }}
                                                         >
                                                             <Button variant="ghost" size="sm">
-                                                                <EyeIcon className="h-4 w-4 mr-2" />
+                                                                <EyeIcon className="mr-2 h-4 w-4" />
                                                                 View Details
                                                             </Button>
                                                         </Link>
@@ -301,8 +300,8 @@ function ContentBrowserPage() {
 
                             {/* Pagination */}
                             {(contentData?.continueCursor || currentPage > 0) && (
-                                <div className="flex items-center justify-between mt-4">
-                                    <p className="text-sm text-muted-foreground">
+                                <div className="mt-4 flex items-center justify-between">
+                                    <p className="text-muted-foreground text-sm">
                                         Showing {filteredContent.length} items
                                     </p>
                                     <div className="flex gap-2">
@@ -312,7 +311,7 @@ function ContentBrowserPage() {
                                             disabled={currentPage === 0}
                                             onClick={() => setCurrentPage(currentPage - 1)}
                                         >
-                                            <ChevronLeft className="h-4 w-4 mr-1" />
+                                            <ChevronLeft className="mr-1 h-4 w-4" />
                                             Previous
                                         </Button>
                                         <Button
@@ -322,7 +321,7 @@ function ContentBrowserPage() {
                                             onClick={() => setCurrentPage(currentPage + 1)}
                                         >
                                             Next
-                                            <ChevronRight className="h-4 w-4 ml-1" />
+                                            <ChevronRight className="ml-1 h-4 w-4" />
                                         </Button>
                                     </div>
                                 </div>

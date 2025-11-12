@@ -7,7 +7,7 @@ import {
   DocumentTextIcon,
   FolderIcon,
   InformationCircleIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { useQuery } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
 import { Loader2 } from "lucide-react"

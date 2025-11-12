@@ -5,7 +5,7 @@ import { LoadingSpinner } from "@/components/shared/loading/loading-spinner"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Id } from "@/convex/_generated/dataModel"
-import { BookOpenIcon, PaperClipIcon } from "@heroicons/react/24/outline"
+import { BookOpenIcon, PaperClipIcon } from "@heroicons/react/24/solid"
 
 import { AttachmentList } from "./attachment-list"
 import { useLesson } from "./hooks/use-lesson"

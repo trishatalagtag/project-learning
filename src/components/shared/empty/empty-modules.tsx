@@ -1,5 +1,5 @@
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { FolderIcon } from "@heroicons/react/24/outline"
+import { FolderIcon } from "@heroicons/react/24/solid"
 
 interface EmptyModulesProps {
   message?: string

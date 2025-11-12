@@ -1,15 +1,14 @@
 "use client"
 
-import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { ArrowUpTrayIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/solid"
 import { useMutation } from "convex/react"
 import { Loader2 } from "lucide-react"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 
 interface CoverImageUploadProps {
   courseId: Id<"courses">

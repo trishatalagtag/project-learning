@@ -8,7 +8,7 @@ import {
     DocumentTextIcon,
     FolderIcon,
     UsersIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { Link } from "@tanstack/react-router"
 import type { FunctionReturnType } from "convex/server"
 
@@ -38,7 +38,7 @@ function MetricCard({ title, value, description, icon: Icon, href, color }: Metr
 
     return (
         <Link to={href} className="block">
-            <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+            <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="font-medium text-sm">{title}</CardTitle>
                     <div className={`rounded-full p-2 ${colorClasses[color]}`}>
@@ -72,7 +72,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         color="primary"
                     />
                     <Link to="/a/users" search={{ role: "LEARNER" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Learners</CardTitle>
                                 <div className="rounded-full bg-blue-500/10 p-2">
@@ -86,7 +86,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         </Card>
                     </Link>
                     <Link to="/a/users" search={{ role: "FACULTY" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Faculty</CardTitle>
                                 <div className="rounded-full bg-purple-500/10 p-2">
@@ -100,7 +100,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         </Card>
                     </Link>
                     <Link to="/a/users" search={{ role: "ADMIN" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Admins</CardTitle>
                                 <div className="rounded-full bg-orange-500/10 p-2">
@@ -129,7 +129,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         color="blue"
                     />
                     <Link to="/a/courses" search={{ status: "published" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Published Courses</CardTitle>
                                 <div className="rounded-full bg-green-500/10 p-2">
@@ -143,7 +143,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         </Card>
                     </Link>
                     <Link to="/a/courses" search={{ status: "pending" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Pending Review</CardTitle>
                                 <div className="rounded-full bg-yellow-500/10 p-2">
@@ -207,7 +207,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                 <h2 className="mb-4 font-semibold text-lg">Content Metrics</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Link to="/a/content" search={{ contentType: "module" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Modules</CardTitle>
                                 <div className="rounded-full bg-primary/10 p-2">
@@ -221,7 +221,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         </Card>
                     </Link>
                     <Link to="/a/content" search={{ contentType: "lesson" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Lessons</CardTitle>
                                 <div className="rounded-full bg-blue-500/10 p-2">
@@ -235,7 +235,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         </Card>
                     </Link>
                     <Link to="/a/content" search={{ contentType: "quiz" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Quizzes</CardTitle>
                                 <div className="rounded-full bg-purple-500/10 p-2">
@@ -249,7 +249,7 @@ export function DashboardAllMetrics({ stats }: DashboardAllMetricsProps) {
                         </Card>
                     </Link>
                     <Link to="/a/content" search={{ contentType: "assignment" }} className="block">
-                        <Card className="cursor-pointer transition-colors hover:bg-accent h-full">
+                        <Card className="h-full cursor-pointer transition-colors hover:bg-accent">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="font-medium text-sm">Assignments</CardTitle>
                                 <div className="rounded-full bg-orange-500/10 p-2">

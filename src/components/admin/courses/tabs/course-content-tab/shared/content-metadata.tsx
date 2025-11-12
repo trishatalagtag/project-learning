@@ -1,4 +1,4 @@
-import { ClockIcon } from "@heroicons/react/24/outline"
+import { ClockIcon } from "@heroicons/react/24/solid"
 import { formatDistanceToNow } from "date-fns"
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"

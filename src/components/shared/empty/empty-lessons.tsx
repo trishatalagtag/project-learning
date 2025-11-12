@@ -8,7 +8,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import type { Id } from "@/convex/_generated/dataModel"
-import { BookOpenIcon } from "@heroicons/react/24/outline"
+import { BookOpenIcon } from "@heroicons/react/24/solid"
 
 interface EmptyLessonsProps {
   moduleId: Id<"modules">

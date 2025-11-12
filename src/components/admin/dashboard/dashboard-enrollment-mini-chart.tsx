@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { api } from "@/convex/_generated/api"
-import { ChartBarIcon } from "@heroicons/react/24/outline"
+import { ChartBarIcon } from "@heroicons/react/24/solid"
 import type { FunctionReturnType } from "convex/server"
 import { format } from "date-fns"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"

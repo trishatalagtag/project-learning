@@ -13,8 +13,9 @@ import {
 import { api } from "@/convex/_generated/api"
 import { useCourseMutations } from "@/hooks/use-course-mutations"
 import type { Course } from "@/lib/types/course"
-import { UserMinusIcon } from "@heroicons/react/24/outline"
+import { UserMinusIcon } from "@heroicons/react/24/solid"
 import { useQuery } from "convex/react"
+import { useMemo } from "react"
 
 interface FacultyAssignmentCardProps {
   course: Course
@@ -25,6 +26,18 @@ export function FacultyAssignmentCard({ course }: FacultyAssignmentCardProps) {
   const faculty = useQuery(api.admin.users.listUsersByRole, {
     role: "FACULTY",
   })
+  const admins = useQuery(api.admin.users.listUsersByRole, {
+    role: "ADMIN",
+  })
+
+  // Combine and deduplicate faculty and admin users
+  const allTeachers = useMemo(() => {
+    if (!faculty || !admins) return []
+    const combined = [...faculty, ...admins]
+    // Remove duplicates by _id
+    const unique = Array.from(new Map(combined.map((teacher) => [teacher._id, teacher])).values())
+    return unique.sort((a, b) => a.name.localeCompare(b.name))
+  }, [faculty, admins])
 
   const handleAssign = async (teacherId: string) => {
     await mutations.assignTeacher(teacherId)
@@ -67,7 +80,7 @@ export function FacultyAssignmentCard({ course }: FacultyAssignmentCardProps) {
                     <SelectValue placeholder="Select a faculty member" />
                   </SelectTrigger>
                   <SelectContent>
-                    {faculty?.map((teacher) => (
+                    {allTeachers.map((teacher) => (
                       <SelectItem key={teacher._id} value={teacher._id}>
                         {teacher.name}
                       </SelectItem>

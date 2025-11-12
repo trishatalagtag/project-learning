@@ -11,7 +11,7 @@ import {
   FolderIcon,
   PlayCircleIcon,
   QuestionMarkCircleIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import type { FunctionReturnType } from "convex/server"
 import { VideoPlayer } from "../viewer/video-player"
 import { AssignmentPreview } from "./assignment-preview"

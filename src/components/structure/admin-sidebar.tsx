@@ -25,7 +25,7 @@ import {
 import { adminSidebarConfig } from "@/config/sidebar/admin"
 import type { MenuItem, SidebarItem as SidebarItemType, ValidRoute } from "@/config/sidebar/config"
 import { api } from "@/convex/_generated/api"
-import { ChevronUpDownIcon } from "@heroicons/react/24/outline"
+import { ChevronUpDownIcon } from "@heroicons/react/24/solid"
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import * as React from "react"

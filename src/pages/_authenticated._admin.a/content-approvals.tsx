@@ -5,9 +5,5 @@ export const Route = createFileRoute("/_authenticated/_admin/a/content-approvals
 })
 
 function ContentApprovalsLayout() {
-  return (
-    <div className="container mx-auto px-4 py-6">
-      <Outlet />
-    </div>
-  )
+  return <Outlet />
 }

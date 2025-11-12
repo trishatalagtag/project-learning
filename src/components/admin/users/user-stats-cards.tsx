@@ -6,7 +6,7 @@ import {
     UserIcon,
     UsersIcon,
     XCircleIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 
 interface UserStatsCardsProps {
     stats: {

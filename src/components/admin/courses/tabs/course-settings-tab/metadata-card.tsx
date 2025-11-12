@@ -20,6 +20,13 @@ export function MetadataCard({ course }: MetadataCardProps) {
         <ItemGroup className="space-y-2">
           <Item variant="outline">
             <ItemContent>
+              <ItemTitle>Created By</ItemTitle>
+              <ItemDescription>{course.createdByName || "Unknown"}</ItemDescription>
+            </ItemContent>
+          </Item>
+
+          <Item variant="outline">
+            <ItemContent>
               <ItemTitle>Created</ItemTitle>
               <ItemDescription>
                 {formatDistanceToNow(new Date(course.createdAt), {

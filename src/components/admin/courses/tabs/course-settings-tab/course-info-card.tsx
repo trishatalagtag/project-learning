@@ -1,5 +1,6 @@
 "use client"
 
+import { MarkdownViewer } from "@/components/shared/content/viewer/markdown-viewer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,7 +36,7 @@ import { useCourseMutations } from "@/hooks/use-course-mutations"
 import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import type { Course } from "@/lib/types/course"
-import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/solid"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
@@ -509,6 +510,22 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                   {course.status}
                 </Badge>
               </div>
+            </ItemContent>
+          </Item>
+
+          {/* COURSE CONTENT */}
+          <Item variant="outline">
+            <ItemContent>
+              <ItemTitle className="font-medium text-sm">Course Content</ItemTitle>
+              <ItemDescription className="mt-2">
+                {course.content ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <MarkdownViewer markdown={course.content} />
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">No content provided</span>
+                )}
+              </ItemDescription>
             </ItemContent>
           </Item>
         </ItemGroup>

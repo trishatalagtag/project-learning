@@ -1,7 +1,3 @@
-import { ChartBarIcon } from "@heroicons/react/24/outline"
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { useQuery } from "convex/react"
-import { Loader2 } from "lucide-react"
 import { CourseStatusChart } from "@/components/admin/analytics/course-status-chart"
 import { SystemStatsCards } from "@/components/admin/analytics/system-stats-cards"
 import { UserDistributionChart } from "@/components/admin/analytics/user-distribution-chart"
@@ -13,6 +9,10 @@ import {
     EmptyTitle,
 } from "@/components/ui/empty"
 import { api } from "@/convex/_generated/api"
+import { ChartBarIcon } from "@heroicons/react/24/solid"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
 
 export const Route = createFileRoute("/_authenticated/_admin/a/analytics/")({
     staticData: {
@@ -26,7 +26,7 @@ function AnalyticsPage() {
 
     if (stats === undefined) {
         return (
-            <div className="flex min-h-[400px] items-center justify-center">
+            <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
                 <Loader2 className="size-8 animate-spin text-muted-foreground" />
             </div>
         )
@@ -34,22 +34,24 @@ function AnalyticsPage() {
 
     if (!stats) {
         return (
-            <Empty>
-                <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                        <ChartBarIcon className="size-12 text-muted-foreground" />
-                    </EmptyMedia>
-                    <EmptyTitle>No analytics data available</EmptyTitle>
-                    <EmptyDescription>
-                        Analytics data will appear here once the system has activity.
-                    </EmptyDescription>
-                </EmptyHeader>
-            </Empty>
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+                <Empty>
+                    <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                            <ChartBarIcon className="size-12 text-muted-foreground" />
+                        </EmptyMedia>
+                        <EmptyTitle>No analytics data available</EmptyTitle>
+                        <EmptyDescription>
+                            Analytics data will appear here once the system has activity.
+                        </EmptyDescription>
+                    </EmptyHeader>
+                </Empty>
+            </div>
         )
     }
 
     return (
-        <div className="space-y-8">
+        <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6 lg:p-8">
             {/* Header */}
             <div>
                 <h1 className="font-bold text-3xl tracking-tight">Admin Dashboard</h1>
@@ -69,7 +71,7 @@ function AnalyticsPage() {
                 <h2 className="mb-4 font-semibold text-xl">Distribution Overview</h2>
                 <div className="grid gap-4 md:grid-cols-2">
                     <UserDistributionChart stats={stats} />
-                    <CourseStatusChart stats={stats}/>
+                    <CourseStatusChart stats={stats} />
                 </div>
             </section>
 
@@ -109,7 +111,7 @@ function AnalyticsPage() {
                         className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent"
                     >
                         <h3 className="font-semibold">Manage Users</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-muted-foreground text-sm">
                             View and manage user accounts
                         </p>
                     </Link>
@@ -118,7 +120,7 @@ function AnalyticsPage() {
                         className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent"
                     >
                         <h3 className="font-semibold">Manage Categories</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-muted-foreground text-sm">
                             Organize course categories
                         </p>
                     </Link>
@@ -127,7 +129,7 @@ function AnalyticsPage() {
                         className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent"
                     >
                         <h3 className="font-semibold">Browse Content</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-muted-foreground text-sm">
                             View all content across the platform
                         </p>
                     </Link>

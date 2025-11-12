@@ -12,11 +12,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid"
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
-import { ArrowLeftIcon, Loader2 } from "lucide-react"
+import { ArrowLeftIcon } from "lucide-react"
 import { useState } from "react"
+import { CourseDetailSkeleton } from "./course-detail-skeleton"
 import { DeleteDialog } from "./delete-dialog"
 import { CourseContentTab } from "./tabs/course-content-tab"
 import { CourseGradingTab } from "./tabs/course-grading-tab"
@@ -35,21 +36,35 @@ export function CourseDetailPage() {
   })
 
   if (course === undefined) {
+    return <CourseDetailSkeleton />
+  }
+
+  // Error state - Convex returns null when query fails
+  if (course === null) {
     return (
       <div>
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+              <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
             </EmptyMedia>
-            <EmptyTitle>Loading course...</EmptyTitle>
-            <EmptyDescription>Please wait while we fetch the data.</EmptyDescription>
+            <EmptyTitle>Failed to load course</EmptyTitle>
+            <EmptyDescription>
+              An error occurred while fetching the course data. Please try again.
+            </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+            <Button variant="outline" onClick={() => navigate({ to: "/a/courses" })}>
+              Back to Courses
+            </Button>
+          </EmptyContent>
         </Empty>
       </div>
     )
   }
 
+  // Not found state - course doesn't exist
   if (!course) {
     return (
       <div>

@@ -3,7 +3,7 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import type { TocAnchor } from "@/lib/tiptap/extensions"
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon } from "@heroicons/react/24/outline"
+import { ChevronDownIcon } from "@heroicons/react/24/solid"
 import { useState } from "react"
 
 interface InlineTOCProps {

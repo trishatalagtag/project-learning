@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/components/shared/status/status-badge"
 import type { ContentStatus } from "@/lib/constants/content-status"
-import { EyeIcon } from "@heroicons/react/24/outline"
+import { EyeIcon } from "@heroicons/react/24/solid"
 
 interface PreviewBannerProps {
   status: ContentStatus

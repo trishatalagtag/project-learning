@@ -1,5 +1,5 @@
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { PaperClipIcon } from "@heroicons/react/24/outline"
+import { PaperClipIcon } from "@heroicons/react/24/solid"
 
 interface EmptyAttachmentsProps {
   message?: string

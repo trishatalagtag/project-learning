@@ -1,11 +1,3 @@
-import type { Id } from "@/convex/_generated/dataModel"
-import { PlusCircleIcon } from "@heroicons/react/24/outline"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -27,6 +19,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import type { Id } from "@/convex/_generated/dataModel"
+import { PlusCircleIcon } from "@heroicons/react/24/solid"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
 import { useCreateLesson } from "./hooks/use-create-lesson"
 

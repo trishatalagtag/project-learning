@@ -29,7 +29,7 @@ import {
   PlusCircleIcon,
   ScaleIcon,
   TrashIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "convex/react"
 import { Loader2, Sparkles } from "lucide-react"

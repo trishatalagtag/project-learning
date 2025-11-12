@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/empty"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "@/convex/_generated/api"
-import { ArrowLeftIcon, UserIcon } from "@heroicons/react/24/outline"
+import { ArrowLeftIcon, UserIcon } from "@heroicons/react/24/solid"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
@@ -57,7 +57,7 @@ function UserDetailPage() {
 
   if (user === undefined) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="container mx-auto flex max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           <p className="text-muted-foreground text-sm">Loading user details...</p>
@@ -108,7 +108,7 @@ function UserDetailPage() {
   const isFacultyOrAdmin = userData.role === "FACULTY" || userData.role === "ADMIN"
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/a/users" })}>

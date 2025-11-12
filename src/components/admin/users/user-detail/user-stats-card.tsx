@@ -11,7 +11,7 @@ import {
     CalendarIcon,
     ClockIcon,
     DocumentTextIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { formatDistanceToNow } from "date-fns"
 
 import type { User } from "../columns"

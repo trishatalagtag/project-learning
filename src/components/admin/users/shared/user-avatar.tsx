@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { UserIcon } from "@heroicons/react/24/outline"
+import { UserIcon } from "@heroicons/react/24/solid"
 
 interface UserAvatarProps {
     name: string

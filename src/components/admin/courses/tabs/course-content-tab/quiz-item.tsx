@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
-import { ClipboardDocumentListIcon, EyeIcon } from "@heroicons/react/24/outline"
+import { ClipboardDocumentListIcon, EyeIcon } from "@heroicons/react/24/solid"
 import { Link } from "@tanstack/react-router"
 import type { FunctionReturnType } from "convex/server"
 import { useContentApproval } from "./hooks/use-content-approval"

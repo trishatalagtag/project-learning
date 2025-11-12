@@ -3,7 +3,7 @@
 import { LoadingSpinner } from "@/components/shared/loading/loading-spinner"
 import type { Id } from "@/convex/_generated/dataModel"
 import { useFileUrl } from "@/hooks/use-file"
-import { PlayCircleIcon } from "@heroicons/react/24/outline"
+import { PlayCircleIcon } from "@heroicons/react/24/solid"
 
 interface VideoPlayerProps {
   fileId: Id<"_storage">

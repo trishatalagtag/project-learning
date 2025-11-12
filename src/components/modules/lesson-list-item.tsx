@@ -1,13 +1,12 @@
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { Bars3Icon, PlayIcon } from "@heroicons/react/24/outline"
-import { Link } from "@tanstack/react-router"
-
 import { StatusBadge } from "@/components/shared/status/status-badge"
 import type { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import { canViewUnpublishedContent, type UserRole } from "@/lib/rbac/permissions"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { Bars3Icon, PlayIcon } from "@heroicons/react/24/solid"
+import { Link } from "@tanstack/react-router"
 import type { FunctionReturnType } from "convex/server"
 
 type CourseLesson = FunctionReturnType<typeof api.faculty.lessons.listLessonsByModule>[number]

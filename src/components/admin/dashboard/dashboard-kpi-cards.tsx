@@ -6,7 +6,7 @@ import {
     ChartBarIcon,
     ClockIcon,
     UsersIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/solid"
 import { Link } from "@tanstack/react-router"
 import type { FunctionReturnType } from "convex/server"
 

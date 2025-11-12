@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { api } from "@/convex/_generated/api"
 import { STATUS_CONFIG } from "@/lib/constants/content-status"
-import { InformationCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline"
+import { InformationCircleIcon, LockClosedIcon } from "@heroicons/react/24/solid"
 import type { FunctionReturnType } from "convex/server"
 
 type Status = FunctionReturnType<typeof api.faculty.modules.listModulesByCourse>[number]["status"]

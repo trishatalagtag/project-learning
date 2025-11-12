@@ -1,5 +1,6 @@
-import { CoursePerformanceTable } from "@/components/admin/analytics/course-performance-table"
 import { CourseCompletionBarChart } from "@/components/admin/analytics/course-completion-bar-chart"
+import { CoursePerformanceTable } from "@/components/admin/analytics/course-performance-table"
+import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyDescription,
@@ -7,9 +8,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Button } from "@/components/ui/button"
 import { api } from "@/convex/_generated/api"
-import { AcademicCapIcon } from "@heroicons/react/24/outline"
+import { AcademicCapIcon } from "@heroicons/react/24/solid"
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
@@ -26,14 +26,14 @@ export const Route = createFileRoute(
 
 function CoursePerformancePage() {
   const [view, setView] = useState<"table" | "chart">("chart")
-  
+
   const courseStats = useQuery(api.admin.analytics.getCourseCompletionRates, {
     limit: 50,
   })
 
   if (courseStats === undefined) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
@@ -41,9 +41,9 @@ function CoursePerformancePage() {
 
   if (courseStats.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="font-bold text-3xl tracking-tight">
             Course Performance
           </h1>
           <p className="mt-2 text-muted-foreground">
@@ -66,11 +66,11 @@ function CoursePerformancePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="font-bold text-3xl tracking-tight">
             Course Performance
           </h1>
           <p className="mt-2 text-muted-foreground">

@@ -2,13 +2,12 @@
 
 import { EmptyContent } from "@/components/shared/empty/empty-content"
 import { LoadingSpinner } from "@/components/shared/loading/loading-spinner"
-import type { Id } from "@/convex/_generated/dataModel"
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/outline"
-import { useQuiz } from "./hooks/use-quiz"
-
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import type { Id } from "@/convex/_generated/dataModel"
+import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid"
+import { useQuiz } from "./hooks/use-quiz"
 
 interface QuizPreviewProps {
   quizId: Id<"quizzes">
@@ -96,11 +95,10 @@ export function QuizPreview({ quizId }: QuizPreviewProps) {
                       return (
                         <div
                           key={optIndex}
-                          className={`flex items-start gap-2 rounded-md border p-2 ${
-                            isCorrect
+                          className={`flex items-start gap-2 rounded-md border p-2 ${isCorrect
                               ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/20"
                               : "border-border bg-muted/30"
-                          }`}
+                            }`}
                         >
                           <span className="mt-0.5 font-mono font-semibold text-xs">
                             {String.fromCharCode(65 + optIndex)}.

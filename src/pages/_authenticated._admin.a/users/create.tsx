@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { ArrowLeftIcon, UserPlusIcon } from "@heroicons/react/24/outline"
+import { ArrowLeftIcon, UserPlusIcon } from "@heroicons/react/24/solid"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_authenticated/_admin/a/users/create")({
@@ -18,7 +18,7 @@ function CreateUserPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       <div className="mb-6">
         <Button
           variant="ghost"

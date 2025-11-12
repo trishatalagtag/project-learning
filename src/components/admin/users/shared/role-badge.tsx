@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { AcademicCapIcon, ShieldCheckIcon, UserIcon } from "@heroicons/react/24/outline"
+import { AcademicCapIcon, ShieldCheckIcon, UserIcon } from "@heroicons/react/24/solid"
 
 interface RoleBadgeProps {
     role: "ADMIN" | "FACULTY" | "LEARNER"

@@ -12,8 +12,8 @@ import {
 import { Sortable, SortableItem, SortableItemHandle } from "@/components/ui/sortable"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
-import { normalizeCategoryTree, type NormalizedCategoryNode } from "@/lib/categories"
-import { ArrowLeftIcon, FolderIcon } from "@heroicons/react/24/outline"
+import { type NormalizedCategoryNode, normalizeCategoryTree } from "@/lib/categories"
+import { ArrowLeftIcon, FolderIcon } from "@heroicons/react/24/solid"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
 import { GripVertical, Loader2 } from "lucide-react"
@@ -145,7 +145,7 @@ function OrganizeCategoriesPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -161,7 +161,7 @@ function OrganizeCategoriesPage() {
 
   if (isEmpty) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">

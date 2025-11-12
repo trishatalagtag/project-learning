@@ -2,13 +2,12 @@
 
 import { EmptyContent } from "@/components/shared/empty/empty-content"
 import { LoadingSpinner } from "@/components/shared/loading/loading-spinner"
-import type { Id } from "@/convex/_generated/dataModel"
-import { CalendarIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
-import { useAssignment } from "../hooks/use-assignment"
-
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import type { Id } from "@/convex/_generated/dataModel"
+import { CalendarIcon, DocumentTextIcon } from "@heroicons/react/24/solid"
+import { useAssignment } from "../hooks/use-assignment"
 
 interface AssignmentPreviewProps {
   assignmentId: Id<"assignments">
