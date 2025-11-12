@@ -69,6 +69,7 @@ export default defineSchema({
     status: v.union(
       v.literal("draft"),
       v.literal("pending"),
+      v.literal("changes_requested"),
       v.literal("approved"),
       v.literal("published")
     ),
@@ -90,6 +91,7 @@ export default defineSchema({
     status: v.union(
       v.literal("draft"),
       v.literal("pending"),
+      v.literal("changes_requested"),
       v.literal("approved"),
       v.literal("published")
     ),
@@ -187,6 +189,7 @@ export default defineSchema({
     status: v.union(
       v.literal("draft"),
       v.literal("pending"),
+      v.literal("changes_requested"),
       v.literal("approved"),
       v.literal("published")
     ),
@@ -238,6 +241,7 @@ export default defineSchema({
     status: v.union(
       v.literal("draft"),
       v.literal("pending"),
+      v.literal("changes_requested"),
       v.literal("approved"),
       v.literal("published")
     ),
@@ -419,4 +423,56 @@ export default defineSchema({
     runAt: v.number(),
   })
     .index("by_migration_id", ["migrationId"]),
+
+  // AUDIT LOGS - Track all content approval actions
+  auditLogs: defineTable({
+    contentType: v.union(
+      v.literal("course"),
+      v.literal("module"),
+      v.literal("lesson"),
+      v.literal("quiz"),
+      v.literal("assignment")
+    ),
+    contentId: v.string(),
+    action: v.union(
+      v.literal("created"),
+      v.literal("submitted_for_review"),
+      v.literal("approved"),
+      v.literal("rejected"),
+      v.literal("changes_requested"),
+      v.literal("published"),
+      v.literal("unpublished")
+    ),
+    performedBy: v.string(),
+    performedByName: v.optional(v.string()),
+    previousStatus: v.optional(v.string()),
+    newStatus: v.optional(v.string()),
+    comments: v.optional(v.string()),
+    timestamp: v.number(),
+  })
+    .index("by_content", ["contentType", "contentId"])
+    .index("by_content_and_action", ["contentType", "contentId", "action"])
+    .index("by_user", ["performedBy"])
+    .index("by_timestamp", ["timestamp"]),
+
+  // NOTIFICATIONS - Notifications for approval/rejection events
+  notifications: defineTable({
+    userId: v.string(),
+    type: v.union(
+      v.literal("content_approved"),
+      v.literal("content_rejected"),
+      v.literal("content_published"),
+      v.literal("pending_review")
+    ),
+    title: v.string(),
+    message: v.string(),
+    contentType: v.optional(v.string()),
+    contentId: v.optional(v.string()),
+    actionUrl: v.optional(v.string()),
+    isRead: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_read", ["userId", "isRead"])
+    .index("by_timestamp", ["createdAt"]),
 });

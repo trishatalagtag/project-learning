@@ -1,13 +1,5 @@
 "use client"
 
-import { api } from "@/convex/_generated/api"
-import type { Id } from "@/convex/_generated/dataModel"
-import { XCircleIcon } from "@heroicons/react/24/outline"
-import { useMutation } from "convex/react"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
-import { toast } from "sonner"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,13 +11,20 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+import { XCircleIcon } from "@heroicons/react/24/outline"
+import { useMutation } from "convex/react"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 
-type ContentType = "module" | "lesson"
+type ContentType = "module" | "lesson" | "quiz" | "assignment"
 
 interface RejectContentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  contentId: Id<"modules"> | Id<"lessons">
+  contentId: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">
   contentType: ContentType
   contentTitle: string
 }

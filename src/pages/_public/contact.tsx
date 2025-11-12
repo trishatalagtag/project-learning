@@ -8,6 +8,7 @@ import {
   PhoneIcon,
   ClockIcon,
 } from "@heroicons/react/24/solid"
+import { Link } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_public/contact")({
   component: ContactPage,
@@ -160,10 +161,10 @@ function ContactPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button size="lg" asChild>
-              <a href="/#courses">Browse Courses</a>
+              <Link to="/courses">Browse Courses</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <a href="/faq">View FAQs</a>
+              <Link to="/faq">View FAQs</Link>
             </Button>
           </div>
         </div>

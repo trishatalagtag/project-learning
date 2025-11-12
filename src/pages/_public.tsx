@@ -9,7 +9,7 @@ import {
 import { Navbar, NavbarLeft, NavbarRight } from "@/components/ui/navbar"
 import { Separator } from "@/components/ui/separator"
 import { useAuthParams } from "@/hooks/use-auth-params"
-import { authClient } from "@/lib/auth/guards"
+import { authClient, getDashboardUrlByRole } from "@/lib/auth/guards"
 import { Bars3Icon, UserCircleIcon, XMarkIcon } from "@heroicons/react/24/solid"
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
@@ -32,11 +32,7 @@ function PublicLayout() {
 
   const getDashboardUrl = () => {
     if (!session?.user) return "/" as const
-    const role = session.user.role
-    if (role === "LEARNER") return "/c/courses" as const
-    if (role === "ADMIN") return "/a" as const
-    if (role === "FACULTY") return "/a" as const
-    return "/" as const
+    return getDashboardUrlByRole(session.user.role)
   }
 
   const closeMobileMenu = () => {
@@ -203,13 +199,13 @@ function PublicLayout() {
                   >
                     Home
                   </Link>
-                  <a
-                    href="/#courses"
+                  <Link
+                    to="/courses"
                     className="rounded-lg px-4 py-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     onClick={closeMobileMenu}
                   >
                     Browse Courses
-                  </a>
+                  </Link>
                   <Link
                     to={getDashboardUrl()}
                     className="rounded-lg px-4 py-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -255,13 +251,13 @@ function PublicLayout() {
                   >
                     Home
                   </Link>
-                  <a
-                    href="/#courses"
+                  <Link
+                    to="/courses"
                     className="rounded-lg px-4 py-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     onClick={closeMobileMenu}
                   >
                     Courses
-                  </a>
+                  </Link>
                   <Link
                     to="/about"
                     className="rounded-lg px-4 py-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -337,9 +333,9 @@ function PublicLayout() {
               <h3 className="mb-4 font-semibold">For Learners</h3>
               <ul className="space-y-2 text-muted-foreground text-sm">
                 <li>
-                  <a href="/#courses" className="hover:underline">
+                  <Link to="/courses" className="hover:underline">
                     Browse Courses
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <Link to="/faq" className="hover:underline">

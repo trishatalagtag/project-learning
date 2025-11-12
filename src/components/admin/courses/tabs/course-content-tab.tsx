@@ -1,5 +1,6 @@
 "use client"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -20,17 +21,31 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   DocumentTextIcon,
-  ExclamationCircleIcon,
+  ExclamationCircleIcon
 } from "@heroicons/react/24/outline"
-import { PencilIcon } from "@heroicons/react/24/solid"
+import { ClipboardDocumentListIcon, PencilIcon } from "@heroicons/react/24/solid"
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { AssignmentItem } from "./course-content-tab/assignment-item"
 import { ModuleItem } from "./course-content-tab/module-item"
+import { QuizItem } from "./course-content-tab/quiz-item"
 
 interface CourseContentTabProps {
   courseId: Id<"courses">
+}
+
+type ContentStats = {
+  total: number
+  published: number
+  pending: number
+  totalLessons: number
+  totalQuizzes?: number
+  pendingQuizzes?: number
+  totalAssignments?: number
+  pendingAssignments?: number
+  assessmentPending?: number
 }
 
 /**
@@ -44,6 +59,12 @@ interface CourseContentTabProps {
  */
 export function CourseContentTab({ courseId }: CourseContentTabProps) {
   const modules = useQuery(api.faculty.modules.listModulesByCourse, {
+    courseId,
+  })
+  const quizzes = useQuery(api.faculty.quizzes.listQuizzesByCourse, {
+    courseId,
+  })
+  const assignments = useQuery(api.faculty.assignments.listAssignmentsByCourse, {
     courseId,
   })
 
@@ -76,16 +97,31 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
   }, [modules, expandedModules])
 
   // Calculate stats
-  const stats = useMemo(() => {
+  const stats = useMemo<ContentStats | null>(() => {
     if (!modules) return null
 
-    return {
+    const baseStats = {
       total: modules.length,
       published: modules.filter((m) => m.status === CONTENT_STATUS.PUBLISHED).length,
       pending: modules.filter((m) => m.status === CONTENT_STATUS.PENDING).length,
       totalLessons: modules.reduce((sum, m) => sum + m.lessonCount, 0),
     }
-  }, [modules])
+
+    if (!quizzes || !assignments) return baseStats
+
+    const pendingQuizCount = quizzes.filter((q) => q.status === CONTENT_STATUS.PENDING).length
+    const pendingAssignmentCount =
+      assignments.filter((a) => a.status === CONTENT_STATUS.PENDING).length
+
+    return {
+      ...baseStats,
+      totalQuizzes: quizzes.length,
+      pendingQuizzes: pendingQuizCount,
+      totalAssignments: assignments.length,
+      pendingAssignments: pendingAssignmentCount,
+      assessmentPending: pendingQuizCount + pendingAssignmentCount,
+    }
+  }, [modules, quizzes, assignments])
 
   // Loading state
   if (modules === undefined) {
@@ -148,6 +184,26 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
                 </span>
               </div>
 
+              {typeof stats.totalQuizzes !== "undefined" && stats.totalQuizzes > 0 && (
+                <div className="flex items-center gap-2 text-sm">
+                  <ClipboardDocumentListIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{stats.totalQuizzes}</span>
+                  <span className="text-muted-foreground">
+                    {stats.totalQuizzes === 1 ? "Quiz" : "Quizzes"}
+                  </span>
+                </div>
+              )}
+
+              {typeof stats.totalAssignments !== "undefined" && stats.totalAssignments > 0 && (
+                <div className="flex items-center gap-2 text-sm">
+                  <DocumentTextIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{stats.totalAssignments}</span>
+                  <span className="text-muted-foreground">
+                    {stats.totalAssignments === 1 ? "Assignment" : "Assignments"}
+                  </span>
+                </div>
+              )}
+
               {stats.published > 0 && (
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircleIcon className="h-4 w-4 text-primary" />
@@ -168,6 +224,23 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">These items require your approval</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
+              {typeof stats.assessmentPending !== "undefined" && stats.assessmentPending > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex cursor-help items-center gap-2 text-sm">
+                        <ExclamationCircleIcon className="h-4 w-4 text-destructive" />
+                        <span className="font-medium text-destructive">{stats.assessmentPending}</span>
+                        <span className="text-muted-foreground">Assessment Review</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">Quizzes and assignments pending approval</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -218,6 +291,34 @@ export function CourseContentTab({ courseId }: CourseContentTabProps) {
           />
         ))}
       </div>
+
+      {quizzes && quizzes.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Quizzes</h3>
+            <Badge variant="secondary">{quizzes.length}</Badge>
+          </div>
+          <div className="space-y-2 rounded-lg border">
+            {quizzes.map((quiz) => (
+              <QuizItem key={quiz._id} quiz={quiz} courseId={courseId} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {assignments && assignments.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Assignments</h3>
+            <Badge variant="secondary">{assignments.length}</Badge>
+          </div>
+          <div className="space-y-2 rounded-lg border">
+            {assignments.map((assignment) => (
+              <AssignmentItem key={assignment._id} assignment={assignment} courseId={courseId} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,11 +1,13 @@
-import { Badge } from "@/components/ui/badge"
+import { CourseCard } from "@/components/course-catalog/course-card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { api } from "@/convex/_generated/api"
 import { useAuthParams } from "@/hooks/use-auth-params"
-import { AcademicCapIcon, BookOpenIcon, RocketLaunchIcon, UserPlusIcon } from "@heroicons/react/24/solid"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { getDashboardUrlByRole } from "@/lib/auth/guards"
+import { useUserRole } from "@/lib/rbac/use-user-role"
+import { ArrowRightIcon, BookOpenIcon, RocketLaunchIcon, UserPlusIcon } from "@heroicons/react/24/solid"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { useRef } from "react"
 import { z } from "zod"
@@ -28,11 +30,21 @@ export const Route = createFileRoute("/_public/")({
 function RouteComponent() {
   const { openModal } = useAuthParams()
   const coursesRef = useRef<HTMLElement>(null)
+  const navigate = useNavigate()
+  const userRole = useUserRole()
 
   const recentCourses = useQuery(api.learner.courses.getRecentlyAddedCourses, { limit: 3 })
 
   const scrollToCourses = () => {
     coursesRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const handleGetStarted = () => {
+    if (!userRole) {
+      openModal("signup", "LEARNER")
+      return
+    }
+    navigate({ to: getDashboardUrlByRole(userRole) })
   }
 
   return (
@@ -89,7 +101,7 @@ function RouteComponent() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => openModal("signup", "LEARNER")}
+                onClick={handleGetStarted}
                 className="w-full border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground sm:w-auto dark:text-white"
               >
                 <UserPlusIcon className="mr-2 size-5" />
@@ -159,65 +171,15 @@ function RouteComponent() {
           <section className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
             <div className="mb-8 flex items-center justify-between">
               <h2 className="font-bold text-2xl sm:text-3xl">Recently Added Courses</h2>
-              <Button variant="ghost" onClick={scrollToCourses}>
-                View All →
+              <Button variant="ghost" onClick={() => navigate({ to: getDashboardUrlByRole(userRole) })}>
+                View All
+                <ArrowRightIcon className="size-4" />
               </Button>
             </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {recentCourses.map((course) => (
-                <Card key={course._id} className="flex h-full flex-col transition-shadow hover:shadow-md">
-                  {/* Cover Image */}
-                  {course.coverImageUrl ? (
-                    <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                      <img
-                        src={course.coverImageUrl}
-                        alt={course.title}
-                        className="size-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex aspect-video w-full items-center justify-center rounded-t-lg bg-muted">
-                      <AcademicCapIcon className="size-16 text-muted-foreground" />
-                    </div>
-                  )}
-
-                  <CardHeader className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {course.categoryName}
-                      </Badge>
-                      {course.isNew && (
-                        <Badge className="bg-primary text-primary-foreground text-xs">New</Badge>
-                      )}
-                      {course.isEnrollmentOpen && (
-                        <Badge className="bg-green-600 text-white text-xs">Open</Badge>
-                      )}
-                    </div>
-                    <CardTitle className="line-clamp-2 text-lg">{course.title}</CardTitle>
-                    {course.description && (
-                      <CardDescription className="line-clamp-2 text-sm">
-                        {course.description}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-
-                  <CardContent className="mt-auto">
-                    {course.teacherName && (
-                      <p className="mb-3 text-muted-foreground text-sm">
-                        Instructor: {course.teacherName}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground text-xs">
-                        Added {new Date(course.createdAt).toLocaleDateString()}
-                      </span>
-                      <Link to="/courses/$courseId" params={{ courseId: course._id }}>
-                        <Button size="sm">View Course</Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                <CourseCard key={course._id} course={course} showNewBadge={true} />
               ))}
             </div>
           </section>
@@ -257,7 +219,7 @@ function RouteComponent() {
           accessible courses.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
-          <Button size="lg" onClick={() => openModal("signup", "LEARNER")}>
+          <Button size="lg" onClick={handleGetStarted}>
             Create Free Account
           </Button>
           <Button size="lg" variant="outline" onClick={scrollToCourses}>

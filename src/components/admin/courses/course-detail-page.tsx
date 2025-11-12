@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline"
-import { useNavigate, useParams } from "@tanstack/react-router"
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { ArrowLeftIcon, Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -25,6 +25,7 @@ import { CourseSettingsTab } from "./tabs/course-settings-tab/index"
 export function CourseDetailPage() {
   const navigate = useNavigate()
   const { courseId } = useParams({ from: "/_authenticated/_admin/a/courses/$courseId" })
+  const search = useSearch({ from: "/_authenticated/_admin/a/courses/$courseId" }) as { tab?: "settings" | "content" | "grading" }
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -86,7 +87,19 @@ export function CourseDetailPage() {
         </div>
 
         {/* Tabbed Interface */}
-        <Tabs defaultValue="settings" className="space-y-2">
+        <Tabs
+          defaultValue={search.tab || "settings"}
+          value={search.tab || "settings"}
+          onValueChange={(value) => {
+            navigate({
+              to: "/a/courses/$courseId",
+              params: { courseId },
+              search: { tab: value as "settings" | "content" | "grading" | undefined },
+              replace: true,
+            })
+          }}
+          className="space-y-2"
+        >
           <TabsList>
             <TabsTrigger value="settings">Settings & Details</TabsTrigger>
             <TabsTrigger value="content">Course Content</TabsTrigger>

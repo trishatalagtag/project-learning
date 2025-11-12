@@ -1,6 +1,7 @@
 import {
   AcademicCapIcon as AcademicCapOutlineIcon,
   ChartPieIcon,
+  CheckCircleIcon,
   ListBulletIcon,
   PlusIcon,
   TagIcon,
@@ -101,10 +102,9 @@ export const adminSidebarConfig: SidebarConfig = {
       label: "Moderation",
       items: [
         {
-          label: "Content Approval",
-          href: "/a/content-approval",
-          icon: ShieldCheckIcon,
-          badge: "12",
+          label: "Content Approvals",
+          href: "/a/content-approvals",
+          icon: CheckCircleIcon,
         },
       ],
     },

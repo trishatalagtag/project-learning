@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
-import { AcademicCapIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/solid"
+import { AcademicCapIcon, BookOpenIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/solid"
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { useMemo, useState } from "react"
@@ -90,12 +90,31 @@ function CoursesPage() {
   return (
     <div className="mx-auto w-full">
       {/* Header */}
-      <section className="bg-muted/30 py-8 sm:py-12">
-        <div className="container mx-auto max-w-7xl px-4">
-          <h1 className="mb-2 font-bold text-3xl sm:text-4xl">Course Catalog</h1>
-          <p className="text-muted-foreground">
-            Browse all available agricultural training courses
-          </p>
+      <section className="relative overflow-hidden bg-background">
+        {/* Background Cover Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/courses-hero.jpg"
+            alt="DISOA Course Catalog"
+            className="size-full object-cover object-center brightness-[0.4] dark:brightness-[0.6]"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/50 to-primary/30 dark:from-primary/60 dark:via-primary/40 dark:to-primary/20" />
+        </div>
+
+        {/* Content */}
+        <div className="container relative z-10 mx-auto max-w-7xl px-4 py-20 sm:py-24 md:py-28 lg:py-36">
+          <div className="text-center">
+            <div className="mb-6 flex justify-center">
+              <BookOpenIcon className="size-16 text-primary-foreground drop-shadow-sm sm:size-20 md:size-24" />
+            </div>
+            <h1 className="mb-4 font-bold text-3xl text-primary-foreground tracking-tight sm:text-4xl md:text-5xl dark:text-white dark:drop-shadow-md">
+              Course Catalog
+            </h1>
+            <p className="mx-auto max-w-2xl text-lg text-primary-foreground/90 dark:text-white/90 dark:drop-shadow-md">
+              Browse all available agricultural training courses
+            </p>
+          </div>
         </div>
       </section>
 

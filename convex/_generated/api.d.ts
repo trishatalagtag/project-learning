@@ -43,6 +43,7 @@ import type * as lib_validators from "../lib/validators.js";
 import type * as migrations_index from "../migrations/index.js";
 import type * as migrations_trigger from "../migrations/trigger.js";
 import type * as mock from "../mock.js";
+import type * as reset from "../reset.js";
 import type * as shared_announcements from "../shared/announcements.js";
 import type * as shared_categories from "../shared/categories.js";
 import type * as shared_files from "../shared/files.js";
@@ -98,6 +99,7 @@ declare const fullApi: ApiFromModules<{
   "migrations/index": typeof migrations_index;
   "migrations/trigger": typeof migrations_trigger;
   mock: typeof mock;
+  reset: typeof reset;
   "shared/announcements": typeof shared_announcements;
   "shared/categories": typeof shared_categories;
   "shared/files": typeof shared_files;

@@ -1,4 +1,4 @@
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline"
+import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/outline"
 import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 interface ApprovalActionsProps {
   onApprove: () => void
   onReject: () => void
+  onRequestChanges?: () => void
   isApproving: boolean
   canApprove?: boolean
   canReject?: boolean
@@ -16,6 +17,7 @@ interface ApprovalActionsProps {
 export function ApprovalActions({
   onApprove,
   onReject,
+  onRequestChanges,
   isApproving,
   canApprove = true,
   canReject = true,
@@ -45,6 +47,21 @@ export function ApprovalActions({
           </>
         )}
       </Button>
+      {onRequestChanges && (
+        <Button
+          size={size}
+          variant="outline"
+          onClick={(e) => {
+            e.stopPropagation()
+            onRequestChanges()
+          }}
+          disabled={isApproving}
+          className={`${layout === "vertical" ? "w-full" : "flex-1"} gap-2`}
+        >
+          <ExclamationTriangleIcon className="h-4 w-4" />
+          Request Changes
+        </Button>
+      )}
       <Button
         size={size}
         variant="destructive"

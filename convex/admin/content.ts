@@ -1,13 +1,68 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { components } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
 import { createUserMap } from "../lib/auth";
-import { adminMutation, adminQuery } from "../lib/functions";
+import { adminMutation, adminQuery, facultyMutation } from "../lib/functions";
 import {
   validateLessonStatus,
   validateModuleStatus,
   type ContentStatus,
 } from "../lib/status_validation";
+
+/**
+ * Helper: Create audit log entry
+ */
+async function createAuditLog(
+  ctx: any,
+  contentType: "course" | "module" | "lesson" | "quiz" | "assignment",
+  contentId: string,
+  action: "created" | "submitted_for_review" | "approved" | "rejected" | "changes_requested" | "published" | "unpublished",
+  previousStatus?: string,
+  newStatus?: string,
+  comments?: string
+) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) return;
+
+  await ctx.db.insert("auditLogs", {
+    contentType,
+    contentId,
+    action,
+    performedBy: identity.subject,
+    performedByName: identity.name,
+    previousStatus,
+    newStatus,
+    comments,
+    timestamp: Date.now(),
+  });
+}
+
+/**
+ * Helper: Create notification for user
+ */
+async function createNotification(
+  ctx: any,
+  userId: string,
+  type: "content_approved" | "content_rejected" | "content_published" | "pending_review",
+  title: string,
+  message: string,
+  contentType?: string,
+  contentId?: string,
+  actionUrl?: string
+) {
+  await ctx.db.insert("notifications", {
+    userId,
+    type,
+    title,
+    message,
+    contentType,
+    contentId,
+    actionUrl,
+    isRead: false,
+    createdAt: Date.now(),
+  });
+}
 
 /**
  * List content paginated by type and status
@@ -1078,6 +1133,16 @@ export const approveModule = adminMutation({
       updatedAt: Date.now(),
     });
 
+    // Audit log
+    await createAuditLog(
+      ctx,
+      "module",
+      args.moduleId,
+      "approved",
+      "pending",
+      "approved"
+    );
+
     return null;
   },
 });
@@ -1119,6 +1184,16 @@ export const approveLesson = adminMutation({
       updatedAt: Date.now(),
     });
 
+    // Audit log
+    await createAuditLog(
+      ctx,
+      "lesson",
+      args.lessonId,
+      "approved",
+      "pending",
+      "approved"
+    );
+
     return null;
   },
 });
@@ -1128,7 +1203,10 @@ export const approveLesson = adminMutation({
  * Admin only
  */
 export const approveQuiz = adminMutation({
-  args: { quizId: v.id("quizzes") },
+  args: { 
+    quizId: v.id("quizzes"),
+    comments: v.optional(v.string()),
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
     const quiz = await ctx.db.get(args.quizId);
@@ -1146,6 +1224,28 @@ export const approveQuiz = adminMutation({
       updatedAt: Date.now(),
     });
 
+    // Audit log
+    await createAuditLog(
+      ctx,
+      "quiz",
+      args.quizId,
+      "approved",
+      "pending",
+      "approved",
+      args.comments
+    );
+
+    // Notify creator
+    await createNotification(
+      ctx,
+      quiz.createdBy,
+      "content_approved",
+      "Quiz Approved",
+      `Your quiz "${quiz.title}" has been approved.`,
+      "quiz",
+      args.quizId
+    );
+
     return null;
   },
 });
@@ -1155,7 +1255,10 @@ export const approveQuiz = adminMutation({
  * Admin only
  */
 export const approveAssignment = adminMutation({
-  args: { assignmentId: v.id("assignments") },
+  args: { 
+    assignmentId: v.id("assignments"),
+    comments: v.optional(v.string()),
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
     const assignment = await ctx.db.get(args.assignmentId);
@@ -1173,7 +1276,202 @@ export const approveAssignment = adminMutation({
       updatedAt: Date.now(),
     });
 
+    // Audit log
+    await createAuditLog(
+      ctx,
+      "assignment",
+      args.assignmentId,
+      "approved",
+      "pending",
+      "approved",
+      args.comments
+    );
+
+    // Notify creator
+    await createNotification(
+      ctx,
+      assignment.createdBy,
+      "content_approved",
+      "Assignment Approved",
+      `Your assignment "${assignment.title}" has been approved.`,
+      "assignment",
+      args.assignmentId
+    );
+
     return null;
+  },
+});
+
+/**
+ * Bulk approve multiple content items
+ * Admin only - approves multiple items in one operation
+ */
+export const bulkApproveContent = adminMutation({
+  args: {
+    items: v.array(
+      v.object({
+        contentType: v.union(
+          v.literal("module"),
+          v.literal("lesson"),
+          v.literal("quiz"),
+          v.literal("assignment")
+        ),
+        contentId: v.string(),
+      })
+    ),
+    comments: v.optional(v.string()),
+  },
+  returns: v.object({
+    successful: v.number(),
+    failed: v.number(),
+    errors: v.array(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    let successful = 0;
+    let failed = 0;
+    const errors: string[] = [];
+
+    for (const item of args.items) {
+      try {
+        // Get the content to check status
+        let content: any;
+
+        if (item.contentType === "module") {
+          content = await ctx.db.get(item.contentId as Id<"modules">);
+          if (!content) throw new Error("Module not found");
+          if (content.status !== "pending") {
+            throw new Error("Only pending modules can be approved");
+          }
+
+          // Validate: check if any lessons have higher status than approved
+          const lessons = await ctx.db
+            .query("lessons")
+            .withIndex("by_module", (q) => q.eq("moduleId", item.contentId as Id<"modules">))
+            .collect();
+
+          validateModuleStatus("approved" as ContentStatus, lessons, content.title);
+
+          await ctx.db.patch(item.contentId as Id<"modules">, {
+            status: "approved",
+            updatedAt: Date.now(),
+          });
+
+          await createAuditLog(
+            ctx,
+            "module",
+            item.contentId,
+            "approved",
+            "pending",
+            "approved",
+            args.comments
+          );
+        } else if (item.contentType === "lesson") {
+          content = await ctx.db.get(item.contentId as Id<"lessons">);
+          if (!content) throw new Error("Lesson not found");
+          if (content.status !== "pending") {
+            throw new Error("Only pending lessons can be approved");
+          }
+
+          // Get parent module to validate status constraint
+          const module = await ctx.db.get(content.moduleId);
+          if (!module || !("status" in module)) {
+            throw new Error("Parent module not found");
+          }
+
+          // Validate: lesson cannot be approved if module isn't approved
+          validateLessonStatus(
+            "approved" as ContentStatus,
+            (module as { status: string }).status as ContentStatus,
+            content.title
+          );
+
+          await ctx.db.patch(item.contentId as Id<"lessons">, {
+            status: "approved",
+            updatedAt: Date.now(),
+          });
+
+          await createAuditLog(
+            ctx,
+            "lesson",
+            item.contentId,
+            "approved",
+            "pending",
+            "approved",
+            args.comments
+          );
+        } else if (item.contentType === "quiz") {
+          content = await ctx.db.get(item.contentId as Id<"quizzes">);
+          if (!content) throw new Error("Quiz not found");
+          if (content.status !== "pending") {
+            throw new Error("Only pending quizzes can be approved");
+          }
+
+          await ctx.db.patch(item.contentId as Id<"quizzes">, {
+            status: "approved",
+            updatedAt: Date.now(),
+          });
+
+          await createAuditLog(
+            ctx,
+            "quiz",
+            item.contentId,
+            "approved",
+            "pending",
+            "approved",
+            args.comments
+          );
+
+          await createNotification(
+            ctx,
+            content.createdBy,
+            "content_approved",
+            "Quiz Approved",
+            `Your quiz "${content.title}" has been approved.`,
+            "quiz",
+            item.contentId
+          );
+        } else if (item.contentType === "assignment") {
+          content = await ctx.db.get(item.contentId as Id<"assignments">);
+          if (!content) throw new Error("Assignment not found");
+          if (content.status !== "pending") {
+            throw new Error("Only pending assignments can be approved");
+          }
+
+          await ctx.db.patch(item.contentId as Id<"assignments">, {
+            status: "approved",
+            updatedAt: Date.now(),
+          });
+
+          await createAuditLog(
+            ctx,
+            "assignment",
+            item.contentId,
+            "approved",
+            "pending",
+            "approved",
+            args.comments
+          );
+
+          await createNotification(
+            ctx,
+            content.createdBy,
+            "content_approved",
+            "Assignment Approved",
+            `Your assignment "${content.title}" has been approved.`,
+            "assignment",
+            item.contentId
+          );
+        }
+
+        successful++;
+      } catch (error) {
+        failed++;
+        const errorMsg = error instanceof Error ? error.message : "Unknown error";
+        errors.push(`${item.contentType} ${item.contentId}: ${errorMsg}`);
+      }
+    }
+
+    return { successful, failed, errors };
   },
 });
 
@@ -1199,7 +1497,7 @@ export const rejectContent = adminMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    let content: { status: string } | null = null;
+    let content: { status: string; createdBy: string; title: string } | null = null;
 
     // Get content based on type
     switch (args.contentType) {
@@ -1224,6 +1522,9 @@ export const rejectContent = adminMutation({
     if (content.status !== "pending") {
       throw new Error(`Only pending ${args.contentType}s can be rejected`);
     }
+
+    const createdBy = content.createdBy;
+    const contentTitle = content.title;
 
     // Set back to draft
     switch (args.contentType) {
@@ -1266,8 +1567,248 @@ export const rejectContent = adminMutation({
         break;
     }
 
-    // TODO: In production, notify creator with rejection reason
-    // Could store rejection history in a separate table
+    // Audit log
+    await createAuditLog(
+      ctx,
+      args.contentType,
+      args.contentId,
+      "rejected",
+      "pending",
+      "draft",
+      args.reason
+    );
+
+    // Notify creator
+    await createNotification(
+      ctx,
+      createdBy,
+      "content_rejected",
+      `${args.contentType.charAt(0).toUpperCase() + args.contentType.slice(1)} Rejected`,
+      `Your ${args.contentType} "${contentTitle}" was rejected. Reason: ${args.reason}`,
+      args.contentType,
+      args.contentId
+    );
+
+    return null;
+  },
+});
+
+/**
+ * Request changes on pending content
+ * Admin only - sets status to changes_requested and notifies creator
+ */
+export const requestChanges = adminMutation({
+  args: {
+    contentType: v.union(
+      v.literal("module"),
+      v.literal("lesson"),
+      v.literal("quiz"),
+      v.literal("assignment")
+    ),
+    contentId: v.string(),
+    feedback: v.string(),
+    issues: v.array(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    // Get content based on type
+    let content: { status: string; createdBy: string; title: string } | null = null;
+
+    switch (args.contentType) {
+      case "module":
+        content = await ctx.db.get(args.contentId as Id<"modules">);
+        break;
+      case "lesson":
+        content = await ctx.db.get(args.contentId as Id<"lessons">);
+        break;
+      case "quiz":
+        content = await ctx.db.get(args.contentId as Id<"quizzes">);
+        break;
+      case "assignment":
+        content = await ctx.db.get(args.contentId as Id<"assignments">);
+        break;
+    }
+
+    if (!content) {
+      throw new Error("Content not found");
+    }
+
+    if (content.status !== "pending") {
+      throw new Error("Only pending content can have changes requested");
+    }
+
+    // Update status
+    switch (args.contentType) {
+      case "module":
+        await ctx.db.patch(args.contentId as Id<"modules">, {
+          status: "changes_requested",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "lesson":
+        await ctx.db.patch(args.contentId as Id<"lessons">, {
+          status: "changes_requested",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "quiz":
+        await ctx.db.patch(args.contentId as Id<"quizzes">, {
+          status: "changes_requested",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "assignment":
+        await ctx.db.patch(args.contentId as Id<"assignments">, {
+          status: "changes_requested",
+          updatedAt: Date.now(),
+        });
+        break;
+    }
+
+    // Audit log
+    await createAuditLog(
+      ctx,
+      args.contentType,
+      args.contentId,
+      "changes_requested",
+      "pending",
+      "changes_requested",
+      `Issues: ${args.issues.join(", ")}\n\nFeedback: ${args.feedback}`
+    );
+
+    // Notify creator with detailed feedback
+    await createNotification(
+      ctx,
+      content.createdBy,
+      "content_rejected",
+      "Changes Requested",
+      `Your ${args.contentType} "${content.title}" needs revisions. Please review the feedback and resubmit.`,
+      args.contentType,
+      args.contentId
+    );
+
+    return null;
+  },
+});
+
+/**
+ * Resubmit content after changes requested
+ * Faculty only - changes status from changes_requested back to pending
+ */
+export const resubmitContent = facultyMutation({
+  args: {
+    contentType: v.union(
+      v.literal("module"),
+      v.literal("lesson"),
+      v.literal("quiz"),
+      v.literal("assignment")
+    ),
+    contentId: v.string(),
+    revisionNotes: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Get content based on type
+    let content: { status: string; createdBy: string; title: string } | null = null;
+
+    switch (args.contentType) {
+      case "module":
+        content = await ctx.db.get(args.contentId as Id<"modules">);
+        break;
+      case "lesson":
+        content = await ctx.db.get(args.contentId as Id<"lessons">);
+        break;
+      case "quiz":
+        content = await ctx.db.get(args.contentId as Id<"quizzes">);
+        break;
+      case "assignment":
+        content = await ctx.db.get(args.contentId as Id<"assignments">);
+        break;
+    }
+
+    if (!content) {
+      throw new Error("Content not found");
+    }
+
+    // Verify user is the creator
+    if (content.createdBy !== ctx.user.userId && ctx.user.role !== "ADMIN") {
+      throw new Error("Only the content creator can resubmit");
+    }
+
+    if (content.status !== "changes_requested") {
+      throw new Error("Only content with requested changes can be resubmitted");
+    }
+
+    // Update to pending
+    switch (args.contentType) {
+      case "module":
+        await ctx.db.patch(args.contentId as Id<"modules">, {
+          status: "pending",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "lesson":
+        await ctx.db.patch(args.contentId as Id<"lessons">, {
+          status: "pending",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "quiz":
+        await ctx.db.patch(args.contentId as Id<"quizzes">, {
+          status: "pending",
+          updatedAt: Date.now(),
+        });
+        break;
+      case "assignment":
+        await ctx.db.patch(args.contentId as Id<"assignments">, {
+          status: "pending",
+          updatedAt: Date.now(),
+        });
+        break;
+    }
+
+    // Audit log
+    await createAuditLog(
+      ctx,
+      args.contentType,
+      args.contentId,
+      "submitted_for_review",
+      "changes_requested",
+      "pending",
+      args.revisionNotes
+    );
+
+    // Notify admins - query admins using auth adapter
+    const adminsResult = await ctx.runQuery(components.auth.adapter.findMany, {
+      model: "user",
+      where: [{ field: "role", operator: "eq", value: "ADMIN" }],
+      limit: 100,
+      offset: 0,
+      paginationOpts: { cursor: null, numItems: 100 },
+    });
+
+    let admins: any[] = [];
+    if (Array.isArray(adminsResult)) {
+      admins = adminsResult;
+    } else if (adminsResult && typeof adminsResult === "object") {
+      admins = adminsResult.data ?? adminsResult.items ?? [];
+    }
+
+    for (const admin of admins) {
+      const adminId = String(admin._id);
+      await createNotification(
+        ctx,
+        adminId,
+        "pending_review",
+        "Content Resubmitted",
+        `Content "${content.title}" has been resubmitted for review.`,
+        args.contentType,
+        args.contentId
+      );
+    }
 
     return null;
   },
@@ -1338,5 +1879,435 @@ export const unpublishLesson = adminMutation({
     });
 
     return null;
+  },
+});
+
+/**
+ * Get counts for all content types
+ */
+export const getAllContentCounts = adminQuery({
+  args: {
+    courseId: v.optional(v.id("courses")),
+  },
+  returns: v.object({
+    modules: v.object({ pending: v.number(), approved: v.number(), rejected: v.number() }),
+    lessons: v.object({ pending: v.number(), approved: v.number(), rejected: v.number() }),
+    quizzes: v.object({ pending: v.number(), approved: v.number(), rejected: v.number() }),
+    assignments: v.object({ pending: v.number(), approved: v.number(), rejected: v.number() }),
+    total: v.object({ pending: v.number(), approved: v.number(), rejected: v.number() }),
+  }),
+  handler: async (ctx, args) => {
+    // Get modules counts
+    const modulesQuery = args.courseId
+      ? ctx.db.query("modules").withIndex("by_course", (q) => q.eq("courseId", args.courseId!))
+      : ctx.db.query("modules");
+    const modulesItems = await modulesQuery.collect();
+    const modules = {
+      pending: modulesItems.filter((item) => item.status === "pending").length,
+      approved: modulesItems.filter((item) => item.status === "approved").length,
+      rejected: modulesItems.filter(
+        (item) => item.status === "draft" && item.updatedAt > item.createdAt
+      ).length,
+    };
+
+    // Get lessons counts
+    // Lessons don't have direct courseId, so we need to filter through modules
+    let lessonsItems = await ctx.db.query("lessons").collect();
+    if (args.courseId) {
+      // Filter lessons by course through their modules
+      const moduleIds = await ctx.db
+        .query("modules")
+        .withIndex("by_course", (q) => q.eq("courseId", args.courseId!))
+        .collect();
+      const moduleIdSet = new Set(moduleIds.map((m) => m._id));
+      lessonsItems = lessonsItems.filter((l) => moduleIdSet.has(l.moduleId));
+    }
+    const lessons = {
+      pending: lessonsItems.filter((item) => item.status === "pending").length,
+      approved: lessonsItems.filter((item) => item.status === "approved").length,
+      rejected: lessonsItems.filter(
+        (item) => item.status === "draft" && item.updatedAt > item.createdAt
+      ).length,
+    };
+
+    // Get quizzes counts
+    const quizzesQuery = args.courseId
+      ? ctx.db.query("quizzes").withIndex("by_course", (q) => q.eq("courseId", args.courseId!))
+      : ctx.db.query("quizzes");
+    const quizzesItems = await quizzesQuery.collect();
+    const quizzes = {
+      pending: quizzesItems.filter((item) => item.status === "pending").length,
+      approved: quizzesItems.filter((item) => item.status === "approved").length,
+      rejected: quizzesItems.filter(
+        (item) => item.status === "draft" && item.updatedAt > item.createdAt
+      ).length,
+    };
+
+    // Get assignments counts
+    const assignmentsQuery = args.courseId
+      ? ctx.db.query("assignments").withIndex("by_course", (q) => q.eq("courseId", args.courseId!))
+      : ctx.db.query("assignments");
+    const assignmentsItems = await assignmentsQuery.collect();
+    const assignments = {
+      pending: assignmentsItems.filter((item) => item.status === "pending").length,
+      approved: assignmentsItems.filter((item) => item.status === "approved").length,
+      rejected: assignmentsItems.filter(
+        (item) => item.status === "draft" && item.updatedAt > item.createdAt
+      ).length,
+    };
+
+    const total = {
+      pending: modules.pending + lessons.pending + quizzes.pending + assignments.pending,
+      approved: modules.approved + lessons.approved + quizzes.approved + assignments.approved,
+      rejected: modules.rejected + lessons.rejected + quizzes.rejected + assignments.rejected,
+    };
+
+    return { modules, lessons, quizzes, assignments, total };
+  },
+});
+
+/**
+ * Get all pending content across types
+ */
+export const getAllPendingContent = adminQuery({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    courseId: v.optional(v.id("courses")),
+    createdBy: v.optional(v.string()),
+    startDate: v.optional(v.number()),
+    endDate: v.optional(v.number()),
+    sortBy: v.optional(
+      v.union(v.literal("newest"), v.literal("oldest"), v.literal("title"))
+    ),
+  },
+  returns: v.object({
+    page: v.array(
+      v.object({
+        _id: v.string(),
+        type: v.string(),
+        title: v.string(),
+        courseName: v.optional(v.string()),
+        courseId: v.optional(v.id("courses")),
+        moduleName: v.optional(v.string()),
+        createdBy: v.string(),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+        status: v.string(),
+      })
+    ),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const modules = await ctx.db
+      .query("modules")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+
+    const lessons = await ctx.db
+      .query("lessons")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+
+    const quizzes = await ctx.db
+      .query("quizzes")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+
+    const assignments = await ctx.db
+      .query("assignments")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+
+    const allItems = await Promise.all([
+      ...modules.map(async (m) => {
+        const course = await ctx.db.get(m.courseId);
+        return {
+          _id: m._id,
+          type: "module",
+          title: m.title,
+          courseName: course?.title,
+          courseId: m.courseId,
+          moduleName: undefined,
+          createdBy: m.createdBy,
+          createdAt: m.createdAt,
+          updatedAt: m.updatedAt,
+          status: m.status,
+        };
+      }),
+      ...lessons.map(async (l) => {
+        const module = await ctx.db.get(l.moduleId);
+        const course = module ? await ctx.db.get(module.courseId) : null;
+        return {
+          _id: l._id,
+          type: "lesson",
+          title: l.title,
+          courseName: course?.title,
+          courseId: module?.courseId,
+          moduleName: module?.title,
+          createdBy: l.createdBy,
+          createdAt: l.createdAt,
+          updatedAt: l.updatedAt,
+          status: l.status,
+        };
+      }),
+      ...quizzes.map(async (q) => {
+        const course = await ctx.db.get(q.courseId);
+        return {
+          _id: q._id,
+          type: "quiz",
+          title: q.title,
+          courseName: course?.title,
+          courseId: q.courseId,
+          moduleName: undefined,
+          createdBy: q.createdBy,
+          createdAt: q.createdAt,
+          updatedAt: q.updatedAt,
+          status: q.status,
+        };
+      }),
+      ...assignments.map(async (a) => {
+        const course = await ctx.db.get(a.courseId);
+        return {
+          _id: a._id,
+          type: "assignment",
+          title: a.title,
+          courseName: course?.title,
+          courseId: a.courseId,
+          moduleName: undefined,
+          createdBy: a.createdBy,
+          createdAt: a.createdAt,
+          updatedAt: a.updatedAt,
+          status: a.status,
+        };
+      }),
+    ]);
+
+    let filtered = allItems;
+
+    if (args.courseId) {
+      filtered = filtered.filter((item) => item.courseId === args.courseId);
+    }
+
+    if (args.createdBy) {
+      filtered = filtered.filter((item) => item.createdBy === args.createdBy);
+    }
+
+    if (args.startDate) {
+      filtered = filtered.filter((item) => item.createdAt >= args.startDate!);
+    }
+
+    if (args.endDate) {
+      filtered = filtered.filter((item) => item.createdAt <= args.endDate!);
+    }
+
+    const sortBy = args.sortBy ?? "newest";
+    if (sortBy === "oldest") {
+      filtered.sort((a, b) => a.createdAt - b.createdAt);
+    } else if (sortBy === "title") {
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+    } else {
+    filtered.sort((a, b) => b.createdAt - a.createdAt);
+    }
+
+    const { numItems } = args.paginationOpts;
+    const page = filtered.slice(0, numItems);
+    const isDone = filtered.length <= numItems;
+
+    return {
+      page,
+      isDone,
+      continueCursor: "",
+    };
+  },
+});
+
+/**
+ * Update content status (for Kanban drag-and-drop)
+ * Admin only - allows changing status between any valid states
+ */
+export const updateContentStatus = adminMutation({
+  args: {
+    contentType: v.union(
+      v.literal("module"),
+      v.literal("lesson"),
+      v.literal("quiz"),
+      v.literal("assignment")
+    ),
+    contentId: v.string(),
+    newStatus: v.union(
+      v.literal("draft"),
+      v.literal("pending"),
+      v.literal("changes_requested"),
+      v.literal("approved"),
+      v.literal("published")
+    ),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    // Get content based on type
+    let content: { status: string; createdBy: string; title: string } | null = null;
+    let previousStatus: string = "";
+
+    switch (args.contentType) {
+      case "module":
+        content = await ctx.db.get(args.contentId as Id<"modules">);
+        if (content) {
+          previousStatus = content.status;
+          // Validate status transitions for modules
+          if (args.newStatus === "approved") {
+            const lessons = await ctx.db
+              .query("lessons")
+              .withIndex("by_module", (q) => q.eq("moduleId", args.contentId as Id<"modules">))
+              .collect();
+            validateModuleStatus(args.newStatus as ContentStatus, lessons, content.title);
+          }
+          await ctx.db.patch(args.contentId as Id<"modules">, {
+            status: args.newStatus,
+            updatedAt: Date.now(),
+          });
+        }
+        break;
+      case "lesson":
+        content = await ctx.db.get(args.contentId as Id<"lessons">);
+        if (content) {
+          previousStatus = content.status;
+          // Validate status transitions for lessons
+          if (args.newStatus === "approved") {
+            const module = await ctx.db.get((content as any).moduleId);
+            if (module && !("status" in module)) {
+              throw new Error("Parent module not found");
+            }
+            validateLessonStatus(
+              args.newStatus as ContentStatus,
+              (module as { status: string })?.status as ContentStatus,
+              content.title
+            );
+          }
+          await ctx.db.patch(args.contentId as Id<"lessons">, {
+            status: args.newStatus,
+            updatedAt: Date.now(),
+          });
+        }
+        break;
+      case "quiz":
+        content = await ctx.db.get(args.contentId as Id<"quizzes">);
+        if (content) {
+          previousStatus = content.status;
+          await ctx.db.patch(args.contentId as Id<"quizzes">, {
+            status: args.newStatus,
+            updatedAt: Date.now(),
+          });
+        }
+        break;
+      case "assignment":
+        content = await ctx.db.get(args.contentId as Id<"assignments">);
+        if (content) {
+          previousStatus = content.status;
+          await ctx.db.patch(args.contentId as Id<"assignments">, {
+            status: args.newStatus,
+            updatedAt: Date.now(),
+          });
+        }
+        break;
+    }
+
+    if (!content) {
+      throw new Error("Content not found");
+    }
+
+    // Only create audit log if status actually changed
+    if (previousStatus !== args.newStatus) {
+      // Map status to appropriate audit log action
+      const statusToAction: Record<
+        string,
+        "created" | "submitted_for_review" | "approved" | "rejected" | "changes_requested" | "published" | "unpublished"
+      > = {
+        approved: "approved",
+        changes_requested: "changes_requested",
+        published: "published",
+        draft: "rejected", // Moving to draft is effectively a rejection
+        pending: "submitted_for_review",
+      };
+
+      const action = statusToAction[args.newStatus] || "approved"; // Default fallback
+
+      await createAuditLog(
+        ctx,
+        args.contentType,
+        args.contentId,
+        action,
+        previousStatus,
+        args.newStatus,
+        `Status changed via Kanban view`
+      );
+
+      // Notify creator if status changed to approved or changes_requested
+      if (args.newStatus === "approved") {
+        await createNotification(
+          ctx,
+          content.createdBy,
+          "content_approved",
+          `${args.contentType.charAt(0).toUpperCase() + args.contentType.slice(1)} Approved`,
+          `Your ${args.contentType} "${content.title}" has been approved.`,
+          args.contentType,
+          args.contentId
+        );
+      } else if (args.newStatus === "changes_requested") {
+        await createNotification(
+          ctx,
+          content.createdBy,
+          "content_rejected",
+          "Changes Requested",
+          `Your ${args.contentType} "${content.title}" needs revisions.`,
+          args.contentType,
+          args.contentId
+        );
+      }
+    }
+
+    return null;
+  },
+});
+
+/**
+ * Get approval history for content
+ */
+export const getContentApprovalHistory = adminQuery({
+  args: {
+    contentType: v.union(
+      v.literal("course"),
+      v.literal("module"),
+      v.literal("lesson"),
+      v.literal("quiz"),
+      v.literal("assignment")
+    ),
+    contentId: v.string(),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("auditLogs"),
+      action: v.string(),
+      performedBy: v.string(),
+      performedByName: v.optional(v.string()),
+      previousStatus: v.optional(v.string()),
+      newStatus: v.optional(v.string()),
+      comments: v.optional(v.string()),
+      timestamp: v.number(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    const logs = await ctx.db
+      .query("auditLogs")
+      .withIndex("by_content", (q) =>
+        q.eq("contentType", args.contentType).eq("contentId", args.contentId)
+      )
+      .order("desc")
+      .collect();
+
+    return logs;
   },
 });

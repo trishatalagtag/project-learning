@@ -22,6 +22,7 @@ import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import { useContentApproval } from "./hooks/use-content-approval"
 import { LessonItem } from "./lesson-item"
 import { RejectContentDialog } from "./reject-content-dialog"
+import { RequestChangesDialog } from "./request-changes-dialog"
 import { ApprovalActions } from "./shared/approval-actions"
 import { ContentMetadata } from "./shared/content-metadata"
 import { StatusBadge } from "./shared/status-badge"
@@ -48,11 +49,19 @@ export function ModuleItem({
     isExpanded ? { moduleId: module._id } : "skip",
   )
 
-  const { isApproving, showRejectDialog, setShowRejectDialog, handleApprove, handleReject } =
-    useContentApproval({
-      contentId: module._id,
-      contentType: "module",
-    })
+  const {
+    isApproving,
+    showRejectDialog,
+    setShowRejectDialog,
+    showRequestChangesDialog,
+    setShowRequestChangesDialog,
+    handleApprove,
+    handleReject,
+    handleRequestChanges,
+  } = useContentApproval({
+    contentId: module._id,
+    contentType: "module",
+  })
 
   const isPending = module.status === CONTENT_STATUS.PENDING
 
@@ -126,6 +135,7 @@ export function ModuleItem({
               <ApprovalActions
                 onApprove={handleApprove}
                 onReject={handleReject}
+                onRequestChanges={handleRequestChanges}
                 isApproving={isApproving}
                 layout="horizontal"
               />
@@ -181,6 +191,13 @@ export function ModuleItem({
       <RejectContentDialog
         open={showRejectDialog}
         onOpenChange={setShowRejectDialog}
+        contentId={module._id}
+        contentType="module"
+        contentTitle={module.title}
+      />
+      <RequestChangesDialog
+        open={showRequestChangesDialog}
+        onOpenChange={setShowRequestChangesDialog}
         contentId={module._id}
         contentType="module"
         contentTitle={module.title}

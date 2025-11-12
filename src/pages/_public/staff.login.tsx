@@ -1,16 +1,30 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel
 } from "@/components/ui/field"
-import { Link } from "@tanstack/react-router"
+import { Input } from "@/components/ui/input"
+import { getDashboardUrlByRole } from "@/lib/auth/guards"
+import { createFileRoute, Link, redirect } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_public/staff/login")({
+  beforeLoad: ({ context: { auth } }) => {
+    const { session, isPending } = auth
+
+    if (isPending) {
+      return
+    }
+
+    if (session?.user) {
+      const dashboardUrl = getDashboardUrlByRole(session.user.role)
+      throw redirect({
+        to: dashboardUrl,
+      })
+    }
+  },
   component: StaffLoginPage,
 })
 

@@ -1,3 +1,4 @@
+import { PublicModuleItem } from "@/components/course-content/public-module-item"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,7 +24,10 @@ import { Separator } from "@/components/ui/separator"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { useAuthParams } from "@/hooks/use-auth-params"
-import { authClient } from "@/lib/auth/guards"
+import { authClient, getDashboardUrlByRole } from "@/lib/auth/guards"
+import { ROLE, type UserRole } from "@/lib/rbac/permissions"
+import { useUserRole } from "@/lib/rbac/use-user-role"
+import { DocumentTextIcon } from "@heroicons/react/24/outline"
 import {
   AcademicCapIcon,
   ArrowLeftIcon,
@@ -45,6 +49,9 @@ function CourseDetailPage() {
   const { openModal } = useAuthParams()
   const { data: session } = authClient.useSession()
   const navigate = useNavigate()
+  const userRole = useUserRole()
+
+  const shouldBlockEnrollment = (role: UserRole | null) => role !== ROLE.LEARNER
 
   const course = useQuery(api.learner.courses.getPublicCourseDetail, {
     courseId: courseId as Id<"courses">,
@@ -77,9 +84,15 @@ function CourseDetailPage() {
       return
     }
 
+    // Block ADMIN/FACULTY from enrollment
+    if (shouldBlockEnrollment(userRole)) {
+      navigate({ to: getDashboardUrlByRole(userRole) })
+      return
+    }
+
     // If already enrolled, redirect to course
     if (enrollment) {
-      navigate({ to: "/c/$courseId", params: { courseId: courseId as Id<"courses"> }} )
+      navigate({ to: "/c/$courseId", params: { courseId: courseId as Id<"courses"> } })
       return
     }
 
@@ -96,7 +109,7 @@ function CourseDetailPage() {
           courseId: courseId as Id<"courses">,
           enrollmentCode: undefined,
         })
-        navigate({ to: "/c/$courseId", params: { courseId: courseId as Id<"courses"> }} )
+        navigate({ to: "/c/$courseId", params: { courseId: courseId as Id<"courses"> } })
       } catch (error) {
         console.error("Enrollment failed:", error)
       }
@@ -104,6 +117,12 @@ function CourseDetailPage() {
   }
 
   const handleEnrollWithCode = async () => {
+    // Block ADMIN/FACULTY from enrollment
+    if (shouldBlockEnrollment(userRole)) {
+      navigate({ to: getDashboardUrlByRole(userRole) })
+      return
+    }
+
     if (!enrollmentCode.trim()) {
       setEnrollmentError("Please enter an enrollment code")
       return
@@ -115,7 +134,7 @@ function CourseDetailPage() {
         enrollmentCode: enrollmentCode.trim(),
       })
       setEnrollmentCodeDialogOpen(false)
-      navigate({ to: "/c/$courseId", params: { courseId: courseId as Id<"courses"> }} )
+      navigate({ to: "/c/$courseId", params: { courseId: courseId as Id<"courses"> } })
     } catch (_error) {
       setEnrollmentError("Invalid enrollment code. Please try again.")
     }
@@ -232,6 +251,15 @@ function CourseDetailPage() {
                 Continue Learning →
               </Button>
             </Link>
+          ) : session?.user && shouldBlockEnrollment(userRole) ? (
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => navigate({ to: getDashboardUrlByRole(userRole) })}
+              className="w-full sm:w-auto"
+            >
+              Go to Dashboard
+            </Button>
           ) : (
             <Button
               size="lg"
@@ -266,42 +294,55 @@ function CourseDetailPage() {
 
       {/* Course Syllabus */}
       <Card>
-        <CardHeader>
-          <CardTitle>Course Syllabus</CardTitle>
+        <CardHeader className="space-y-4">
+          <div>
+            <CardTitle>Course Syllabus</CardTitle>
+            <p className="mt-1 text-muted-foreground text-sm">
+              Explore the modules included in this course.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">{modules.length}</span>
+              <span className="text-muted-foreground">
+                {modules.length === 1 ? "Module" : "Modules"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <DocumentTextIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">{totalLessons}</span>
+              <span className="text-muted-foreground">
+                {totalLessons === 1 ? "Lesson" : "Lessons"}
+              </span>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {modules.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <BookOpenIcon className="size-12" />
+            <div className="py-12">
+              <Empty>
+                <EmptyMedia>
+                  <BookOpenIcon className="h-12 w-12" />
                 </EmptyMedia>
-                <EmptyTitle>No modules yet</EmptyTitle>
-                <EmptyDescription>
-                  The instructor is still preparing the course content.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+                <EmptyHeader>
+                  <EmptyTitle>No modules yet</EmptyTitle>
+                  <EmptyDescription>
+                    The instructor is still preparing the course content.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </div>
           ) : (
             <div className="space-y-4">
               {modules.map((module, idx) => (
-                <div
+                <PublicModuleItem
                   key={module._id}
-                  className="rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="mb-1 font-semibold">
-                        Module {idx + 1}: {module.title}
-                      </h3>
-                      <p className="mb-2 text-muted-foreground text-sm">{module.description}</p>
-                      <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                        <BookOpenIcon className="size-3" />
-                        <span>{module.lessonCount} lessons</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  moduleNumber={idx + 1}
+                  title={module.title}
+                  description={module.description}
+                  lessonCount={module.lessonCount}
+                />
               ))}
             </div>
           )}
@@ -314,16 +355,24 @@ function CourseDetailPage() {
           <h3 className="mb-2 font-semibold text-xl">Ready to start learning?</h3>
           <p className="mb-4 text-muted-foreground">
             {session?.user
-              ? "Enroll now and start your agricultural education journey"
+              ? shouldBlockEnrollment(userRole)
+                ? "Enrollment is only available to learner accounts"
+                : "Enroll now and start your agricultural education journey"
               : "Create an account to enroll in this course"}
           </p>
-          <Button size="lg" onClick={handleEnroll} disabled={!course.isEnrollmentOpen}>
-            {session?.user
-              ? course.isEnrollmentOpen
-                ? "Enroll in This Course"
-                : "Enrollment Closed"
-              : "Sign Up to Enroll"}
-          </Button>
+          {session?.user && shouldBlockEnrollment(userRole) ? (
+            <Button size="lg" variant="outline" onClick={() => navigate({ to: getDashboardUrlByRole(userRole) })}>
+              Go to Dashboard
+            </Button>
+          ) : (
+            <Button size="lg" onClick={handleEnroll} disabled={!course.isEnrollmentOpen}>
+              {session?.user
+                ? course.isEnrollmentOpen
+                  ? "Enroll in This Course"
+                  : "Enrollment Closed"
+                : "Sign Up to Enroll"}
+            </Button>
+          )}
         </div>
       )}
 

@@ -28,19 +28,21 @@ export function CourseCard({ course, showNewBadge = true }: CourseCardProps) {
     return (
         <Card className="flex h-full flex-col transition-shadow hover:shadow-md">
             {/* Cover Image */}
-            {course.coverImageUrl ? (
-                <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                    <img
-                        src={course.coverImageUrl}
-                        alt={course.title}
-                        className="size-full object-cover"
-                    />
-                </div>
-            ) : (
-                <div className="flex aspect-video w-full items-center justify-center rounded-t-lg bg-muted">
-                    <AcademicCapIcon className="size-16 text-muted-foreground" />
-                </div>
-            )}
+            <div className="-mt-6">
+                {course.coverImageUrl ? (
+                    <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                        <img
+                            src={course.coverImageUrl}
+                            alt={course.title}
+                            className="size-full object-cover"
+                        />
+                    </div>
+                ) : (
+                    <div className="flex aspect-video w-full items-center justify-center rounded-t-lg bg-muted">
+                        <AcademicCapIcon className="size-16 text-muted-foreground" />
+                    </div>
+                )}
+            </div>
 
             <CardHeader className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">

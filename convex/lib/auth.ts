@@ -219,7 +219,7 @@ export async function requireCourseAccess(
 export async function canModifyContent(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   content: {
-    status: "draft" | "pending" | "approved" | "published";
+    status: "draft" | "pending" | "approved" | "published" | "changes_requested";
     createdBy: string;
   },
   course: Doc<"courses">
@@ -243,7 +243,7 @@ export async function canModifyContent(
 export async function requireContentModifyPermission(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   content: {
-    status: "draft" | "pending" | "approved" | "published";
+    status: "draft" | "pending" | "approved" | "published" | "changes_requested";
     createdBy: string;
   },
   course: Doc<"courses">

@@ -17,17 +17,35 @@ function AboutPage() {
   return (
     <div className="mx-auto w-full">
       {/* Hero Section */}
-      <section className="bg-muted/30 py-12 sm:py-16 md:py-20">
-        <div className="container mx-auto max-w-5xl px-4 text-center">
-          <div className="mb-6 flex justify-center">
-            <img src="/disoa.png" alt="DISOA Logo" className="size-24 sm:size-32" />
+      <section className="relative overflow-hidden bg-background">
+        {/* Background Cover Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/about-hero.png"
+            alt="DISOA About"
+            className="size-full object-cover object-center brightness-[0.4] dark:brightness-[0.6]"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/50 to-primary/30 dark:from-primary/60 dark:via-primary/40 dark:to-primary/20" />
+        </div>
+
+        {/* Content */}
+        <div className="container relative z-10 mx-auto max-w-5xl px-4 py-20 sm:py-24 md:py-28 lg:py-36">
+          <div className="text-center">
+            <div className="mb-6 flex justify-center">
+              <img
+                src="/disoa.png"
+                alt="DISOA Logo"
+                className="size-24 shadow-primary/50 drop-shadow-sm sm:size-32"
+              />
+            </div>
+            <h1 className="mb-4 font-bold text-3xl text-primary-foreground tracking-tight sm:text-4xl md:text-5xl dark:text-white dark:drop-shadow-md">
+              About DISOA
+            </h1>
+            <p className="mx-auto max-w-3xl text-lg text-primary-foreground/90 dark:text-white/90 dark:drop-shadow-md">
+              Dumingag Institute of Sustainable Organic Agriculture
+            </p>
           </div>
-          <h1 className="mb-4 font-bold text-3xl sm:text-4xl md:text-5xl">
-            About DISOA
-          </h1>
-          <p className="mx-auto max-w-3xl text-lg text-muted-foreground">
-            Dumingag Institute of Sustainable Organic Agriculture
-          </p>
         </div>
       </section>
 

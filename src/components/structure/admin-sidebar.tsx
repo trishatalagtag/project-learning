@@ -24,8 +24,10 @@ import {
 } from "@/components/ui/sidebar"
 import { adminSidebarConfig } from "@/config/sidebar/admin"
 import type { MenuItem, SidebarItem as SidebarItemType, ValidRoute } from "@/config/sidebar/config"
+import { api } from "@/convex/_generated/api"
 import { ChevronUpDownIcon } from "@heroicons/react/24/outline"
 import { Link } from "@tanstack/react-router"
+import { useQuery } from "convex/react"
 import * as React from "react"
 
 type MenuItemWithExtras = {
@@ -35,13 +37,41 @@ type MenuItemWithExtras = {
 
 export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>): React.ReactNode {
   const config = adminSidebarConfig
+  const contentCounts = useQuery(api.admin.content.getAllContentCounts, {})
+
+  const getBadgeForHref = (href?: string) => {
+    if (!href) return undefined
+    if (href === "/a/content-approvals") {
+      const pending = contentCounts?.total.pending ?? 0
+      return pending > 0 ? String(pending) : undefined
+    }
+    return undefined
+  }
+
+  const enhanceMenuItem = (item: SidebarItemType): SidebarItemType => {
+    if (item.children && item.children.length > 0) {
+      return {
+        ...item,
+        children: item.children.map((child) => ({
+          ...child,
+          badge: getBadgeForHref(child.href),
+        })),
+      }
+    }
+
+    return {
+      ...item,
+      badge: getBadgeForHref(item.href),
+    }
+  }
 
   const renderSidebarItem = (item: SidebarItemType, parentKey = ""): React.ReactNode => {
-    const Icon = item.icon
-    const itemKey = `${parentKey}-${item.label}`
+    const enhancedItem = enhanceMenuItem(item)
+    const Icon = enhancedItem.icon
+    const itemKey = `${parentKey}-${enhancedItem.label}`
 
-    if (item.children && item.children.length > 0) {
-      const defaultOpen = item.defaultExpanded ?? false
+    if (enhancedItem.children && enhancedItem.children.length > 0) {
+      const defaultOpen = enhancedItem.defaultExpanded ?? false
 
       return (
         <Collapsible key={itemKey} defaultOpen={defaultOpen} className="group/collapsible">
@@ -49,21 +79,21 @@ export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>
             <CollapsibleTrigger asChild>
               <SidebarMenuButton>
                 <Icon className="mr-2 h-4 w-4" />
-                <span>{item.label}</span>
+                <span>{enhancedItem.label}</span>
                 <ChevronUpDownIcon className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
               </SidebarMenuButton>
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarMenu className="mt-1 ml-4">
-                {item.children.map((child) => {
+                {enhancedItem.children.map((child) => {
                   const ChildIcon = child.icon
                   const childWithExtras = child as MenuItemWithExtras
                   return (
-                    <SidebarMenuItem key={child.label}>
+                    <SidebarMenuItem key={childWithExtras.label}>
                       <SidebarMenuButton asChild isActive={childWithExtras.isCurrent}>
                         <Link to={child.href as ValidRoute}>
                           <ChildIcon className="mr-2 h-4 w-4" />
-                          <span>{child.label}</span>
+                          <span>{childWithExtras.label}</span>
                           {childWithExtras.badge && (
                             <SidebarMenuBadge>{childWithExtras.badge}</SidebarMenuBadge>
                           )}
@@ -81,11 +111,11 @@ export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>
 
     return (
       <SidebarMenuItem key={itemKey}>
-        <SidebarMenuButton asChild isActive={item.isCurrent} tooltip={item.tooltip}>
-          <Link to={item.href as ValidRoute}>
+        <SidebarMenuButton asChild isActive={enhancedItem.isCurrent} tooltip={enhancedItem.tooltip}>
+          <Link to={enhancedItem.href as ValidRoute}>
             <Icon className="mr-2 h-4 w-4" />
-            <span>{item.label}</span>
-            {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
+            <span>{enhancedItem.label}</span>
+            {enhancedItem.badge && <SidebarMenuBadge>{enhancedItem.badge}</SidebarMenuBadge>}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>

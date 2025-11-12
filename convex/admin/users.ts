@@ -12,7 +12,7 @@ export const getUserById = adminQuery({
   returns: v.union(
     v.object({
       _id: v.string(),
-      userId: v.string(), // ← ADD THIS (will contain _id value)
+      userId: v.string(), 
       name: v.string(),
       email: v.string(),
       role: v.optional(v.string()),

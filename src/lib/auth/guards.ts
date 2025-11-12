@@ -44,3 +44,10 @@ export function isValidRole(role: string | null | undefined): role is UserRole {
   if (!role) return false
   return Object.values(ROLE).includes(role as UserRole)
 }
+
+export function getDashboardUrlByRole(role: string | null | undefined): "/c/courses" | "/a" | "/" {
+  if (!role) return "/"
+  if (role === ROLE.LEARNER) return "/c/courses"
+  if (role === ROLE.ADMIN || role === ROLE.FACULTY) return "/a"
+  return "/"
+}

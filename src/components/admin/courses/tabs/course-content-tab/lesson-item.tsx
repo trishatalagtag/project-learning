@@ -17,6 +17,7 @@ import { useState } from "react"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import { useContentApproval } from "./hooks/use-content-approval"
 import { RejectContentDialog } from "./reject-content-dialog"
+import { RequestChangesDialog } from "./request-changes-dialog"
 import { ApprovalActions } from "./shared/approval-actions"
 import { ContentMetadata } from "./shared/content-metadata"
 import { StatusBadge } from "./shared/status-badge"
@@ -47,11 +48,19 @@ export function LessonItem({
 }: LessonItemProps) {
   const [showDetails, setShowDetails] = useState(false)
 
-  const { isApproving, showRejectDialog, setShowRejectDialog, handleApprove, handleReject } =
-    useContentApproval({
-      contentId: lesson._id,
-      contentType: "lesson",
-    })
+  const {
+    isApproving,
+    showRejectDialog,
+    setShowRejectDialog,
+    showRequestChangesDialog,
+    setShowRequestChangesDialog,
+    handleApprove,
+    handleReject,
+    handleRequestChanges,
+  } = useContentApproval({
+    contentId: lesson._id,
+    contentType: "lesson",
+  })
 
   const isPending = lesson.status === CONTENT_STATUS.PENDING
 
@@ -147,6 +156,7 @@ export function LessonItem({
                     <ApprovalActions
                       onApprove={handleApprove}
                       onReject={handleReject}
+                      onRequestChanges={handleRequestChanges}
                       isApproving={isApproving}
                       size="sm"
                     />
@@ -188,6 +198,13 @@ export function LessonItem({
       <RejectContentDialog
         open={showRejectDialog}
         onOpenChange={setShowRejectDialog}
+        contentId={lesson._id}
+        contentType="lesson"
+        contentTitle={lesson.title}
+      />
+      <RequestChangesDialog
+        open={showRequestChangesDialog}
+        onOpenChange={setShowRequestChangesDialog}
         contentId={lesson._id}
         contentType="lesson"
         contentTitle={lesson.title}
