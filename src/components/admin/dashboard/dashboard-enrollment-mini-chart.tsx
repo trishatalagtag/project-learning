@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
     ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
@@ -94,6 +96,7 @@ export function DashboardEnrollmentMiniChart({ data }: DashboardEnrollmentMiniCh
                             tickCount={4}
                         />
                         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <ChartLegend content={<ChartLegendContent />} />
                         <defs>
                             <linearGradient id="fillEnrollments" x1="0" y1="0" x2="0" y2="1">
                                 <stop

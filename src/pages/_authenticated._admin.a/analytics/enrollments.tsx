@@ -1,11 +1,12 @@
 import { ChartBarIcon } from "@heroicons/react/24/outline";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { DateRangePicker } from "@/components/admin/analytics/date-range-picker";
 import { EnrollmentTrendsChart } from "@/components/admin/analytics/enrollment-trends-chart";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -42,6 +43,11 @@ function EnrollmentTrendsPage() {
     endDate: dateRange.end,
   });
 
+  const handleRetry = () => {
+    // Force a re-fetch by updating the date range with the same values
+    setDateRange({ ...dateRange });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -61,6 +67,21 @@ function EnrollmentTrendsPage() {
         <div className="flex min-h-[400px] items-center justify-center">
           <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
+      ) : trends === null ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <AlertCircle className="size-12 text-destructive" />
+            </EmptyMedia>
+            <EmptyTitle>Failed to load enrollment data</EmptyTitle>
+            <EmptyDescription>
+              An error occurred while loading enrollment trends. Please try again.
+            </EmptyDescription>
+            <Button onClick={handleRetry} variant="outline" className="mt-4">
+              Retry
+            </Button>
+          </EmptyHeader>
+        </Empty>
       ) : trends.length === 0 ? (
         <Empty>
           <EmptyHeader>

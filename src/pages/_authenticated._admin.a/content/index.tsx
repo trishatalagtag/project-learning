@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { api } from "@/convex/_generated/api"
-import type { ContentStatus } from "@/lib/constants/content-status"
 import {
     BookOpenIcon,
     ClipboardDocumentListIcon,
@@ -22,11 +21,11 @@ import {
     MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline"
 import { EyeIcon } from "@heroicons/react/24/solid"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { formatDistanceToNow } from "date-fns"
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export const Route = createFileRoute("/_authenticated/_admin/a/content/")({
     component: ContentBrowserPage,
@@ -40,14 +39,65 @@ const CONTENT_TYPE_ICONS = {
 } as const
 
 type ContentTypeFilter = "module" | "lesson" | "quiz" | "assignment"
-type StatusFilter = "pending" | "approved" | "draft" | "published" | "changes_requested"
+type StatusFilter = "pending" | "approved" | "draft"
 
 function ContentBrowserPage() {
-    const [contentType, setContentType] = useState<ContentTypeFilter>("module")
-    const [status, setStatus] = useState<StatusFilter>("published")
-    const [search, setSearch] = useState("")
+    const navigate = useNavigate()
+    const searchParams = useSearch({ from: "/_authenticated/_admin/a/content/" })
+
+    // Get filter values from URL search params or use defaults
+    const contentTypeFromUrl = (searchParams?.contentType as ContentTypeFilter) ?? "module"
+    const statusFromUrl = (searchParams?.status as StatusFilter) ?? "pending"
+    const searchFromUrl = (searchParams?.q as string) ?? ""
+
+    const [contentType, setContentType] = useState<ContentTypeFilter>(contentTypeFromUrl)
+    const [status, setStatus] = useState<StatusFilter>(statusFromUrl)
+    const [search, setSearch] = useState(searchFromUrl)
     const [currentPage, setCurrentPage] = useState(0)
     const itemsPerPage = 20
+
+    // Sync contentType from URL on mount
+    useEffect(() => {
+        setContentType(contentTypeFromUrl)
+    }, [contentTypeFromUrl])
+
+    // Sync status from URL on mount
+    useEffect(() => {
+        setStatus(statusFromUrl)
+    }, [statusFromUrl])
+
+    // Sync search from URL on mount
+    useEffect(() => {
+        setSearch(searchFromUrl)
+    }, [searchFromUrl])
+
+    // Update URL when filters change
+    const handleContentTypeChange = (newType: ContentTypeFilter) => {
+        setContentType(newType)
+        setCurrentPage(0)
+        navigate({
+            to: "/a/content",
+            search: { ...searchParams, contentType: newType, pageIndex: 0 }
+        })
+    }
+
+    const handleStatusChange = (newStatus: StatusFilter) => {
+        setStatus(newStatus)
+        setCurrentPage(0)
+        navigate({
+            to: "/a/content",
+            search: { ...searchParams, status: newStatus, pageIndex: 0 }
+        })
+    }
+
+    const handleSearchChange = (newSearch: string) => {
+        setSearch(newSearch)
+        setCurrentPage(0)
+        navigate({
+            to: "/a/content",
+            search: { ...searchParams, q: newSearch, pageIndex: 0 }
+        })
+    }
 
     // Query for paginated content
     const contentData = useQuery(api.admin.content.listContentPaginated, {
@@ -111,7 +161,7 @@ function ContentBrowserPage() {
                         {/* Content Type Filter */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Content Type</label>
-                            <Select value={contentType} onValueChange={(value) => setContentType(value as ContentTypeFilter)}>
+                            <Select value={contentType} onValueChange={(value) => handleContentTypeChange(value as ContentTypeFilter)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -127,7 +177,7 @@ function ContentBrowserPage() {
                         {/* Status Filter */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Status</label>
-                            <Select value={status} onValueChange={(value) => setStatus(value as StatusFilter)}>
+                            <Select value={status} onValueChange={(value) => handleStatusChange(value as StatusFilter)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -135,8 +185,6 @@ function ContentBrowserPage() {
                                     <SelectItem value="draft">Draft</SelectItem>
                                     <SelectItem value="pending">Pending Review</SelectItem>
                                     <SelectItem value="approved">Approved</SelectItem>
-                                    <SelectItem value="published">Published</SelectItem>
-                                    <SelectItem value="changes_requested">Changes Requested</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -149,7 +197,7 @@ function ContentBrowserPage() {
                                 <Input
                                     placeholder="Search by title..."
                                     value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-9"
                                 />
                             </div>
@@ -218,7 +266,7 @@ function ContentBrowserPage() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <StatusBadge status={status as ContentStatus} />
+                                                        <StatusBadge status={status} />
                                                     </TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-2">

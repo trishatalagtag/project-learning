@@ -1,20 +1,17 @@
 import { UserDistributionChart } from "@/components/admin/analytics/user-distribution-chart"
+import { DashboardAllMetrics, DashboardAllMetricsSkeleton } from "@/components/admin/dashboard/dashboard-all-metrics"
 import { DashboardEnrollmentMiniChart, DashboardEnrollmentMiniChartSkeleton } from "@/components/admin/dashboard/dashboard-enrollment-mini-chart"
 import { DashboardKpiCards, DashboardKpiCardsSkeleton } from "@/components/admin/dashboard/dashboard-kpi-cards"
 import { DashboardPendingWidget, DashboardPendingWidgetSkeleton } from "@/components/admin/dashboard/dashboard-pending-widget"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/convex/_generated/api"
 import {
   AcademicCapIcon,
   ChartBarIcon,
+  ExclamationTriangleIcon,
   FolderIcon,
   RectangleStackIcon,
   Squares2X2Icon,
@@ -43,25 +40,39 @@ function DashboardPage() {
   })
 
   const isLoading = stats === undefined || counts === undefined || enrollmentTrends === undefined
+  const statsError = stats === null
+  const countsError = counts === null
+  const trendsError = enrollmentTrends === null
+  const hasError = statsError || countsError || trendsError
+
+  const handleRetry = () => {
+    // Convex will automatically retry on refresh
+    window.location.reload()
+  }
 
   if (isLoading) {
     return <DashboardSkeleton />
   }
 
-  if (!stats) {
+  if (statsError) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ChartBarIcon className="size-12 text-muted-foreground" />
-            </EmptyMedia>
-            <EmptyTitle>No statistics available</EmptyTitle>
-            <EmptyDescription>
-              System statistics will appear here once the platform has activity.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+      <div className="space-y-6 p-6">
+        <div>
+          <h1 className="font-bold text-3xl tracking-tight">Admin Dashboard</h1>
+          <p className="mt-2 text-muted-foreground">
+            Welcome back! Here's an overview of your platform.
+          </p>
+        </div>
+        <Alert variant="destructive">
+          <ExclamationTriangleIcon className="h-4 w-4" />
+          <AlertTitle>Failed to Load Statistics</AlertTitle>
+          <AlertDescription className="mt-2">
+            <p className="mb-4">We encountered an error while fetching system statistics. This could be due to a temporary server issue or network problem.</p>
+            <Button onClick={handleRetry} variant="outline" size="sm">
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }
@@ -76,6 +87,20 @@ function DashboardPage() {
         </p>
       </div>
 
+      {/* Error alerts for non-critical data */}
+      {hasError && (
+        <Alert variant="destructive">
+          <ExclamationTriangleIcon className="h-4 w-4" />
+          <AlertTitle>Partial Data Load</AlertTitle>
+          <AlertDescription className="mt-2">
+            <p className="mb-4">Some dashboard information failed to load. Please refresh to retry.</p>
+            <Button onClick={handleRetry} variant="outline" size="sm">
+              Refresh
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* KPI Cards */}
       <section>
         <DashboardKpiCards
@@ -84,25 +109,6 @@ function DashboardPage() {
         />
       </section>
 
-      {/* Charts Section */}
-      <section>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Enrollment Trends - 2/3 width */}
-          <div className="lg:col-span-2">
-            <DashboardEnrollmentMiniChart data={enrollmentTrends} />
-          </div>
-
-          {/* User Distribution - 1/3 width */}
-          <div className="lg:col-span-1">
-            <UserDistributionChart stats={stats} />
-          </div>
-        </div>
-      </section>
-
-      {/* Pending Approvals Widget */}
-      <section>
-        {counts && <DashboardPendingWidget counts={counts} />}
-      </section>
 
       {/* Quick Actions */}
       <section>
@@ -218,6 +224,54 @@ function DashboardPage() {
           </Link>
         </div>
       </section>
+
+      {/* Charts Section */}
+      <section>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {/* Enrollment Trends - 2/3 width */}
+          <div className="lg:col-span-2">
+            {enrollmentTrends !== undefined ? (
+              <DashboardEnrollmentMiniChart data={enrollmentTrends} />
+            ) : (
+              <DashboardEnrollmentMiniChartSkeleton />
+            )}
+          </div>
+
+          {/* User Distribution - 1/3 width */}
+          <div className="lg:col-span-1">
+            {stats !== undefined ? (
+              <UserDistributionChart stats={stats} />
+            ) : (
+              <Card>
+                <CardContent className="p-6">
+                  <Skeleton className="h-[300px] w-full" />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Pending Approvals Widget */}
+      <section>
+        {counts !== undefined ? (
+          <DashboardPendingWidget counts={counts} />
+        ) : (
+          <DashboardPendingWidgetSkeleton />
+        )}
+      </section>
+
+      {/* All Metrics Section */}
+      <section>
+        <h2 className="mb-4 font-semibold text-xl">All Platform Metrics</h2>
+        {stats !== undefined ? (
+          <DashboardAllMetrics stats={stats} />
+        ) : (
+          <DashboardAllMetricsSkeleton />
+        )}
+      </section>
+
+
     </div>
   )
 }

@@ -1,7 +1,9 @@
 "use client"
 
+import { CoursesTableContentSkeleton, CoursesTableSkeleton } from "@/components/admin/courses/courses-table-skeleton"
 import { DataTablePagination } from "@/components/table/data-table-pagination"
 import { DataTableViewOptions } from "@/components/table/data-table-view-options"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,7 +26,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -43,11 +47,15 @@ import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import { cn } from "@/lib/utils"
 import {
   AcademicCapIcon,
+  ArchiveBoxIcon,
+  BookOpenIcon,
+  CheckCircleIcon,
   ChevronRightIcon,
   ExclamationTriangleIcon,
   FolderIcon,
   MagnifyingGlassIcon,
   PlusIcon,
+  SparklesIcon,
   UserIcon,
   UsersIcon
 } from "@heroicons/react/24/outline"
@@ -62,8 +70,8 @@ import {
 import { useDebounce } from "@uidotdev/usehooks"
 import { useQuery } from "convex/react"
 import { formatDistanceToNow } from "date-fns"
-import { Loader2 } from "lucide-react"
-import { useMemo } from "react"
+import { AlertCircle, Loader2 } from "lucide-react"
+import React, { useEffect, useMemo, useState } from "react"
 import { type Course, createColumns } from "./columns"
 
 export function CoursesTable() {
@@ -80,6 +88,8 @@ export function CoursesTable() {
     sortBy?: string
     sortOrder?: "asc" | "desc"
   }
+
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   const {
     columnVisibility = {},
@@ -138,6 +148,15 @@ export function CoursesTable() {
   const totalCourses = coursesData?.total ?? 0
   const pageCount = Math.ceil(totalCourses / pageSize)
 
+  const isLoading = coursesData === undefined || categories === undefined || faculty === undefined
+
+  // Track when data finishes loading for the first time
+  useEffect(() => {
+    if (!isLoading) {
+      setHasInitialized(true)
+    }
+  }, [isLoading])
+
   const updateSearch = (updates: Partial<typeof search>) => {
     navigate({
       // @ts-expect-error - prev is not typed
@@ -148,6 +167,11 @@ export function CoursesTable() {
 
   const handleView = (courseId: Id<"courses">) => {
     navigate({ to: "/a/courses/$courseId", params: { courseId } })
+  }
+
+  const handleRetry = () => {
+    // Force a re-fetch by updating the search state
+    updateSearch({})
   }
 
   const columns = useMemo(
@@ -204,18 +228,30 @@ export function CoursesTable() {
     manualSorting: true,
   })
 
-  // Loading state
-  if (coursesData === undefined || categories === undefined || faculty === undefined) {
+  // Loading state - show full skeleton on initial load, table-only skeleton on refetch
+  if (isLoading && !hasInitialized) {
+    return <CoursesTableSkeleton />
+  }
+
+  // Error state
+  if (coursesData === null || categories === null || faculty === null) {
     return (
       <div className="container mx-auto py-10">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+              <AlertCircle className="h-12 w-12 text-destructive" />
             </EmptyMedia>
-            <EmptyTitle>Loading courses...</EmptyTitle>
-            <EmptyDescription>Please wait while we fetch your data.</EmptyDescription>
+            <EmptyTitle>Failed to load courses</EmptyTitle>
+            <EmptyDescription>
+              An error occurred while loading the course list. Please try again.
+            </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={handleRetry} variant="outline">
+              Retry
+            </Button>
+          </EmptyContent>
         </Empty>
       </div>
     )
@@ -242,6 +278,33 @@ export function CoursesTable() {
         </Empty>
       </div>
     )
+  }
+
+  const getStatusIcon = (statusValue: string) => {
+    const iconProps = "h-4 w-4 opacity-60"
+    const statusMap: Record<string, React.ReactNode> = {
+      draft: <SparklesIcon className={iconProps} />,
+      pending: <ExclamationTriangleIcon className={iconProps} />,
+      approved: <CheckCircleIcon className={iconProps} />,
+      published: <CheckCircleIcon className={iconProps} />,
+      archived: <ArchiveBoxIcon className={iconProps} />,
+    }
+    return statusMap[statusValue] || <ExclamationTriangleIcon className={iconProps} />
+  }
+
+  const getAvatarFallback = (name: string) => {
+    return name
+      .split(" ")
+      .map(n => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  const getCategoryName = (id: string): string => {
+    if (!id || id === "all") return "All categories"
+    const category = flatCategories.find(cat => cat._id === id)
+    return category?.name || "Category"
   }
 
   const getStatusVariant = (courseStatus: string) => {
@@ -281,6 +344,7 @@ export function CoursesTable() {
               value={q}
               onChange={(e) => updateSearch({ q: e.target.value, pageIndex: 0 })}
               className="h-9 pl-8"
+              disabled={isLoading}
             />
           </div>
 
@@ -293,17 +357,51 @@ export function CoursesTable() {
                 pageIndex: 0,
               })
             }
+            disabled={isLoading}
           >
             <SelectTrigger className="h-9 w-full sm:w-[140px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value={CONTENT_STATUS.DRAFT}>Draft</SelectItem>
-              <SelectItem value={CONTENT_STATUS.PENDING}>Pending</SelectItem>
-              <SelectItem value={CONTENT_STATUS.APPROVED}>Approved</SelectItem>
-              <SelectItem value={CONTENT_STATUS.PUBLISHED}>Published</SelectItem>
-              <SelectItem value="archived">Archived</SelectItem>
+              <SelectGroup>
+                <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">Filter by Status</SelectLabel>
+                <SelectItem value="all">
+                  <span className="flex items-center gap-2">
+                    <UsersIcon className="h-4 w-4 opacity-60" />
+                    <span>All statuses</span>
+                  </span>
+                </SelectItem>
+                <SelectItem value={CONTENT_STATUS.DRAFT}>
+                  <span className="flex items-center gap-2">
+                    {getStatusIcon("draft")}
+                    <span>Draft</span>
+                  </span>
+                </SelectItem>
+                <SelectItem value={CONTENT_STATUS.PENDING}>
+                  <span className="flex items-center gap-2">
+                    {getStatusIcon("pending")}
+                    <span>Pending</span>
+                  </span>
+                </SelectItem>
+                <SelectItem value={CONTENT_STATUS.APPROVED}>
+                  <span className="flex items-center gap-2">
+                    {getStatusIcon("approved")}
+                    <span>Approved</span>
+                  </span>
+                </SelectItem>
+                <SelectItem value={CONTENT_STATUS.PUBLISHED}>
+                  <span className="flex items-center gap-2">
+                    {getStatusIcon("published")}
+                    <span>Published</span>
+                  </span>
+                </SelectItem>
+                <SelectItem value="archived">
+                  <span className="flex items-center gap-2">
+                    {getStatusIcon("archived")}
+                    <span>Archived</span>
+                  </span>
+                </SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
 
@@ -316,24 +414,50 @@ export function CoursesTable() {
                 pageIndex: 0,
               })
             }
+            disabled={isLoading}
           >
             <SelectTrigger className="h-9 w-full sm:w-[160px]">
-              <SelectValue placeholder="Category" />
+              <SelectValue
+                placeholder="Category"
+              >
+                {categoryId ? (
+                  <span className="flex items-center gap-2">
+                    <FolderIcon className="h-4 w-4 opacity-60" />
+                    <span className="truncate">{getCategoryName(categoryId)}</span>
+                  </span>
+                ) : null}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
+              <SelectGroup>
+                <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">All Categories</SelectLabel>
+                <SelectItem value="all">
+                  <span className="flex items-center gap-2">
+                    <FolderIcon className="h-4 w-4 opacity-60" />
+                    <span>All categories</span>
+                  </span>
+                </SelectItem>
+              </SelectGroup>
               {categories === undefined ? (
                 <div className="flex items-center justify-center p-2">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                flatCategories.map((cat) => (
-                  <SelectItem key={cat._id} value={cat._id}>
-                    {"\u00A0\u00A0".repeat(cat.level - 1)}
-                    {cat.level > 1 && "└─ "}
-                    {cat.name}
-                  </SelectItem>
-                ))
+                <SelectGroup>
+                  <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">Available Categories</SelectLabel>
+                  {flatCategories.map((cat) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      <span className="flex items-center gap-2">
+                        <FolderIcon className="h-4 w-4 opacity-60" />
+                        <span>
+                          {"\u00A0\u00A0".repeat(cat.level - 1)}
+                          {cat.level > 1 && "└─ "}
+                          {cat.name}
+                        </span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               )}
             </SelectContent>
           </Select>
@@ -347,17 +471,34 @@ export function CoursesTable() {
                 pageIndex: 0,
               })
             }
+            disabled={isLoading}
           >
             <SelectTrigger className="h-9 w-full sm:w-[180px]">
               <SelectValue placeholder="Teacher" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All teachers</SelectItem>
-              {faculty.map((teacher) => (
-                <SelectItem key={teacher._id} value={teacher._id}>
-                  {teacher.name}
+              <SelectGroup>
+                <SelectLabel className="text-xs py-1 font-normal text-muted-foreground">Select a teacher</SelectLabel>
+                <SelectItem value="all">
+                  <span className="flex items-center gap-2">
+                    <UsersIcon className="h-4 w-4 opacity-60" />
+                    <span>All teachers</span>
+                  </span>
                 </SelectItem>
-              ))}
+                {(faculty || []).map((teacher) => {
+                  const initials = getAvatarFallback(teacher.name)
+                  return (
+                    <SelectItem key={teacher._id} value={teacher._id}>
+                      <span className="flex items-center gap-2">
+                        <Avatar className="h-5 w-5">
+                          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                        </Avatar>
+                        <span>{teacher.name}</span>
+                      </span>
+                    </SelectItem>
+                  )
+                })}
+              </SelectGroup>
             </SelectContent>
           </Select>
 
@@ -377,7 +518,9 @@ export function CoursesTable() {
 
       {/* Mobile List View */}
       <div className="md:hidden">
-        {data.length > 0 ? (
+        {isLoading && hasInitialized ? (
+          <CoursesTableContentSkeleton />
+        ) : data.length > 0 ? (
           <ItemGroup className="space-y-0">
             {data.map((course: Course, index) => {
               const isFirst = index === 0
@@ -436,6 +579,10 @@ export function CoursesTable() {
                           <UsersIcon className="h-3.5 w-3.5" />
                           {course.enrollmentCount} enrolled
                         </span>
+                        <span className="flex items-center gap-1">
+                          <BookOpenIcon className="h-3.5 w-3.5" />
+                          {course.moduleCount} modules
+                        </span>
                         <span>
                           Updated {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}
                         </span>
@@ -460,43 +607,47 @@ export function CoursesTable() {
 
       {/* Desktop Table View */}
       <div className="hidden rounded-md border md:block">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+        {isLoading && hasInitialized ? (
+          <CoursesTableContentSkeleton />
+        ) : (
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                    <ExclamationTriangleIcon className="h-8 w-8" />
-                    <p>No courses found{q && ` matching "${q}"`}</p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <ExclamationTriangleIcon className="h-8 w-8" />
+                      <p>No courses found{q && ` matching "${q}"`}</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
       <DataTablePagination table={table} />

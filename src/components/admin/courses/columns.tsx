@@ -7,7 +7,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import type { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import {
-  AcademicCapIcon, EyeIcon,
+  AcademicCapIcon,
+  BookOpenIcon,
+  EyeIcon,
   FolderIcon,
   UserIcon,
   UsersIcon
@@ -111,6 +113,16 @@ export const createColumns = ({ onView }: ColumnsConfig): ColumnDef<Course>[] =>
       <div className="flex items-center gap-2 text-sm">
         <UsersIcon className="h-4 w-4 text-muted-foreground" />
         <span className="font-medium tabular-nums">{row.getValue("enrollmentCount")}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "moduleCount",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Modules" />,
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2 text-sm">
+        <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
+        <span className="font-medium tabular-nums">{row.getValue("moduleCount")}</span>
       </div>
     ),
   },

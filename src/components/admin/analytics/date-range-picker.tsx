@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { format } from "date-fns";
+import { format, startOfYear, subDays } from "date-fns";
 import { useState } from "react";
 
 interface DateRangePickerProps {
@@ -44,10 +44,57 @@ export function DateRangePicker({
         onDateRangeChange({ start: undefined, end: undefined });
     };
 
+    const handlePresetRange = (days: number | "year") => {
+        const end = Date.now();
+        let start: number;
+
+        if (days === "year") {
+            start = startOfYear(new Date()).getTime();
+        } else {
+            start = subDays(new Date(), days).getTime();
+        }
+
+        onDateRangeChange({ start, end });
+    };
+
     return (
-        <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2">
-                <span className="font-medium text-sm">Date Range:</span>
+        <div className="flex flex-col gap-4">
+            {/* Preset Buttons */}
+            <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-sm">Quick Select:</span>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePresetRange(7)}
+                >
+                    Last 7 Days
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePresetRange(30)}
+                >
+                    Last 30 Days
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePresetRange(90)}
+                >
+                    Last 90 Days
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePresetRange("year")}
+                >
+                    This Year
+                </Button>
+            </div>
+
+            {/* Custom Date Range */}
+            <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-sm">Custom Range:</span>
 
                 {/* Start Date */}
                 <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>

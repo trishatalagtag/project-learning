@@ -29,20 +29,22 @@ export function DashboardKpiCards({ stats, pendingCount = 0 }: DashboardKpiCards
     return (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Total Users */}
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="font-medium text-sm">Total Users</CardTitle>
-                    <div className="rounded-full bg-primary/10 p-2">
-                        <UsersIcon className="h-4 w-4 text-primary" />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="font-bold text-2xl">{stats.totalUsers.toLocaleString()}</div>
-                    <p className="mt-1 text-muted-foreground text-xs">
-                        {stats.totalLearners} learners · {stats.totalFaculty} faculty · {stats.totalAdmins} admins
-                    </p>
-                </CardContent>
-            </Card>
+            <Link to="/a/users" className="block">
+                <Card className="cursor-pointer transition-colors hover:bg-accent">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="font-medium text-sm">Total Users</CardTitle>
+                        <div className="rounded-full bg-primary/10 p-2">
+                            <UsersIcon className="h-4 w-4 text-primary" />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="font-bold text-2xl">{stats.totalUsers.toLocaleString()}</div>
+                        <p className="mt-1 text-muted-foreground text-xs">
+                            {stats.totalLearners} learners · {stats.totalFaculty} faculty · {stats.totalAdmins} admins
+                        </p>
+                    </CardContent>
+                </Card>
+            </Link>
 
             {/* Active Enrollments */}
             <Card>
@@ -66,12 +68,12 @@ export function DashboardKpiCards({ stats, pendingCount = 0 }: DashboardKpiCards
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="font-medium text-sm">Pending Content</CardTitle>
                         <div className={`rounded-full p-2 ${pendingCount > 0
-                                ? 'bg-yellow-500/10'
-                                : 'bg-green-500/10'
+                            ? 'bg-yellow-500/10'
+                            : 'bg-green-500/10'
                             }`}>
                             <ClockIcon className={`h-4 w-4 ${pendingCount > 0
-                                    ? 'text-yellow-600'
-                                    : 'text-green-600'
+                                ? 'text-yellow-600'
+                                : 'text-green-600'
                                 }`} />
                         </div>
                     </CardHeader>
