@@ -24,7 +24,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -36,7 +38,7 @@ import { useCourseMutations } from "@/hooks/use-course-mutations"
 import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import type { Course } from "@/lib/types/course"
-import { CheckIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/solid"
+import { CheckIcon, FolderIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/solid"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
@@ -149,9 +151,6 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
     setError(null)
   }
 
-  const getCategoryIndentation = (level: number) => {
-    return "\u00A0".repeat((level - 1) * 4)
-  }
 
   return (
     <Card>
@@ -407,13 +406,23 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
                                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                                 </div>
                               ) : (
-                                flatCategories.map((cat) => (
-                                  <SelectItem key={cat._id} value={cat._id} className="font-mono">
-                                    {getCategoryIndentation(cat.level)}
-                                    {cat.level > 1 && "└─ "}
-                                    {cat.name}
-                                  </SelectItem>
-                                ))
+                                <SelectGroup>
+                                  <SelectLabel className="py-1 font-normal text-muted-foreground text-xs">
+                                    Available Categories
+                                  </SelectLabel>
+                                  {flatCategories.map((cat) => (
+                                    <SelectItem key={cat._id} value={cat._id}>
+                                      <span className="flex items-center gap-2">
+                                        <FolderIcon className="h-4 w-4 opacity-60" />
+                                        <span>
+                                          {"\u00A0\u00A0".repeat(cat.level - 1)}
+                                          {cat.level > 1 && "└─ "}
+                                          {cat.name}
+                                        </span>
+                                      </span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
                               )}
                             </SelectContent>
                           </Select>

@@ -1,5 +1,21 @@
 "use client"
 
+import {
+  AcademicCapIcon,
+  BookOpenIcon,
+  CheckIcon,
+  FolderIcon,
+  UserIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useLocalStorage } from "@uidotdev/usehooks"
+import { useMutation, useQuery } from "convex/react"
+import { Loader2, Search } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { FormProvider, useForm, useFormContext } from "react-hook-form"
+import * as z from "zod"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,6 +28,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -43,21 +60,6 @@ import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
-import {
-  AcademicCapIcon,
-  BookOpenIcon,
-  CheckIcon,
-  FolderIcon,
-  UserIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/solid"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useLocalStorage } from "@uidotdev/usehooks"
-import { useMutation, useQuery } from "convex/react"
-import { Loader2, Search } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
-import { FormProvider, useForm, useFormContext } from "react-hook-form"
-import * as z from "zod"
 
 import type { Course } from "./columns"
 
@@ -90,19 +92,19 @@ const STEPS = [
     id: 3,
     name: "Teacher",
     description: "Assign faculty member",
-    fields: [] as FieldName[], // Optional step, no validation required
+    fields: [] as FieldName[],
   },
   {
     id: 4,
     name: "Settings",
     description: "Enrollment options",
-    fields: ["isEnrollmentOpen"] as FieldName[],
+    fields: [] as FieldName[],
   },
   {
     id: 5,
     name: "Preview",
     description: "Review and publish",
-    fields: [] as FieldName[], // Preview only, no validation
+    fields: [] as FieldName[],
   },
 ] as const
 
@@ -128,7 +130,7 @@ export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: Cour
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden p-0">
+        <DialogContent className="max-h-[90vh] w-full max-w-3xl overflow-hidden p-0">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle className="flex items-center gap-2">
               <AcademicCapIcon className="h-5 w-5 text-primary" />
@@ -185,10 +187,7 @@ function CourseFormContent({
   const [savedFormState, setSavedFormState] = useLocalStorage<{
     currentStep: number
     formValues: Partial<FormData>
-  } | null>({
-    key: storageKey,
-    defaultValue: null,
-  })
+  } | null>(storageKey, null)
 
   const createCourse = useMutation(api.faculty.courses.createCourse)
   const updateCourse = useMutation(api.faculty.courses.updateCourse)
@@ -224,10 +223,12 @@ function CourseFormContent({
 
   // Restore from localStorage or course data
   useEffect(() => {
-    if (savedFormState && open) {
+    if (!open) return
+
+    if (savedFormState) {
       form.reset(savedFormState.formValues as FormData)
       setCurrentStep(savedFormState.currentStep)
-    } else if (course && mode === "edit" && getCourseById && open) {
+    } else if (course && mode === "edit" && getCourseById) {
       form.reset({
         title: getCourseById.title,
         description: getCourseById.description,
@@ -237,11 +238,15 @@ function CourseFormContent({
         isEnrollmentOpen: getCourseById.isEnrollmentOpen,
       })
       setCurrentStep(1)
-    } else if (!open) {
-      // Reset when dialog closes
+    }
+  }, [open, course, mode, getCourseById, savedFormState, form])
+
+  // Reset when dialog closes
+  useEffect(() => {
+    if (!open) {
       setCurrentStep(1)
     }
-  }, [course, mode, getCourseById, savedFormState, form, open])
+  }, [open])
 
   // Save form state to localStorage
   const saveFormState = (step: number) => {
@@ -307,7 +312,7 @@ function CourseFormContent({
           if (stepData.fields.length > 0) {
             const isValid = await form.trigger(stepData.fields)
             if (!isValid) {
-              return // Stop if any step is invalid
+              return
             }
           }
         }
@@ -386,9 +391,9 @@ function CourseFormContent({
                 <StepperTrigger asChild>
                   <div className="flex flex-col items-center gap-2">
                     <StepperIndicator />
-                    <div className="hidden text-center md:block">
-                      <div className="font-medium text-xs">{step.name}</div>
-                      <div className="text-muted-foreground text-xs">{step.description}</div>
+                    <div className="hidden text-center lg:block">
+                      <div className="text-xs font-medium">{step.name}</div>
+                      <div className="text-xs text-muted-foreground">{step.description}</div>
                     </div>
                   </div>
                 </StepperTrigger>
@@ -400,21 +405,25 @@ function CourseFormContent({
 
         {/* Form Content - Scrollable */}
         <div className="flex-1 overflow-y-auto px-4 py-6 md:px-6">
-          {/* Note: We DON'T wrap in <form> here to prevent auto-submit on Enter */}
-          {currentStep === 1 && <BasicInfoStep categories={flatCategories} />}
-          {currentStep === 2 && <ContentStep />}
-          {currentStep === 3 && (
-            <TeacherStep faculty={faculty} onOpenTeacherDialog={() => setTeacherDialogOpen(true)} />
-          )}
-          {currentStep === 4 && <SettingsStep />}
-          {currentStep === 5 && (
-            <PreviewStep categories={flatCategories} faculty={faculty} onGoToStep={goToStep} />
-          )}
+          <div className="mx-auto max-w-2xl">
+            {currentStep === 1 && <BasicInfoStep categories={flatCategories} />}
+            {currentStep === 2 && <ContentStep />}
+            {currentStep === 3 && (
+              <TeacherStep
+                faculty={faculty}
+                onOpenTeacherDialog={() => setTeacherDialogOpen(true)}
+              />
+            )}
+            {currentStep === 4 && <SettingsStep />}
+            {currentStep === 5 && (
+              <PreviewStep categories={flatCategories} faculty={faculty} onGoToStep={goToStep} />
+            )}
+          </div>
         </div>
 
         {/* Navigation - Fixed at bottom */}
         <div className="shrink-0 border-t px-4 py-4 md:px-6">
-          <div className="flex items-center justify-between">
+          <div className="mx-auto flex max-w-2xl items-center justify-between">
             <Button
               type="button"
               variant="outline"
@@ -438,11 +447,7 @@ function CourseFormContent({
               </Button>
 
               {currentStep === STEPS.length ? (
-                <Button
-                  type="button"
-                  onClick={form.handleSubmit(onSubmit)}
-                  disabled={isSubmitting}
-                >
+                <Button type="button" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -489,59 +494,69 @@ function BasicInfoStep({ categories }: { categories: any[] }) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg">Basic Information</h3>
-        <p className="text-muted-foreground text-sm">
+        <h3 className="text-lg font-semibold">Basic Information</h3>
+        <p className="text-sm text-muted-foreground">
           Let's start with the course title and category
         </p>
       </div>
 
-      <FieldGroup>
-        <Field data-invalid={!!errors.title}>
-          <FieldLabel htmlFor="title">Course Title</FieldLabel>
-          <Input
-            id="title"
-            placeholder="e.g., Sustainable Crop Production Techniques"
-            aria-invalid={!!errors.title}
-            {...register("title")}
-          />
-          <FieldDescription>Choose a clear, descriptive title</FieldDescription>
-          <FieldError>{errors.title?.message}</FieldError>
+      <FieldGroup className="@container/field-group">
+        <Field orientation="responsive" data-invalid={!!errors.title}>
+          <FieldContent>
+            <FieldLabel htmlFor="title">Course Title</FieldLabel>
+            <FieldDescription>Choose a clear, descriptive title</FieldDescription>
+          </FieldContent>
+          <div className="w-full sm:min-w-[300px]">
+            <Input
+              id="title"
+              placeholder="e.g., Sustainable Crop Production Techniques"
+              aria-invalid={!!errors.title}
+              {...register("title")}
+            />
+            {errors.title && <FieldError>{errors.title.message}</FieldError>}
+          </div>
         </Field>
 
-        <Field data-invalid={!!errors.categoryId}>
-          <FieldLabel htmlFor="categoryId" className="flex items-center gap-2">
-            <FolderIcon className="h-4 w-4 text-muted-foreground" />
-            Category
-          </FieldLabel>
-          <Select
-            value={categoryId}
-            onValueChange={(value) => setValue("categoryId", value, { shouldValidate: true })}
-          >
-            <SelectTrigger id="categoryId" aria-invalid={!!errors.categoryId}>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              {!categories ? (
-                <div className="flex items-center justify-center p-4">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-              ) : categories.length === 0 ? (
-                <div className="px-2 py-1.5 text-muted-foreground text-sm">
-                  No categories available
-                </div>
-              ) : (
-                categories.map((cat) => (
-                  <SelectItem key={cat._id} value={cat._id} className="font-mono">
-                    {"\u00A0\u00A0".repeat(Math.max(0, cat.level - 1))}
-                    {cat.level > 1 && "└─ "}
-                    {cat.name}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-          <FieldDescription>Select the course subject area</FieldDescription>
-          <FieldError>{errors.categoryId?.message}</FieldError>
+        <FieldSeparator />
+
+        <Field orientation="responsive" data-invalid={!!errors.categoryId}>
+          <FieldContent>
+            <FieldLabel htmlFor="categoryId" className="flex items-center gap-2">
+              <FolderIcon className="h-4 w-4 text-muted-foreground" />
+              Category
+            </FieldLabel>
+            <FieldDescription>Select the course subject area</FieldDescription>
+          </FieldContent>
+          <div className="w-full sm:min-w-[300px]">
+            <Select
+              value={categoryId || ""}
+              onValueChange={(value) => setValue("categoryId", value, { shouldValidate: true })}
+            >
+              <SelectTrigger id="categoryId" aria-invalid={!!errors.categoryId}>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {!categories ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                ) : categories.length === 0 ? (
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                    No categories available
+                  </div>
+                ) : (
+                  categories.map((cat) => (
+                    <SelectItem key={cat._id} value={cat._id} className="font-mono">
+                      {"\u00A0\u00A0".repeat(Math.max(0, cat.level - 1))}
+                      {cat.level > 1 && "└─ "}
+                      {cat.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {errors.categoryId && <FieldError>{errors.categoryId.message}</FieldError>}
+          </div>
         </Field>
       </FieldGroup>
     </div>
@@ -562,41 +577,53 @@ function ContentStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg">Course Content</h3>
-        <p className="text-muted-foreground text-sm">
+        <h3 className="text-lg font-semibold">Course Content</h3>
+        <p className="text-sm text-muted-foreground">
           Describe what learners will gain from this course
         </p>
       </div>
 
-      <FieldGroup>
-        <Field data-invalid={!!errors.description}>
-          <FieldLabel htmlFor="description">Description</FieldLabel>
-          <Textarea
-            id="description"
-            placeholder="Describe what farmers will learn in this course..."
-            rows={4}
-            aria-invalid={!!errors.description}
-            {...register("description")}
-          />
-          <FieldDescription>
-            A brief overview of the course ({descriptionLength} characters)
-          </FieldDescription>
-          <FieldError>{errors.description?.message}</FieldError>
+      <FieldGroup className="@container/field-group">
+        <Field orientation="responsive" data-invalid={!!errors.description}>
+          <FieldContent>
+            <FieldLabel htmlFor="description">Description</FieldLabel>
+            <FieldDescription>
+              A brief overview of the course ({descriptionLength} characters)
+            </FieldDescription>
+          </FieldContent>
+          <div className="w-full sm:min-w-[300px]">
+            <Textarea
+              id="description"
+              placeholder="Describe what farmers will learn in this course..."
+              rows={4}
+              aria-invalid={!!errors.description}
+              className="resize-none"
+              {...register("description")}
+            />
+            {errors.description && <FieldError>{errors.description.message}</FieldError>}
+          </div>
         </Field>
 
-        <Field data-invalid={!!errors.content}>
-          <FieldLabel htmlFor="content">Course Introduction</FieldLabel>
-          <Textarea
-            id="content"
-            placeholder="Welcome to the course! In this course, you will learn modern farming practices..."
-            rows={6}
-            aria-invalid={!!errors.content}
-            {...register("content")}
-          />
-          <FieldDescription>
-            Detailed introduction shown to enrolled students ({contentLength} characters)
-          </FieldDescription>
-          <FieldError>{errors.content?.message}</FieldError>
+        <FieldSeparator />
+
+        <Field orientation="responsive" data-invalid={!!errors.content}>
+          <FieldContent>
+            <FieldLabel htmlFor="content">Course Introduction</FieldLabel>
+            <FieldDescription>
+              Detailed introduction shown to enrolled students ({contentLength} characters)
+            </FieldDescription>
+          </FieldContent>
+          <div className="w-full sm:min-w-[300px]">
+            <Textarea
+              id="content"
+              placeholder="Welcome to the course! In this course, you will learn modern farming practices..."
+              rows={6}
+              aria-invalid={!!errors.content}
+              className="resize-none"
+              {...register("content")}
+            />
+            {errors.content && <FieldError>{errors.content.message}</FieldError>}
+          </div>
         </Field>
       </FieldGroup>
     </div>
@@ -626,8 +653,8 @@ function TeacherStep({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg">Assign Teacher</h3>
-        <p className="text-muted-foreground text-sm">
+        <h3 className="text-lg font-semibold">Assign Teacher</h3>
+        <p className="text-sm text-muted-foreground">
           Assign a faculty member to teach this course (optional)
         </p>
       </div>
@@ -678,7 +705,7 @@ function TeacherStep({
             <UserIcon className="h-8 w-8 text-muted-foreground" />
           </div>
           <h4 className="mt-4 font-medium">No teacher assigned</h4>
-          <p className="mt-2 text-muted-foreground text-sm">
+          <p className="mt-2 text-sm text-muted-foreground">
             You can assign a teacher now or skip and assign later
           </p>
           <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
@@ -704,13 +731,13 @@ function SettingsStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg">Course Settings</h3>
-        <p className="text-muted-foreground text-sm">
+        <h3 className="text-lg font-semibold">Course Settings</h3>
+        <p className="text-sm text-muted-foreground">
           Configure enrollment and visibility options
         </p>
       </div>
 
-      <FieldGroup>
+      <FieldGroup className="@container/field-group">
         <Field orientation="horizontal" className="rounded-lg border p-4">
           <Switch
             id="isEnrollmentOpen"
@@ -731,9 +758,11 @@ function SettingsStep() {
           </FieldContent>
         </Field>
 
+        <FieldSeparator />
+
         <div className="rounded-lg border bg-muted/50 p-4">
-          <h4 className="mb-2 font-medium text-sm">Enrollment Status</h4>
-          <p className="text-muted-foreground text-sm">
+          <h4 className="mb-2 text-sm font-medium">Enrollment Status</h4>
+          <p className="text-sm text-muted-foreground">
             {isEnrollmentOpen ? (
               <>
                 When enrollment is open, learners will be able to discover and enroll in this
@@ -770,8 +799,8 @@ function PreviewStep({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg">Review Course</h3>
-        <p className="text-muted-foreground text-sm">
+        <h3 className="text-lg font-semibold">Review Course</h3>
+        <p className="text-sm text-muted-foreground">
           Review your course details before publishing
         </p>
       </div>
@@ -780,7 +809,7 @@ function PreviewStep({
         {/* Header */}
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-2">
-            <h4 className="font-bold text-xl leading-tight md:text-2xl">
+            <h4 className="text-xl font-bold leading-tight md:text-2xl">
               {values.title || "Untitled Course"}
             </h4>
             <Button
@@ -814,7 +843,7 @@ function PreviewStep({
         {/* Description */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h5 className="font-semibold text-sm">Description</h5>
+            <h5 className="text-sm font-semibold">Description</h5>
             <Button
               type="button"
               variant="ghost"
@@ -825,7 +854,7 @@ function PreviewStep({
               Edit
             </Button>
           </div>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {values.description || "No description provided"}
           </p>
         </div>
@@ -833,7 +862,7 @@ function PreviewStep({
         {/* Introduction */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h5 className="font-semibold text-sm">Course Introduction</h5>
+            <h5 className="text-sm font-semibold">Course Introduction</h5>
             <Button
               type="button"
               variant="ghost"
@@ -852,7 +881,7 @@ function PreviewStep({
         {/* Teacher */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h5 className="font-semibold text-sm">Assigned Teacher</h5>
+            <h5 className="text-sm font-semibold">Assigned Teacher</h5>
             <Button
               type="button"
               variant="ghost"
@@ -882,7 +911,7 @@ function PreviewStep({
               </ItemContent>
             </Item>
           ) : (
-            <p className="text-muted-foreground text-sm">No teacher assigned</p>
+            <p className="text-sm text-muted-foreground">No teacher assigned</p>
           )}
         </div>
       </div>
@@ -917,7 +946,7 @@ function TeacherSelectionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[650px]">
+      <DialogContent className="min-w-full max-w-md p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserIcon className="h-5 w-5 text-primary" />
@@ -927,7 +956,7 @@ function TeacherSelectionDialog({
 
         <div className="space-y-4">
           <div className="relative">
-            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search by name or email..."
               value={search}
@@ -984,7 +1013,7 @@ function TeacherSelectionDialog({
               <div className="py-12 text-center">
                 <UserIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
                 <p className="mt-4 font-medium">No teachers found</p>
-                <p className="mt-1 text-muted-foreground text-sm">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {search ? "Try adjusting your search" : "No faculty members available"}
                 </p>
               </div>
