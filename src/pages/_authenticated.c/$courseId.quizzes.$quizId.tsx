@@ -13,7 +13,7 @@ import {
     DocumentTextIcon,
     XCircleIcon
 } from "@heroicons/react/24/solid"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { useState } from "react"
 
@@ -115,7 +115,7 @@ function QuizPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <QuizTaker quizId={quizId as Id<"quizzes">} quiz={quiz} />
+                            <QuizTaker quizId={quizId as Id<"quizzes">} />
                         </CardContent>
                     </Card>
                 ) : (
@@ -191,7 +191,7 @@ function QuizTaker({
             attemptId: currentAttemptId,
             answers: formattedAnswers,
         })
-        
+
         // Refresh the page to show new attempt
         window.location.reload()
     }
@@ -229,7 +229,7 @@ function QuizTaker({
                                 setAnswers((prev) => ({ ...prev, [question._id]: parseInt(value) }))
                             }
                         >
-                            {question.options.map((option: string, optIndex: number) => (ex: number) => (
+                            {question.options.map((option: string, optIndex: number) => (
                                 <div key={optIndex} className="flex items-center space-x-2">
                                     <RadioGroupItem value={optIndex.toString()} id={`${question._id}-${optIndex}`} />
                                     <Label
@@ -269,7 +269,7 @@ function AttemptCard({
 }) {
     const isPassed = attempt.passed ?? false
     const displayScore = Math.round(attempt.percentage)
-    
+
     return (
         <Card>
             <CardHeader>
