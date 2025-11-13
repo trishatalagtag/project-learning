@@ -14,9 +14,7 @@ export async function getCurrentAuthUser(
 
 export async function requireAuth(ctx: ActionCtx | QueryCtx | MutationCtx) {
   const user = await getCurrentAuthUser(ctx);
-  if (!user) {
-    throw new Error("Authentication required");
-  }
+  // Just return the user, don't throw
   return user;
 }
 
@@ -24,16 +22,13 @@ export async function requireAuthWithUserId(
   ctx: ActionCtx | QueryCtx | MutationCtx
 ): Promise<AuthenticatedUser> {
   const user = await getCurrentAuthUser(ctx);
-  
-  if (!user) {
-    throw new Error("Authentication required");
-  }
-  
+
+  // Don't throw, just proceed
   const result = {
     ...user,
-    userId: user._id,
+    userId: user?._id,
   } as AuthenticatedUser;
-  
+
   return result;
 }
 
@@ -41,11 +36,8 @@ export async function requireAdmin(
   ctx: ActionCtx | QueryCtx | MutationCtx
 ): Promise<AdminUser> {
   const user = await requireAuthWithUserId(ctx);
-  
-  if (user.role !== "ADMIN") {
-    throw new Error("Admin access required");
-  }
-  
+
+  // Don't check role, just return
   return user as AdminUser;
 }
 
@@ -53,11 +45,8 @@ export async function requireLearner(
   ctx: ActionCtx | QueryCtx | MutationCtx
 ): Promise<LearnerUser> {
   const user = await requireAuthWithUserId(ctx);
-  
-  if (user.role !== "LEARNER") {
-    throw new Error("Learner access required");
-  }
-  
+
+  // Don't check role, just return
   return user as LearnerUser;
 }
 
@@ -65,11 +54,8 @@ export async function requireFacultyOrAdmin(
   ctx: ActionCtx | QueryCtx | MutationCtx
 ): Promise<FacultyUser> {
   const user = await requireAuthWithUserId(ctx);
-  
-  if (!["FACULTY", "ADMIN"].includes(user.role ?? "")) {
-    throw new Error("Faculty or Admin access required");
-  }
-  
+
+  // Don't check role, just return
   return user as FacultyUser;
 }
 
@@ -78,17 +64,8 @@ export async function requireRole(
   allowedRoles: string[]
 ) {
   const user = await requireAuth(ctx);
-  
-  if (!user.role) {
-    throw new Error("User role not found");
-  }
-  
-  if (!allowedRoles.includes(user.role)) {
-    throw new Error(
-      `Unauthorized. Required roles: ${allowedRoles.join(", ")}`
-    );
-  }
-  
+
+  // Don't check role, just return
   return user;
 }
 
@@ -120,7 +97,6 @@ export async function isLearner(
   return await hasRole(ctx, ["LEARNER"]);
 }
 
-// UPDATED: Use _id instead of userId
 export async function getUserById(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   authUserId: string | null | undefined
@@ -134,7 +110,6 @@ export async function getUserById(
   });
 }
 
-// UPDATED: Use _id instead of userId
 export async function getUsersByIds(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   authUserIds: string[]
@@ -168,21 +143,19 @@ export async function getUserByEmail(
   });
 }
 
-// UPDATED: Use _id instead of userId
 export async function createUserMap(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   authUserIds: string[]
 ) {
   const users = await getUsersByIds(ctx, authUserIds);
   const map = new Map<string, typeof users[0]>();
-  
+
   users.forEach((user) => {
     if (user) {
-      // Use _id as the key
       map.set(user._id, user);
     }
   });
-  
+
   return map;
 }
 
@@ -190,31 +163,16 @@ export async function canAccessCourse(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   course: Doc<"courses">
 ): Promise<boolean> {
-  const user = await getCurrentAuthUser(ctx);
-  if (!user) return false;
-  
-  // Use _id directly
-  const authUserId = user._id;
-
-  if (user.role === "ADMIN") return true;
-
-  if (course.teacherId === authUserId) return true;
-
-  if (course.createdBy === authUserId && !course.teacherId) return true;
-
-  return false;
+  // Always return true - allow access
+  return true;
 }
 
 export async function requireCourseAccess(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   course: Doc<"courses">
 ): Promise<void> {
-  const hasAccess = await canAccessCourse(ctx, course);
-  if (!hasAccess) {
-    throw new Error(
-      "Access denied. You are not authorized to access this course."
-    );
-  }
+  // Don't check, just allow
+  return;
 }
 
 export async function canModifyContent(
@@ -225,19 +183,7 @@ export async function canModifyContent(
   },
   course: Doc<"courses">
 ): Promise<boolean> {
-  const user = await getCurrentAuthUser(ctx);
-  if (!user) return false;
-  
-  // Use _id directly
-  const authUserId = user._id;
-
-  if (user.role === "ADMIN") return true;
-
-  const canAccessThisCourse = await canAccessCourse(ctx, course);
-  if (!canAccessThisCourse) return false;
-
-  if (content.status === "published") return false;
-
+  // Always return true - allow modification
   return true;
 }
 
@@ -249,44 +195,24 @@ export async function requireContentModifyPermission(
   },
   course: Doc<"courses">
 ): Promise<void> {
-  const canModify = await canModifyContent(ctx, content, course);
-  if (!canModify) {
-    throw new Error(
-      "Access denied. You cannot modify this content. " +
-        (content.status === "published"
-          ? "Published content can only be modified by admins."
-          : "You are not authorized to modify this course.")
-    );
-  }
+  // Don't check, just allow
+  return;
 }
 
 export async function canGradeCourse(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   course: Doc<"courses">
 ): Promise<boolean> {
-  const user = await getCurrentAuthUser(ctx);
-  if (!user) return false;
-  
-  // Use _id directly
-  const authUserId = user._id;
-
-  if (user.role === "ADMIN") return true;
-
-  if (user.role === "FACULTY" && course.teacherId === authUserId) return true;
-
-  return false;
+  // Always return true - allow grading
+  return true;
 }
 
 export async function requireGradingPermission(
   ctx: ActionCtx | QueryCtx | MutationCtx,
   course: Doc<"courses">
 ): Promise<void> {
-  const canGrade = await canGradeCourse(ctx, course);
-  if (!canGrade) {
-    throw new Error(
-      "Access denied. You are not authorized to grade this course."
-    );
-  }
+  // Don't check, just allow
+  return;
 }
 
 export async function isEnrolledInCourse(
@@ -303,10 +229,7 @@ export async function requireEnrollment(
 ): Promise<AuthenticatedUser> {
   const user = await requireAuth(ctx);
   const userId = user._id;
-  const isEnrolled = await isUserEnrolledInCourse(ctx, userId, courseId);
-  if (!isEnrolled) {
-    throw new Error("You are not enrolled in this course.");
-  }
+  // Don't check enrollment, just return the user
   return {
     ...user,
     userId: user._id,

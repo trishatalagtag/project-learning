@@ -474,3 +474,78 @@ export const getMySubmissions = learnerQuery({
       }));
   },
 });
+
+/**
+ * Get all my submissions across all assignments
+ */
+export const getAllMySubmissions = learnerQuery({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("assignmentSubmissions"),
+      _creationTime: v.number(),
+      attemptNumber: v.number(),
+      assignmentId: v.id("assignments"),
+      assignmentTitle: v.string(),
+      courseId: v.id("courses"),
+      courseTitle: v.string(),
+      status: v.string(),
+      submittedAt: v.optional(v.number()),
+      isLate: v.boolean(),
+      grade: v.optional(v.number()),
+      teacherFeedback: v.optional(v.string()),
+      createdAt: v.number(),
+    })
+  ),
+  handler: async (ctx) => {
+    // Get all submissions by this user
+    const submissions = await ctx.db
+      .query("assignmentSubmissions")
+      .withIndex("by_user", (q) => q.eq("userId", ctx.user.userId))
+      .collect();
+
+    // Enrich with assignment and course details
+    const enrichedSubmissions = await Promise.all(
+      submissions.map(async (submission) => {
+        const assignment = await ctx.db.get(submission.assignmentId);
+        if (!assignment) return null;
+
+        const course = await ctx.db.get(assignment.courseId);
+        if (!course) return null;
+
+        // Verify enrollment
+        const enrollment = await ctx.db
+          .query("enrollments")
+          .withIndex("by_user_and_course", (q) =>
+            q.eq("userId", ctx.user.userId).eq("courseId", course._id)
+          )
+          .first();
+
+        if (!enrollment || enrollment.status !== "active") {
+          return null;
+        }
+
+        return {
+          _id: submission._id,
+          _creationTime: submission._creationTime,
+          attemptNumber: submission.attemptNumber,
+          assignmentId: assignment._id,
+          assignmentTitle: assignment.title,
+          courseId: course._id,
+          courseTitle: course.title,
+          status: submission.status,
+          submittedAt: submission.submittedAt,
+          isLate: submission.isLate,
+          grade: submission.grade,
+          teacherFeedback: submission.teacherFeedback,
+          createdAt: submission.createdAt,
+        };
+      })
+    );
+
+    // Filter out nulls and sort by submission date
+    return enrichedSubmissions
+      .filter((s): s is NonNullable<typeof s> => s !== null)
+      .sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0));
+  },
+});

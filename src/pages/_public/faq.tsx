@@ -68,8 +68,8 @@ function FAQPage() {
       <Separator />
 
       {/* FAQ Sections */}
-      <section className="container mx-auto max-w-7xl px-4 py-12 sm:py-16">
-        <ItemGroup>
+      <section className="container mx-auto max-w-7xl gap-4 px-4 py-12 sm:py-16">
+        <ItemGroup className="space-y-4">
           {/* General Questions */}
           <Item asChild>
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">

@@ -38,7 +38,17 @@ import { useCourseMutations } from "@/hooks/use-course-mutations"
 import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { CONTENT_STATUS } from "@/lib/constants/content-status"
 import type { Course } from "@/lib/types/course"
-import { CheckIcon, FolderIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/solid"
+import {
+  AcademicCapIcon,
+  BookOpenIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  DocumentTextIcon,
+  FolderIcon,
+  InformationCircleIcon,
+  PencilIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "convex/react"
 import { Loader2 } from "lucide-react"
@@ -155,7 +165,10 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Basic Information</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <InformationCircleIcon className="h-5 w-5" />
+          Basic Information
+        </CardTitle>
         <CardDescription>Manage core details about this course</CardDescription>
       </CardHeader>
       <CardContent>
@@ -237,7 +250,10 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="font-medium text-sm">Course Title</ItemTitle>
+                  <ItemTitle className="flex items-center gap-2 font-medium text-sm">
+                    <AcademicCapIcon className="h-4 w-4" />
+                    Course Title
+                  </ItemTitle>
                   <ItemDescription className="mt-1 font-semibold text-base text-foreground">
                     {course.title}
                   </ItemDescription>
@@ -345,7 +361,10 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="font-medium text-sm">Description</ItemTitle>
+                  <ItemTitle className="flex items-center gap-2 font-medium text-sm">
+                    <DocumentTextIcon className="h-4 w-4" />
+                    Description
+                  </ItemTitle>
                   <ItemDescription className="mt-1 whitespace-pre-wrap text-foreground/80 text-sm">
                     {course.description}
                   </ItemDescription>
@@ -480,7 +499,10 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
             ) : (
               <>
                 <ItemContent>
-                  <ItemTitle className="font-medium text-sm">Category</ItemTitle>
+                  <ItemTitle className="flex items-center gap-2 font-medium text-sm">
+                    <FolderIcon className="h-4 w-4" />
+                    Category
+                  </ItemTitle>
                   <ItemDescription className="mt-1 text-foreground/80 text-sm">
                     {course.categoryName}
                   </ItemDescription>
@@ -510,7 +532,10 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
           {/* STATUS */}
           <Item variant="outline">
             <ItemContent>
-              <ItemTitle className="font-medium text-sm">Status</ItemTitle>
+              <ItemTitle className="flex items-center gap-2 font-medium text-sm">
+                <CheckCircleIcon className="h-4 w-4" />
+                Status
+              </ItemTitle>
               <div className="mt-1">
                 <Badge
                   variant={course.status === CONTENT_STATUS.PUBLISHED ? "default" : "secondary"}
@@ -525,7 +550,10 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
           {/* COURSE CONTENT */}
           <Item variant="outline">
             <ItemContent>
-              <ItemTitle className="font-medium text-sm">Course Content</ItemTitle>
+              <ItemTitle className="flex items-center gap-2 font-medium text-sm">
+                <BookOpenIcon className="h-4 w-4" />
+                Course Content
+              </ItemTitle>
               <ItemDescription className="mt-2">
                 {course.content ? (
                   <div className="prose prose-sm dark:prose-invert max-w-none">

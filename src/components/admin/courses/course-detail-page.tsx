@@ -47,7 +47,7 @@ export function CourseDetailPage() {
   // Error state - Convex returns null when query fails
   if (course === null) {
     return (
-      <div>
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -72,7 +72,7 @@ export function CourseDetailPage() {
   // Not found state - course doesn't exist
   if (!course) {
     return (
-      <div>
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -91,7 +91,7 @@ export function CourseDetailPage() {
 
   return (
     <>
-      <div>
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-4">

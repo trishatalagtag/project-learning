@@ -67,6 +67,7 @@ export function AuthSignUpForm({
 
   const name = watch("name")
   const password = watch("password")
+  const confirmPassword = watch("confirmPassword")
   const acceptTerms = watch("acceptTerms")
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -219,6 +220,7 @@ export function AuthSignUpForm({
           id="confirmPassword"
           label="Confirm Password"
           error={errors.confirmPassword?.message}
+          value={confirmPassword}
           {...register("confirmPassword", {
             required: "Please confirm your password",
             validate: (value) => {

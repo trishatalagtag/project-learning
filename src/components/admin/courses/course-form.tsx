@@ -2,6 +2,7 @@
 
 import {
   AcademicCapIcon,
+  ArrowLeftIcon,
   BookOpenIcon,
   CheckIcon,
   FolderIcon,
@@ -9,18 +10,17 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useLocalStorage } from "@uidotdev/usehooks"
 import { useMutation, useQuery } from "convex/react"
 import { Loader2, Search } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
-import { FormProvider, useForm, useFormContext } from "react-hook-form"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import * as z from "zod"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import {
   Field,
   FieldContent,
@@ -32,34 +32,17 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item"
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Stepper,
-  StepperIndicator,
-  StepperItem,
-  StepperSeparator,
-  StepperTrigger,
-} from "@/components/ui/stepper"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
-import { useMediaQuery } from "@/hooks/use-media-query"
-import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
+import { cn } from "@/lib/utils"
 
 import type { Course } from "./columns"
 
@@ -73,257 +56,63 @@ const formSchema = z.object({
 })
 
 type FormData = z.infer<typeof formSchema>
-type FieldName = keyof FormData
 
 const STEPS = [
-  {
-    id: 1,
-    name: "Basic Info",
-    description: "Course title and category",
-    fields: ["title", "categoryId"] as FieldName[],
-  },
-  {
-    id: 2,
-    name: "Content",
-    description: "Description and introduction",
-    fields: ["description", "content"] as FieldName[],
-  },
-  {
-    id: 3,
-    name: "Teacher",
-    description: "Assign faculty member",
-    fields: [] as FieldName[],
-  },
-  {
-    id: 4,
-    name: "Settings",
-    description: "Enrollment options",
-    fields: [] as FieldName[],
-  },
-  {
-    id: 5,
-    name: "Preview",
-    description: "Review and publish",
-    fields: [] as FieldName[],
-  },
+  { id: 1, name: "Basic Info", description: "Title & Category" },
+  { id: 2, name: "Content", description: "Description" },
+  { id: 3, name: "Teacher", description: "Assignment" },
+  { id: 4, name: "Settings", description: "Enrollment" },
+  { id: 5, name: "Review", description: "Preview" },
 ] as const
 
 type CourseFormProps =
   | {
-    open: boolean
-    onOpenChange: (open: boolean) => void
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
     mode: "create"
     course?: never
     onSuccess?: (courseId: Id<"courses">) => void
   }
   | {
-    open: boolean
-    onOpenChange: (open: boolean) => void
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
     mode: "edit"
     course: Course
     onSuccess?: () => void
   }
 
-export function CourseForm({ open, onOpenChange, mode, course, onSuccess }: CourseFormProps) {
-  const isDesktop = useMediaQuery("(min-width: 768px)")
-
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[90vh] w-full max-w-3xl overflow-hidden p-0">
-          <DialogHeader className="px-6 pt-6">
-            <DialogTitle className="flex items-center gap-2">
-              <AcademicCapIcon className="h-5 w-5 text-primary" />
-              {mode === "create" ? "Create New Course" : "Edit Course"}
-            </DialogTitle>
-          </DialogHeader>
-          <CourseFormContent
-            mode={mode}
-            course={course}
-            onSuccess={onSuccess}
-            onOpenChange={onOpenChange}
-          />
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[96vh]">
-        <DrawerHeader className="text-left">
-          <DrawerTitle className="flex items-center gap-2">
-            <AcademicCapIcon className="h-5 w-5 text-primary" />
-            {mode === "create" ? "Create New Course" : "Edit Course"}
-          </DrawerTitle>
-        </DrawerHeader>
-        <CourseFormContent
-          mode={mode}
-          course={course}
-          onSuccess={onSuccess}
-          onOpenChange={onOpenChange}
-        />
-      </DrawerContent>
-    </Drawer>
-  )
-}
-
-function CourseFormContent({
-  mode,
-  course,
-  onSuccess,
-  onOpenChange,
-}: {
-  mode: "create" | "edit"
-  course?: Course
-  onSuccess?: ((courseId: Id<"courses">) => void) | (() => void)
-  onOpenChange: (open: boolean) => void
-}) {
+export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseFormProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [teacherDialogOpen, setTeacherDialogOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const storageKey = `course-form-${mode}-${course?._id || "new"}`
-  const [savedFormState, setSavedFormState] = useLocalStorage<{
-    currentStep: number
-    formValues: Partial<FormData>
-  } | null>(storageKey, null)
 
   const createCourse = useMutation(api.faculty.courses.createCourse)
   const updateCourse = useMutation(api.faculty.courses.updateCourse)
   const assignFaculty = useMutation(api.admin.courses.assignFaculty)
-  const getCourseById = useQuery(
-    api.faculty.courses.getCourseById,
-    course && mode === "edit" ? { courseId: course._id } : "skip",
-  )
 
   const categories = useQuery(api.shared.categories.listAllCategories)
-  const normalizedCategories = useMemo(
-    () => (categories ? normalizeCategoryTree(categories) : []),
-    [categories],
-  )
-  const flatCategories = useMemo(
-    () => flattenCategoryTree(normalizedCategories),
-    [normalizedCategories],
-  )
   const faculty = useQuery(api.admin.users.listUsersByRole, { role: "FACULTY" })
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
     defaultValues: {
-      title: "",
-      description: "",
-      content: "",
-      categoryId: "",
-      teacherId: undefined,
-      isEnrollmentOpen: false,
+      title: course?.title || "",
+      description: course?.description || "",
+      content: course?.content || "",
+      categoryId: course?.categoryId || "",
+      teacherId: course?.teacherId || undefined,
+      isEnrollmentOpen: course?.isEnrollmentOpen || false,
     },
   })
 
-  // Restore from localStorage or course data
-  useEffect(() => {
-    if (!open) return
-
-    if (savedFormState) {
-      form.reset(savedFormState.formValues as FormData)
-      setCurrentStep(savedFormState.currentStep)
-    } else if (course && mode === "edit" && getCourseById) {
-      form.reset({
-        title: getCourseById.title,
-        description: getCourseById.description,
-        content: getCourseById.content,
-        categoryId: getCourseById.categoryId,
-        teacherId: getCourseById.teacherId || undefined,
-        isEnrollmentOpen: getCourseById.isEnrollmentOpen,
-      })
-      setCurrentStep(1)
-    }
-  }, [open, course, mode, getCourseById, savedFormState, form])
-
-  // Reset when dialog closes
-  useEffect(() => {
-    if (!open) {
-      setCurrentStep(1)
-    }
-  }, [open])
-
-  // Save form state to localStorage
-  const saveFormState = (step: number) => {
-    setSavedFormState({
-      currentStep: step,
-      formValues: form.getValues(),
-    })
-  }
-
-  // Clear form state
-  const clearFormState = () => {
-    setSavedFormState(null)
-    form.reset({
-      title: "",
-      description: "",
-      content: "",
-      categoryId: "",
-      teacherId: undefined,
-      isEnrollmentOpen: false,
-    })
-    setCurrentStep(1)
-  }
-
-  const nextStep = async () => {
-    const currentStepData = STEPS[currentStep - 1]
-
-    // Skip validation for steps with no required fields
-    if (currentStepData.fields.length === 0) {
-      const nextStepNum = currentStep + 1
-      saveFormState(nextStepNum)
-      setCurrentStep(nextStepNum)
-      return
-    }
-
-    // Trigger validation for current step fields
-    const isValid = await form.trigger(currentStepData.fields)
-
-    if (!isValid) {
-      return
-    }
-
-    if (currentStep < STEPS.length) {
-      const nextStepNum = currentStep + 1
-      saveFormState(nextStepNum)
-      setCurrentStep(nextStepNum)
-    }
-  }
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      const prevStepNum = currentStep - 1
-      saveFormState(prevStepNum)
-      setCurrentStep(prevStepNum)
-    }
-  }
-
-  const goToStep = async (step: number) => {
-    if (step >= 1 && step <= STEPS.length) {
-      // Validate all previous steps before allowing jump forward
-      if (step > currentStep) {
-        for (let i = currentStep - 1; i < step - 1; i++) {
-          const stepData = STEPS[i]
-          if (stepData.fields.length > 0) {
-            const isValid = await form.trigger(stepData.fields)
-            if (!isValid) {
-              return
-            }
-          }
-        }
-      }
-      saveFormState(step)
-      setCurrentStep(step)
-    }
-  }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    setValue,
+  } = form
 
   const onSubmit = async (values: FormData) => {
-    setIsSubmitting(true)
     try {
       if (mode === "create") {
         const courseId = await createCourse({
@@ -341,10 +130,9 @@ function CourseFormContent({
           })
         }
 
-        clearFormState()
-        onOpenChange(false)
-          ; (onSuccess as (courseId: Id<"courses">) => void)?.(courseId)
-      } else if (mode === "edit" && course) {
+        toast.success("Course created successfully")
+        onSuccess?.(courseId as any)
+      } else if (course) {
         await updateCourse({
           courseId: course._id,
           title: values.title,
@@ -354,104 +142,447 @@ function CourseFormContent({
           isEnrollmentOpen: values.isEnrollmentOpen,
         })
 
-        const currentTeacherId = course.teacherId
-        const newTeacherId = values.teacherId
-
-        if (newTeacherId && newTeacherId !== currentTeacherId) {
+        if (values.teacherId && values.teacherId !== course.teacherId) {
           await assignFaculty({
             courseId: course._id,
-            teacherId: newTeacherId,
+            teacherId: values.teacherId,
           })
         }
 
-        clearFormState()
-        onOpenChange(false)
-          ; (onSuccess as () => void)?.()
+        toast.success("Course updated successfully")
+        onSuccess?.()
       }
     } catch (error) {
       console.error("Failed to save course:", error)
-    } finally {
-      setIsSubmitting(false)
+      toast.error("Failed to save course. Please try again.")
+    }
+  }
+
+  const canGoToStep = (step: number) => {
+    if (step === 1) return true
+    if (step === 2) return !!watch("title") && !!watch("categoryId")
+    if (step === 3) return !!watch("description") && !!watch("content")
+    return true
+  }
+
+  const goToStep = (step: number) => {
+    if (canGoToStep(step)) {
+      setCurrentStep(step)
+    }
+  }
+
+  const nextStep = () => {
+    if (currentStep < 5 && canGoToStep(currentStep + 1)) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
     }
   }
 
   return (
-    <FormProvider {...form}>
-      <div className="flex flex-col overflow-hidden md:h-[calc(90vh-5rem)]">
-        {/* Stepper */}
-        <div className="shrink-0 border-b px-4 py-4 md:px-6">
-          <Stepper value={currentStep} onValueChange={goToStep} className="w-full">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto max-w-5xl px-4 py-6">
+          <div className="flex items-center gap-4">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange?.(false)}
+              disabled={isSubmitting}
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="flex items-center gap-2 font-semibold text-2xl">
+                <AcademicCapIcon className="h-6 w-6 text-primary" />
+                {mode === "create" ? "Create New Course" : "Edit Course"}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1].name}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Steps */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto max-w-5xl px-4 py-6">
+          <div className="flex items-center justify-between">
             {STEPS.map((step, index) => (
-              <StepperItem
-                key={step.id}
-                step={step.id}
-                completed={currentStep > step.id}
-                className="not-last:flex-1"
-              >
-                <StepperTrigger asChild>
-                  <div className="flex flex-col items-center gap-2">
-                    <StepperIndicator />
-                    <div className="hidden text-center lg:block">
-                      <div className="text-xs font-medium">{step.name}</div>
-                      <div className="text-xs text-muted-foreground">{step.description}</div>
+              <div key={step.id} className="flex flex-1 items-center">
+                <button
+                  type="button"
+                  onClick={() => goToStep(step.id)}
+                  disabled={!canGoToStep(step.id)}
+                  className="group flex flex-col items-center gap-2"
+                >
+                  <div
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-all",
+                      currentStep === step.id &&
+                      "bg-primary text-primary-foreground ring-4 ring-primary/20",
+                      currentStep > step.id && "bg-primary/20 text-primary hover:bg-primary/30",
+                      currentStep < step.id && "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {currentStep > step.id ? <CheckIcon className="h-5 w-5" /> : step.id}
+                  </div>
+                  <div className="hidden text-center md:block">
+                    <div
+                      className={cn(
+                        "text-xs font-medium",
+                        currentStep >= step.id ? "text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      {step.name}
+                    </div>
+                    <div className="text-muted-foreground text-xs">{step.description}</div>
+                  </div>
+                </button>
+                {index < STEPS.length - 1 && (
+                  <div
+                    className={cn(
+                      "mx-2 h-[2px] flex-1",
+                      currentStep > step.id ? "bg-primary/30" : "bg-muted"
+                    )}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Form Content */}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="container mx-auto max-w-3xl px-4 py-8">
+          <div className="min-h-[400px]">
+            {/* Step 1: Basic Info */}
+            {currentStep === 1 && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                <div>
+                  <h2 className="font-semibold text-xl">Basic Information</h2>
+                  <p className="text-muted-foreground">
+                    Let's start with the course title and category
+                  </p>
+                </div>
+
+                <FieldGroup>
+                  <Field data-invalid={!!errors.title}>
+                    <FieldLabel htmlFor="title">Course Title</FieldLabel>
+                    <Input
+                      id="title"
+                      placeholder="e.g., Sustainable Crop Production Techniques"
+                      aria-invalid={!!errors.title}
+                      {...register("title")}
+                    />
+                    <FieldDescription>Choose a clear, descriptive title for your course</FieldDescription>
+                    {errors.title && <FieldError>{errors.title.message}</FieldError>}
+                  </Field>
+
+                  <FieldSeparator />
+
+                  <Field data-invalid={!!errors.categoryId}>
+                    <FieldLabel htmlFor="categoryId">Category</FieldLabel>
+                    <Select
+                      value={watch("categoryId") || ""}
+                      onValueChange={(value) => setValue("categoryId", value)}
+                    >
+                      <SelectTrigger id="categoryId" aria-invalid={!!errors.categoryId}>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {!categories ? (
+                          <div className="flex justify-center p-4">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          </div>
+                        ) : categories.length === 0 ? (
+                          <div className="p-4 text-center text-muted-foreground text-sm">
+                            No categories available
+                          </div>
+                        ) : (
+                          categories.map((cat) => (
+                            <SelectItem key={cat._id} value={cat._id}>
+                              <span className="flex items-center gap-2">
+                                <FolderIcon className="h-4 w-4 text-muted-foreground" />
+                                {cat.name}
+                              </span>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>Select the subject area for this course</FieldDescription>
+                    {errors.categoryId && <FieldError>{errors.categoryId.message}</FieldError>}
+                  </Field>
+                </FieldGroup>
+              </div>
+            )}
+
+            {/* Step 2: Content */}
+            {currentStep === 2 && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                <div>
+                  <h2 className="font-semibold text-xl">Course Content</h2>
+                  <p className="text-muted-foreground">
+                    Describe what learners will gain from this course
+                  </p>
+                </div>
+
+                <FieldGroup>
+                  <Field data-invalid={!!errors.description}>
+                    <FieldLabel htmlFor="description">Description</FieldLabel>
+                    <Textarea
+                      id="description"
+                      placeholder="Describe what farmers will learn in this course..."
+                      rows={4}
+                      aria-invalid={!!errors.description}
+                      className="resize-none"
+                      {...register("description")}
+                    />
+                    <FieldDescription>
+                      A brief overview that will appear in course listings ({watch("description")?.length || 0} characters)
+                    </FieldDescription>
+                    {errors.description && <FieldError>{errors.description.message}</FieldError>}
+                  </Field>
+
+                  <FieldSeparator />
+
+                  <Field data-invalid={!!errors.content}>
+                    <FieldLabel htmlFor="content">Course Introduction</FieldLabel>
+                    <Textarea
+                      id="content"
+                      placeholder="Welcome to the course! In this course, you will learn..."
+                      rows={8}
+                      aria-invalid={!!errors.content}
+                      className="resize-none"
+                      {...register("content")}
+                    />
+                    <FieldDescription>
+                      Detailed introduction shown to enrolled students ({watch("content")?.length || 0} characters)
+                    </FieldDescription>
+                    {errors.content && <FieldError>{errors.content.message}</FieldError>}
+                  </Field>
+                </FieldGroup>
+              </div>
+            )}
+
+            {/* Step 3: Teacher */}
+            {currentStep === 3 && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                <div>
+                  <h2 className="font-semibold text-xl">Assign Teacher</h2>
+                  <p className="text-muted-foreground">
+                    Optionally assign a faculty member to teach this course
+                  </p>
+                </div>
+
+                {watch("teacherId") ? (
+                  <TeacherCard
+                    teacher={faculty?.find((t) => t._id === watch("teacherId"))}
+                    onRemove={() => setValue("teacherId", undefined)}
+                    onChange={() => setTeacherDialogOpen(true)}
+                  />
+                ) : (
+                  <div className="rounded-lg border-2 border-dashed p-12 text-center">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                      <UserIcon className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h4 className="mt-4 font-medium">No teacher assigned</h4>
+                    <p className="mt-2 text-muted-foreground text-sm">
+                      You can assign a teacher now or skip this step
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-6"
+                      onClick={() => setTeacherDialogOpen(true)}
+                    >
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Select Teacher
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 4: Settings */}
+            {currentStep === 4 && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                <div>
+                  <h2 className="font-semibold text-xl">Course Settings</h2>
+                  <p className="text-muted-foreground">
+                    Configure enrollment and visibility options
+                  </p>
+                </div>
+
+                <FieldGroup>
+                  <Field orientation="horizontal" className="rounded-lg border p-6">
+                    <Switch
+                      id="enrollment"
+                      checked={watch("isEnrollmentOpen")}
+                      onCheckedChange={(checked) => setValue("isEnrollmentOpen", checked)}
+                    />
+                    <FieldContent>
+                      <FieldLabel htmlFor="enrollment">Open for Enrollment</FieldLabel>
+                      <FieldDescription>
+                        {watch("isEnrollmentOpen")
+                          ? "Learners can enroll in this course immediately"
+                          : "Course is closed. You can open it later"}
+                      </FieldDescription>
+                    </FieldContent>
+                  </Field>
+
+                  <FieldSeparator />
+
+                  <div className="rounded-lg bg-muted/50 p-4">
+                    <h4 className="mb-2 font-medium text-sm">About Enrollment</h4>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {watch("isEnrollmentOpen") ? (
+                        <>
+                          When enrollment is open, learners can discover and enroll in this course
+                          from the catalog. You can close it anytime.
+                        </>
+                      ) : (
+                        <>
+                          When enrollment is closed, only you and assigned teachers can access the
+                          course. You can manually enroll specific learners.
+                        </>
+                      )}
+                    </p>
+                  </div>
+                </FieldGroup>
+              </div>
+            )}
+
+            {/* Step 5: Preview */}
+            {currentStep === 5 && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                <div>
+                  <h2 className="font-semibold text-xl">Review & Submit</h2>
+                  <p className="text-muted-foreground">
+                    Review your course details before publishing
+                  </p>
+                </div>
+
+                <div className="space-y-6 rounded-lg border-2 bg-card p-6">
+                  {/* Header */}
+                  <div className="space-y-3 border-b pb-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <h3 className="font-bold text-2xl leading-tight">{watch("title")}</h3>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(1)}>
+                        Edit
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className="gap-1">
+                        <FolderIcon className="h-3 w-3" />
+                        {categories?.find((c) => c._id === watch("categoryId"))?.name}
+                      </Badge>
+                      <Badge variant={watch("isEnrollmentOpen") ? "default" : "secondary"}>
+                        {watch("isEnrollmentOpen") ? "Open for Enrollment" : "Enrollment Closed"}
+                      </Badge>
                     </div>
                   </div>
-                </StepperTrigger>
-                {index < STEPS.length - 1 && <StepperSeparator />}
-              </StepperItem>
-            ))}
-          </Stepper>
-        </div>
 
-        {/* Form Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-6">
-          <div className="mx-auto max-w-2xl">
-            {currentStep === 1 && <BasicInfoStep categories={flatCategories} />}
-            {currentStep === 2 && <ContentStep />}
-            {currentStep === 3 && (
-              <TeacherStep
-                faculty={faculty}
-                onOpenTeacherDialog={() => setTeacherDialogOpen(true)}
-              />
-            )}
-            {currentStep === 4 && <SettingsStep />}
-            {currentStep === 5 && (
-              <PreviewStep categories={flatCategories} faculty={faculty} onGoToStep={goToStep} />
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-sm">Description</h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(2)}>
+                        Edit
+                      </Button>
+                    </div>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {watch("description")}
+                    </p>
+                  </div>
+
+                  {/* Introduction */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-sm">Introduction</h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(2)}>
+                        Edit
+                      </Button>
+                    </div>
+                    <div className="rounded-lg bg-muted/50 p-4">
+                      <p className="text-sm leading-relaxed">{watch("content")}</p>
+                    </div>
+                  </div>
+
+                  {/* Teacher */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-sm">Assigned Teacher</h4>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => goToStep(3)}>
+                        Edit
+                      </Button>
+                    </div>
+                    {watch("teacherId") ? (
+                      <div className="flex items-center gap-3 rounded-lg border p-3">
+                        <Avatar>
+                          <AvatarImage
+                            src={faculty?.find((t) => t._id === watch("teacherId"))?.image}
+                          />
+                          <AvatarFallback>
+                            {faculty
+                              ?.find((t) => t._id === watch("teacherId"))
+                              ?.name.split(" ")
+                              .map((n: string) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-sm">
+                            {faculty?.find((t) => t._id === watch("teacherId"))?.name}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {faculty?.find((t) => t._id === watch("teacherId"))?.email}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No teacher assigned</p>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Navigation - Fixed at bottom */}
-        <div className="shrink-0 border-t px-4 py-4 md:px-6">
-          <div className="mx-auto flex max-w-2xl items-center justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={prevStep}
-              disabled={currentStep === 1 || isSubmitting}
-            >
-              Previous
-            </Button>
-
-            <div className="flex gap-2">
+        {/* Footer Navigation */}
+        <div className="sticky bottom-0 border-t bg-card shadow-lg">
+          <div className="container mx-auto max-w-3xl px-4 py-4">
+            <div className="flex items-center justify-between">
               <Button
                 type="button"
-                variant="ghost"
-                onClick={() => {
-                  clearFormState()
-                  onOpenChange(false)
-                }}
-                disabled={isSubmitting}
+                variant="outline"
+                onClick={prevStep}
+                disabled={currentStep === 1 || isSubmitting}
               >
-                Cancel
+                <ArrowLeftIcon className="mr-2 h-4 w-4" />
+                Previous
               </Button>
 
-              {currentStep === STEPS.length ? (
-                <Button type="button" onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+              <div className="text-muted-foreground text-sm">
+                Step {currentStep} of {STEPS.length}
+              </div>
+
+              {currentStep === 5 ? (
+                <Button type="submit" disabled={isSubmitting} size="lg">
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {mode === "create" ? "Creating..." : "Saving..."}
+                      Saving...
                     </>
                   ) : (
                     <>
@@ -461,492 +592,95 @@ function CourseFormContent({
                   )}
                 </Button>
               ) : (
-                <Button type="button" onClick={nextStep} disabled={isSubmitting}>
+                <Button type="button" onClick={nextStep} disabled={!canGoToStep(currentStep + 1)}>
                   Next
+                  <CheckIcon className="ml-2 h-4 w-4" />
                 </Button>
               )}
             </div>
           </div>
         </div>
-      </div>
+      </form>
 
-      {/* Nested Dialog for Teacher Selection */}
+      {/* Teacher Selection Dialog */}
       <TeacherSelectionDialog
         open={teacherDialogOpen}
         onOpenChange={setTeacherDialogOpen}
         faculty={faculty}
+        selectedId={watch("teacherId")}
+        onSelect={(id) => {
+          setValue("teacherId", id)
+          setTeacherDialogOpen(false)
+        }}
       />
-    </FormProvider>
-  )
-}
-
-// STEP 1: Basic Info
-function BasicInfoStep({ categories }: { categories: any[] }) {
-  const {
-    register,
-    formState: { errors },
-    setValue,
-    watch,
-  } = useFormContext<FormData>()
-
-  const categoryId = watch("categoryId")
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">Basic Information</h3>
-        <p className="text-sm text-muted-foreground">
-          Let's start with the course title and category
-        </p>
-      </div>
-
-      <FieldGroup className="@container/field-group">
-        <Field orientation="responsive" data-invalid={!!errors.title}>
-          <FieldContent>
-            <FieldLabel htmlFor="title">Course Title</FieldLabel>
-            <FieldDescription>Choose a clear, descriptive title</FieldDescription>
-          </FieldContent>
-          <div className="w-full sm:min-w-[300px]">
-            <Input
-              id="title"
-              placeholder="e.g., Sustainable Crop Production Techniques"
-              aria-invalid={!!errors.title}
-              {...register("title")}
-            />
-            {errors.title && <FieldError>{errors.title.message}</FieldError>}
-          </div>
-        </Field>
-
-        <FieldSeparator />
-
-        <Field orientation="responsive" data-invalid={!!errors.categoryId}>
-          <FieldContent>
-            <FieldLabel htmlFor="categoryId" className="flex items-center gap-2">
-              <FolderIcon className="h-4 w-4 text-muted-foreground" />
-              Category
-            </FieldLabel>
-            <FieldDescription>Select the course subject area</FieldDescription>
-          </FieldContent>
-          <div className="w-full sm:min-w-[300px]">
-            <Select
-              value={categoryId || ""}
-              onValueChange={(value) => setValue("categoryId", value, { shouldValidate: true })}
-            >
-              <SelectTrigger id="categoryId" aria-invalid={!!errors.categoryId}>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {!categories ? (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  </div>
-                ) : categories.length === 0 ? (
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    No categories available
-                  </div>
-                ) : (
-                  categories.map((cat) => (
-                    <SelectItem key={cat._id} value={cat._id} className="font-mono">
-                      {"\u00A0\u00A0".repeat(Math.max(0, cat.level - 1))}
-                      {cat.level > 1 && "└─ "}
-                      {cat.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            {errors.categoryId && <FieldError>{errors.categoryId.message}</FieldError>}
-          </div>
-        </Field>
-      </FieldGroup>
     </div>
   )
 }
 
-// STEP 2: Content
-function ContentStep() {
-  const {
-    register,
-    watch,
-    formState: { errors },
-  } = useFormContext<FormData>()
-
-  const descriptionLength = watch("description")?.length || 0
-  const contentLength = watch("content")?.length || 0
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">Course Content</h3>
-        <p className="text-sm text-muted-foreground">
-          Describe what learners will gain from this course
-        </p>
-      </div>
-
-      <FieldGroup className="@container/field-group">
-        <Field orientation="responsive" data-invalid={!!errors.description}>
-          <FieldContent>
-            <FieldLabel htmlFor="description">Description</FieldLabel>
-            <FieldDescription>
-              A brief overview of the course ({descriptionLength} characters)
-            </FieldDescription>
-          </FieldContent>
-          <div className="w-full sm:min-w-[300px]">
-            <Textarea
-              id="description"
-              placeholder="Describe what farmers will learn in this course..."
-              rows={4}
-              aria-invalid={!!errors.description}
-              className="resize-none"
-              {...register("description")}
-            />
-            {errors.description && <FieldError>{errors.description.message}</FieldError>}
-          </div>
-        </Field>
-
-        <FieldSeparator />
-
-        <Field orientation="responsive" data-invalid={!!errors.content}>
-          <FieldContent>
-            <FieldLabel htmlFor="content">Course Introduction</FieldLabel>
-            <FieldDescription>
-              Detailed introduction shown to enrolled students ({contentLength} characters)
-            </FieldDescription>
-          </FieldContent>
-          <div className="w-full sm:min-w-[300px]">
-            <Textarea
-              id="content"
-              placeholder="Welcome to the course! In this course, you will learn modern farming practices..."
-              rows={6}
-              aria-invalid={!!errors.content}
-              className="resize-none"
-              {...register("content")}
-            />
-            {errors.content && <FieldError>{errors.content.message}</FieldError>}
-          </div>
-        </Field>
-      </FieldGroup>
-    </div>
-  )
-}
-
-// STEP 3: Teacher Assignment
-function TeacherStep({
-  faculty,
-  onOpenTeacherDialog,
+function TeacherCard({
+  teacher,
+  onRemove,
+  onChange,
 }: {
-  faculty: any[] | undefined
-  onOpenTeacherDialog: () => void
+  teacher: any
+  onRemove: () => void
+  onChange: () => void
 }) {
-  const { watch, setValue } = useFormContext<FormData>()
-  const selectedTeacherId = watch("teacherId")
-  const selectedTeacher = faculty?.find((t) => t._id === selectedTeacherId)
-
-  const handleSkip = () => {
-    setValue("teacherId", undefined, { shouldValidate: true, shouldDirty: true })
-  }
-
-  const handleRemove = () => {
-    setValue("teacherId", undefined, { shouldValidate: true, shouldDirty: true })
-  }
+  if (!teacher) return null
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">Assign Teacher</h3>
-        <p className="text-sm text-muted-foreground">
-          Assign a faculty member to teach this course (optional)
-        </p>
+    <div className="flex items-center justify-between rounded-lg border-2 border-primary/20 bg-primary/5 p-6">
+      <div className="flex items-center gap-4">
+        <Avatar className="h-14 w-14">
+          <AvatarImage src={teacher.image} alt={teacher.name} />
+          <AvatarFallback className="bg-primary/10 text-lg text-primary">
+            {teacher.name
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="font-semibold text-base">{teacher.name}</p>
+          <p className="text-muted-foreground text-sm">{teacher.email}</p>
+        </div>
       </div>
-
-      {selectedTeacher ? (
-        <div className="space-y-4">
-          <Item variant="outline" className="border-2 border-primary/20 bg-primary/5">
-            <ItemMedia variant="icon">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={selectedTeacher.image} />
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  {selectedTeacher.name
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle className="text-base">{selectedTeacher.name}</ItemTitle>
-              <ItemDescription>{selectedTeacher.email}</ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <Button type="button" variant="outline" size="sm" onClick={onOpenTeacherDialog}>
-                Change
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={handleRemove}>
-                <XMarkIcon className="h-4 w-4" />
-              </Button>
-            </ItemActions>
-          </Item>
-
-          <div className="rounded-lg border bg-muted/50 p-4">
-            <div className="flex items-start gap-2">
-              <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-              <div className="text-sm">
-                <p className="font-medium">Teacher assigned successfully</p>
-                <p className="text-muted-foreground">
-                  {selectedTeacher.name} will be able to manage this course
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-lg border-2 border-dashed p-8 text-center md:p-12">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-            <UserIcon className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h4 className="mt-4 font-medium">No teacher assigned</h4>
-          <p className="mt-2 text-sm text-muted-foreground">
-            You can assign a teacher now or skip and assign later
-          </p>
-          <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-            <Button type="button" variant="outline" onClick={onOpenTeacherDialog}>
-              <UserIcon className="mr-2 h-4 w-4" />
-              Select Teacher
-            </Button>
-            <Button type="button" variant="ghost" onClick={handleSkip}>
-              Skip for now
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// STEP 4: Settings
-function SettingsStep() {
-  const { watch, setValue } = useFormContext<FormData>()
-  const isEnrollmentOpen = watch("isEnrollmentOpen")
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">Course Settings</h3>
-        <p className="text-sm text-muted-foreground">
-          Configure enrollment and visibility options
-        </p>
-      </div>
-
-      <FieldGroup className="@container/field-group">
-        <Field orientation="horizontal" className="rounded-lg border p-4">
-          <Switch
-            id="isEnrollmentOpen"
-            checked={isEnrollmentOpen}
-            onCheckedChange={(checked) =>
-              setValue("isEnrollmentOpen", checked, { shouldValidate: true, shouldDirty: true })
-            }
-          />
-          <FieldContent>
-            <FieldLabel htmlFor="isEnrollmentOpen" className="text-base">
-              Open for Enrollment
-            </FieldLabel>
-            <FieldDescription>
-              {isEnrollmentOpen
-                ? "Learners can enroll in this course immediately"
-                : "Enrollment is closed. You can open it later from course settings"}
-            </FieldDescription>
-          </FieldContent>
-        </Field>
-
-        <FieldSeparator />
-
-        <div className="rounded-lg border bg-muted/50 p-4">
-          <h4 className="mb-2 text-sm font-medium">Enrollment Status</h4>
-          <p className="text-sm text-muted-foreground">
-            {isEnrollmentOpen ? (
-              <>
-                When enrollment is open, learners will be able to discover and enroll in this
-                course from the course catalog.
-              </>
-            ) : (
-              <>
-                When enrollment is closed, only you and assigned teachers can access the course.
-                You can manually enroll specific learners.
-              </>
-            )}
-          </p>
-        </div>
-      </FieldGroup>
-    </div>
-  )
-}
-
-// STEP 5: Preview
-function PreviewStep({
-  categories,
-  faculty,
-  onGoToStep,
-}: {
-  categories: any[]
-  faculty: any[] | undefined
-  onGoToStep: (step: number) => void
-}) {
-  const { watch } = useFormContext<FormData>()
-  const values = watch()
-  const category = categories?.find((c) => c._id === values.categoryId)
-  const teacher = faculty?.find((t) => t._id === values.teacherId)
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">Review Course</h3>
-        <p className="text-sm text-muted-foreground">
-          Review your course details before publishing
-        </p>
-      </div>
-
-      <div className="space-y-6 rounded-lg border-2 bg-card p-4 md:p-6">
-        {/* Header */}
-        <div className="space-y-3">
-          <div className="flex items-start justify-between gap-2">
-            <h4 className="text-xl font-bold leading-tight md:text-2xl">
-              {values.title || "Untitled Course"}
-            </h4>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onGoToStep(1)}
-              className="shrink-0 text-muted-foreground"
-            >
-              Edit
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {category && (
-              <Badge variant="outline" className="gap-1">
-                <FolderIcon className="h-3 w-3" />
-                {category.name}
-              </Badge>
-            )}
-            {values.isEnrollmentOpen ? (
-              <Badge variant="default" className="bg-green-500">
-                Open for Enrollment
-              </Badge>
-            ) : (
-              <Badge variant="secondary">Enrollment Closed</Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h5 className="text-sm font-semibold">Description</h5>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onGoToStep(2)}
-              className="text-muted-foreground"
-            >
-              Edit
-            </Button>
-          </div>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {values.description || "No description provided"}
-          </p>
-        </div>
-
-        {/* Introduction */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h5 className="text-sm font-semibold">Course Introduction</h5>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onGoToStep(2)}
-              className="text-muted-foreground"
-            >
-              Edit
-            </Button>
-          </div>
-          <div className="rounded-md bg-muted/50 p-4">
-            <p className="text-sm leading-relaxed">{values.content || "No introduction provided"}</p>
-          </div>
-        </div>
-
-        {/* Teacher */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h5 className="text-sm font-semibold">Assigned Teacher</h5>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onGoToStep(3)}
-              className="text-muted-foreground"
-            >
-              Edit
-            </Button>
-          </div>
-          {teacher ? (
-            <Item variant="outline" size="sm">
-              <ItemMedia variant="icon">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={teacher.image} />
-                  <AvatarFallback>
-                    {teacher.name
-                      .split(" ")
-                      .map((n: string) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>{teacher.name}</ItemTitle>
-                <ItemDescription>{teacher.email}</ItemDescription>
-              </ItemContent>
-            </Item>
-          ) : (
-            <p className="text-sm text-muted-foreground">No teacher assigned</p>
-          )}
-        </div>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" onClick={onChange}>
+          Change
+        </Button>
+        <Button type="button" variant="ghost" size="icon" onClick={onRemove}>
+          <XMarkIcon className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   )
 }
 
-// NESTED DIALOG: Teacher Selection
 function TeacherSelectionDialog({
   open,
   onOpenChange,
   faculty,
+  selectedId,
+  onSelect,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   faculty: any[] | undefined
+  selectedId?: string
+  onSelect: (id: string) => void
 }) {
-  const { watch, setValue } = useFormContext<FormData>()
-  const selectedTeacherId = watch("teacherId")
   const [search, setSearch] = useState("")
 
-  const filteredFaculty = faculty?.filter(
-    (teacher) =>
-      teacher.name.toLowerCase().includes(search.toLowerCase()) ||
-      teacher.email.toLowerCase().includes(search.toLowerCase()),
+  const filtered = faculty?.filter(
+    (t) =>
+      t.name.toLowerCase().includes(search.toLowerCase()) ||
+      t.email.toLowerCase().includes(search.toLowerCase())
   )
-
-  const handleSelect = (teacherId: string) => {
-    setValue("teacherId", teacherId, { shouldValidate: true, shouldDirty: true })
-    onOpenChange(false)
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-full max-w-md p-6">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserIcon className="h-5 w-5 text-primary" />
@@ -956,7 +690,7 @@ function TeacherSelectionDialog({
 
         <div className="space-y-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search by name or email..."
               value={search}
@@ -965,56 +699,45 @@ function TeacherSelectionDialog({
             />
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto">
-            {faculty === undefined ? (
-              <div className="flex items-center justify-center py-12">
+          <div className="max-h-[400px] space-y-2 overflow-y-auto">
+            {!faculty ? (
+              <div className="flex justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            ) : filteredFaculty && filteredFaculty.length > 0 ? (
-              <ItemGroup>
-                {filteredFaculty.map((teacher) => {
-                  const isSelected = selectedTeacherId === teacher._id
-                  return (
-                    <Item
-                      key={teacher._id}
-                      variant={isSelected ? "muted" : "default"}
-                      className="cursor-pointer transition-colors hover:bg-muted/50"
-                      onClick={() => handleSelect(teacher._id)}
-                    >
-                      <ItemMedia variant="icon">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={teacher.image} />
-                          <AvatarFallback
-                            className={isSelected ? "bg-primary text-primary-foreground" : ""}
-                          >
-                            {teacher.name
-                              .split(" ")
-                              .map((n: string) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                      </ItemMedia>
-                      <ItemContent>
-                        <ItemTitle className="font-medium">{teacher.name}</ItemTitle>
-                        <ItemDescription>{teacher.email}</ItemDescription>
-                      </ItemContent>
-                      {isSelected && (
-                        <ItemActions>
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-                            <CheckIcon className="h-4 w-4 text-primary-foreground" />
-                          </div>
-                        </ItemActions>
-                      )}
-                    </Item>
-                  )
-                })}
-              </ItemGroup>
+            ) : filtered && filtered.length > 0 ? (
+              filtered.map((teacher) => (
+                <button
+                  key={teacher._id}
+                  type="button"
+                  onClick={() => onSelect(teacher._id)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-all hover:bg-muted/50",
+                    selectedId === teacher._id &&
+                    "border-primary bg-primary/5 ring-2 ring-primary/20"
+                  )}
+                >
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={teacher.image} alt={teacher.name} />
+                    <AvatarFallback>
+                      {teacher.name
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium">{teacher.name}</p>
+                    <p className="text-muted-foreground text-sm">{teacher.email}</p>
+                  </div>
+                  {selectedId === teacher._id && <CheckIcon className="h-5 w-5 text-primary" />}
+                </button>
+              ))
             ) : (
               <div className="py-12 text-center">
                 <UserIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
                 <p className="mt-4 font-medium">No teachers found</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {search ? "Try adjusting your search" : "No faculty members available"}
+                <p className="mt-1 text-muted-foreground text-sm">
+                  {search ? "Try a different search term" : "No faculty members available"}
                 </p>
               </div>
             )}

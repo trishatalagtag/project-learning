@@ -2,6 +2,7 @@ import { CourseCard } from "@/components/course-catalog/course-card"
 import { CourseListItem } from "@/components/course-catalog/course-list-item"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Empty,
   EmptyContent,
@@ -12,13 +13,24 @@ import {
 } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { ItemGroup } from "@/components/ui/item"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { flattenCategoryTree, normalizeCategoryTree } from "@/lib/categories"
 import { cn } from "@/lib/utils"
-import { AcademicCapIcon, BookOpenIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/solid"
+import {
+  AcademicCapIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  BookOpenIcon,
+  FunnelIcon,
+  ListBulletIcon,
+  MagnifyingGlassIcon,
+  Squares2X2Icon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid"
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { useMemo, useState } from "react"
@@ -28,7 +40,7 @@ const courseSearchSchema = z.object({
   page: z.number().optional().default(1),
   limit: z.number().optional().default(12),
   search: z.string().optional(),
-  categoryId: z.string().optional(),
+  categoryIds: z.array(z.string()).optional(),
   sortBy: z.enum(["title", "createdAt", "updatedAt"]).optional().default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
   enrollmentOpen: z.boolean().optional(),
@@ -49,7 +61,7 @@ function CoursesPage() {
     limit: searchParams.limit,
     offset,
     search: searchParams.search,
-    categoryId: searchParams.categoryId as Id<"categories"> | undefined,
+    categoryId: searchParams.categoryIds?.[0] as Id<"categories"> | undefined,
     sortBy: searchParams.sortBy,
     sortOrder: searchParams.sortOrder,
   })
@@ -64,15 +76,24 @@ function CoursesPage() {
     [normalizedCategories],
   )
 
-  const filteredCourses =
-    result?.courses && searchParams.enrollmentOpen !== undefined
-      ? result.courses.filter((course) => course.isEnrollmentOpen === searchParams.enrollmentOpen)
-      : result?.courses
+  const filteredCourses = useMemo(() => {
+    let courses = result?.courses || []
 
-  const filteredTotal =
-    searchParams.enrollmentOpen !== undefined
-      ? (filteredCourses?.length ?? 0)
-      : (result?.total ?? 0)
+    // Filter by enrollment status
+    if (searchParams.enrollmentOpen !== undefined) {
+      courses = courses.filter((course) => course.isEnrollmentOpen === searchParams.enrollmentOpen)
+    }
+
+    // Filter by multiple categories
+    if (searchParams.categoryIds && searchParams.categoryIds.length > 0) {
+      const categoryIds = searchParams.categoryIds as Id<"categories">[]
+      courses = courses.filter((course) => categoryIds.includes(course.categoryId))
+    }
+
+    return courses
+  }, [result?.courses, searchParams.enrollmentOpen, searchParams.categoryIds])
+
+  const filteredTotal = filteredCourses?.length ?? 0
 
   const [localSearch, setLocalSearch] = useState(searchParams.search ?? "")
 
@@ -130,54 +151,169 @@ function CoursesPage() {
       <Separator />
 
       <section className="container mx-auto max-w-7xl px-4 py-8">
-        {/* Category Filters */}
-        <div className="mb-6 flex flex-wrap items-center gap-2">
-          <Badge
-            variant={searchParams.categoryId ? "outline" : "default"}
-            className="cursor-pointer select-none"
-            onClick={() => applySearchParam("categoryId", undefined)}
-            role="button"
-            tabIndex={0}
-          >
-            All Categories
-          </Badge>
-          {categories === undefined ? (
-            <Badge variant="outline" className="cursor-default">
-              Loading...
-            </Badge>
-          ) : (
-            flatCategories.map((cat) => (
-              <Badge
-                key={cat._id}
-                variant={
-                  searchParams.categoryId === (cat._id as unknown as string) ? "default" : "outline"
-                }
-                className="cursor-pointer select-none"
-                onClick={() => applySearchParam("categoryId", cat._id as unknown as string)}
-                role="button"
-                tabIndex={0}
+        {/* Category Filter - Multi-Select */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 items-center gap-3">
+            <label htmlFor="category-filter" className="whitespace-nowrap font-medium text-muted-foreground text-sm">
+              <FunnelIcon className="mr-1 inline h-4 w-4" />
+              Categories:
+            </label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="category-filter"
+                  variant="outline"
+                  className="w-full justify-between sm:w-[300px]"
+                >
+                  <span>
+                    {searchParams.categoryIds && searchParams.categoryIds.length > 0
+                      ? `${searchParams.categoryIds.length} selected`
+                      : "All Categories"}
+                  </span>
+                  <FunnelIcon className="h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0" align="start">
+                <div className="max-h-[400px] overflow-y-auto p-2">
+                  {categories === undefined ? (
+                    <div className="flex items-center justify-center p-4">
+                      <span className="text-muted-foreground text-sm">Loading...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {normalizedCategories.map((level1Cat) => (
+                        <div key={level1Cat._id} className="space-y-1">
+                          <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">
+                            {level1Cat.name}
+                          </div>
+                          <label
+                            htmlFor={`category-${level1Cat._id}`}
+                            className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent"
+                          >
+                            <Checkbox
+                              id={`category-${level1Cat._id}`}
+                              checked={searchParams.categoryIds?.includes(level1Cat._id as unknown as string) || false}
+                              onCheckedChange={(checked) => {
+                                const currentIds = searchParams.categoryIds || []
+                                const newIds = checked
+                                  ? [...currentIds, level1Cat._id as unknown as string]
+                                  : currentIds.filter((id) => id !== (level1Cat._id as unknown as string))
+                                applySearchParam("categoryIds", newIds.length > 0 ? newIds : undefined)
+                              }}
+                            />
+                            <span className="text-sm">{level1Cat.name}</span>
+                          </label>
+                          {level1Cat.children.map((level2Cat) => (
+                            <label
+                              key={level2Cat._id}
+                              htmlFor={`category-${level2Cat._id}`}
+                              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 pl-6 hover:bg-accent"
+                            >
+                              <Checkbox
+                                id={`category-${level2Cat._id}`}
+                                checked={searchParams.categoryIds?.includes(level2Cat._id as unknown as string) || false}
+                                onCheckedChange={(checked) => {
+                                  const currentIds = searchParams.categoryIds || []
+                                  const newIds = checked
+                                    ? [...currentIds, level2Cat._id as unknown as string]
+                                    : currentIds.filter((id) => id !== (level2Cat._id as unknown as string))
+                                  applySearchParam("categoryIds", newIds.length > 0 ? newIds : undefined)
+                                }}
+                              />
+                              <span className="text-sm">{level2Cat.name}</span>
+                            </label>
+                          ))}
+                          {level1Cat.children.flatMap((level2Cat) =>
+                            level2Cat.children.map((level3Cat) => (
+                              <label
+                                key={level3Cat._id}
+                                htmlFor={`category-${level3Cat._id}`}
+                                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 pl-10 hover:bg-accent"
+                              >
+                                <Checkbox
+                                  id={`category-${level3Cat._id}`}
+                                  checked={searchParams.categoryIds?.includes(level3Cat._id as unknown as string) || false}
+                                  onCheckedChange={(checked) => {
+                                    const currentIds = searchParams.categoryIds || []
+                                    const newIds = checked
+                                      ? [...currentIds, level3Cat._id as unknown as string]
+                                      : currentIds.filter((id) => id !== (level3Cat._id as unknown as string))
+                                    applySearchParam("categoryIds", newIds.length > 0 ? newIds : undefined)
+                                  }}
+                                />
+                                <span className="text-sm">{level3Cat.name}</span>
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+          {searchParams.categoryIds && searchParams.categoryIds.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {searchParams.categoryIds.slice(0, 3).map((categoryId) => {
+                const selectedCategory = flatCategories.find(
+                  (cat) => cat._id === (categoryId as Id<"categories">)
+                )
+                if (!selectedCategory) return null
+                return (
+                  <Badge
+                    key={categoryId}
+                    variant="default"
+                    className="cursor-pointer gap-1"
+                    onClick={() => {
+                      const newIds = searchParams.categoryIds?.filter((id) => id !== categoryId) || []
+                      applySearchParam("categoryIds", newIds.length > 0 ? newIds : undefined)
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {selectedCategory.name}
+                    <XMarkIcon className="h-3 w-3" />
+                  </Badge>
+                )
+              })}
+              {searchParams.categoryIds.length > 3 && (
+                <Badge variant="secondary" className="gap-1">
+                  +{searchParams.categoryIds.length - 3} more
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => applySearchParam("categoryIds", undefined)}
+                className="h-6 px-2 text-xs"
+                aria-label="Clear all category filters"
               >
-                {cat.level > 1 && `${"\u00A0".repeat((cat.level - 1) * 2)}└─ `}
-                {cat.name}
-              </Badge>
-            ))
+                <XMarkIcon className="mr-1 h-3 w-3" />
+                Clear All
+              </Button>
+            </div>
           )}
         </div>
 
         {/* Search, Filters, and View Toggle */}
         <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div className="col-span-1 sm:col-span-2 lg:col-span-2">
-            <Input
-              placeholder="Search courses..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  applySearchParam("search", localSearch || undefined)
-                }
-              }}
-              aria-label="Search courses"
-            />
+            <div className="relative">
+              <MagnifyingGlassIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search courses..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    applySearchParam("search", localSearch || undefined)
+                  }
+                }}
+                className="pl-9"
+                aria-label="Search courses"
+              />
+            </div>
           </div>
 
           <Select
@@ -192,6 +328,7 @@ function CoursesPage() {
             }}
           >
             <SelectTrigger aria-label="Sort courses">
+              <FunnelIcon className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -211,6 +348,7 @@ function CoursesPage() {
             aria-pressed={!!searchParams.enrollmentOpen}
             className="w-full"
           >
+            <BookOpenIcon className="mr-2 h-4 w-4" />
             Open Enrollment
           </Button>
 
@@ -254,6 +392,7 @@ function CoursesPage() {
               })
             }}
           >
+            <XMarkIcon className="mr-2 h-4 w-4" />
             Reset Filters
           </Button>
         </div>
@@ -332,8 +471,11 @@ function CoursesPage() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
-                <div className="text-muted-foreground text-sm">
-                  Page {searchParams.page} of {totalPages}
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <BookOpenIcon className="h-4 w-4" />
+                  <span>
+                    Page {searchParams.page} of {totalPages}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -341,6 +483,7 @@ function CoursesPage() {
                     disabled={searchParams.page <= 1}
                     onClick={() => applySearchParam("page", Math.max(1, searchParams.page - 1))}
                   >
+                    <ArrowLeftIcon className="mr-2 h-4 w-4" />
                     Previous
                   </Button>
                   <span className="text-sm">
@@ -354,6 +497,7 @@ function CoursesPage() {
                     }
                   >
                     Next
+                    <ArrowRightIcon className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </div>

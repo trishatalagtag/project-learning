@@ -149,7 +149,7 @@ export function FacultyCoursesDashboard() {
 
       {/* Filters and Search */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex-1">
               <Input

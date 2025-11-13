@@ -8,8 +8,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useAuthParams } from "@/hooks/use-auth-params"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import type { Mode, Role } from "@/lib/models/schema"
 import { useCallback, useRef } from "react"
+import { Drawer } from "vaul"
 
 function getTitle(mode: Mode, role: Role) {
   const action = mode === "signin" ? "Sign In" : "Sign Up"
@@ -25,8 +27,9 @@ function getDescription(mode: Mode) {
 
 export function AuthDialog() {
   const { authenticateMode, role, closeModal, openModal } = useAuthParams()
+  const isDesktop = useMediaQuery("(min-width: 768px)")
 
-  // i have to track of last valid mode+role in a ref (handles modal transitions)
+  // Track last valid mode+role in a ref (handles modal transitions)
   const snapshot = useRef({ mode: authenticateMode, role })
 
   if (authenticateMode && role) {
@@ -51,25 +54,77 @@ export function AuthDialog() {
     return null
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{getTitle(mode, snapshotRole)}</DialogTitle>
-          <DialogDescription>{getDescription(mode)}</DialogDescription>
-        </DialogHeader>
+  if (isDesktop) {
+    return (
+      <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
+        <DialogContent className="flex max-h-[90vh] w-full max-w-md flex-col gap-0 p-0">
+          <DialogHeader className="shrink-0 space-y-1.5 border-b border-border px-6 pb-4 pt-6">
+            <DialogTitle>{getTitle(mode, snapshotRole)}</DialogTitle>
+            <DialogDescription>{getDescription(mode)}</DialogDescription>
+          </DialogHeader>
 
-        {mode === "signin" ? (
-          <AuthSignInForm
-            role={snapshotRole}
-            onSuccess={handleSuccess}
-            onSwitchMode={switchMode}
-            open={isOpen}
-          />
-        ) : (
-          <AuthSignUpForm role={snapshotRole} onSuccess={handleSuccess} onSwitchMode={switchMode} />
-        )}
-      </DialogContent>
-    </Dialog>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+            {mode === "signin" ? (
+              <AuthSignInForm
+                role={snapshotRole}
+                onSuccess={handleSuccess}
+                onSwitchMode={switchMode}
+                open={isOpen}
+              />
+            ) : (
+              <AuthSignUpForm
+                role={snapshotRole}
+                onSuccess={handleSuccess}
+                onSwitchMode={switchMode}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  return (
+    <Drawer.Root
+      open={isOpen}
+      onOpenChange={(open) => !open && closeModal()}
+      dismissible={true}
+      modal={true}
+    >
+      <Drawer.Portal>
+        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+        <Drawer.Content className="fixed bottom-0 left-0 right-0 mt-24 flex max-h-[96vh] flex-col rounded-t-[10px] bg-background">
+          <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+
+          <div className="flex max-h-[96vh] flex-col">
+            <div className="shrink-0 border-b border-border px-4 pb-4 pt-3">
+              <Drawer.Title className="text-lg font-semibold">
+                {getTitle(mode, snapshotRole)}
+              </Drawer.Title>
+              <Drawer.Description className="text-sm text-muted-foreground">
+                {getDescription(mode)}
+              </Drawer.Description>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
+              {mode === "signin" ? (
+                <AuthSignInForm
+                  role={snapshotRole}
+                  onSuccess={handleSuccess}
+                  onSwitchMode={switchMode}
+                  open={isOpen}
+                />
+              ) : (
+                <AuthSignUpForm
+                  role={snapshotRole}
+                  onSuccess={handleSuccess}
+                  onSwitchMode={switchMode}
+                />
+              )}
+            </div>
+          </div>
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
   )
 }

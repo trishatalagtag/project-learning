@@ -34,33 +34,17 @@ export function FacultyAssignmentCard({ course }: FacultyAssignmentCardProps) {
   const faculty = useQuery(api.admin.users.listUsersByRole, {
     role: "FACULTY",
   })
-  const admins = useQuery(api.admin.users.listUsersByRole, {
-    role: "ADMIN",
-  })
-
-  // Combine and deduplicate faculty and admin users
-  const allTeachers = useMemo(() => {
-    if (!faculty || !admins) return []
-    const combined = [...faculty, ...admins]
-    // Remove duplicates by _id
-    const unique = Array.from(new Map(combined.map((teacher) => [teacher._id, teacher])).values())
-    return unique.sort((a, b) => a.name.localeCompare(b.name))
-  }, [faculty, admins]) as Array<{
-    _id: string
-    userId: string
-    name: string
-    email: string
-    image?: string
-  }>
 
   const filteredTeachers = useMemo(() => {
-    if (!search) return allTeachers
-    return allTeachers.filter(
+    if (!faculty) return []
+    const sorted = [...faculty].sort((a, b) => a.name.localeCompare(b.name))
+    if (!search) return sorted
+    return sorted.filter(
       (teacher) =>
         teacher.name.toLowerCase().includes(search.toLowerCase()) ||
         teacher.email.toLowerCase().includes(search.toLowerCase()),
     )
-  }, [allTeachers, search])
+  }, [faculty, search])
 
   const handleAssign = async (teacherId: string) => {
     await mutations.assignTeacher(teacherId)
@@ -72,7 +56,7 @@ export function FacultyAssignmentCard({ course }: FacultyAssignmentCardProps) {
     await mutations.unassignTeacher()
   }
 
-  const selectedTeacher = allTeachers.find(
+  const selectedTeacher = faculty?.find(
     (t) => t._id === course.teacherId,
   ) as { _id: string; userId: string; name: string; email: string; image?: string } | undefined
 
@@ -152,7 +136,7 @@ export function FacultyAssignmentCard({ course }: FacultyAssignmentCardProps) {
             </div>
 
             <div className="max-h-[400px] overflow-y-auto">
-              {faculty === undefined || admins === undefined ? (
+              {faculty === undefined ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>

@@ -6,7 +6,7 @@ import { ArrowLeftIcon } from "lucide-react"
 
 export function CourseDetailSkeleton() {
     return (
-        <div>
+        <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
             {/* Header Skeleton */}
             <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">

@@ -17,7 +17,7 @@ export function SystemStatsCards({ stats }: SystemStatsCardsProps) {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {/* Total Users */}
             <Card>
-                <CardContent className="p-6">
+                <CardContent>
                     <div className="flex items-center gap-4">
                         <div className="rounded-full bg-primary/10 p-3">
                             <UsersIcon className="size-6 text-primary" />
@@ -29,8 +29,8 @@ export function SystemStatsCards({ stats }: SystemStatsCardsProps) {
                             <p className="font-bold text-2xl">{stats.totalUsers}</p>
                             <div className="mt-1 flex gap-3 text-muted-foreground text-xs">
                                 <span>Learners: {stats.totalLearners}</span>
-                                <span>Faculty: {stats.totalFaculty}</span>
-                                <span>Admins: {stats.totalAdmins}</span>
+                                <span className="text-muted-foreground text-xs">Faculty: {stats.totalFaculty}</span>
+                                <span className="text-muted-foreground text-xs">Admins: {stats.totalAdmins}</span>
                             </div>
                         </div>
                     </div>
@@ -39,7 +39,7 @@ export function SystemStatsCards({ stats }: SystemStatsCardsProps) {
 
             {/* Total Courses */}
             <Card>
-                <CardContent className="p-6">
+                <CardContent>
                     <div className="flex items-center gap-4">
                         <div className="rounded-full bg-blue-500/10 p-3">
                             <AcademicCapIcon className="size-6 text-blue-500" />
@@ -60,7 +60,7 @@ export function SystemStatsCards({ stats }: SystemStatsCardsProps) {
 
             {/* Total Enrollments */}
             <Card>
-                <CardContent className="p-6">
+                <CardContent>
                     <div className="flex items-center gap-4">
                         <div className="rounded-full bg-green-500/10 p-3">
                             <CheckCircleIcon className="size-6 text-green-500" />
@@ -81,7 +81,7 @@ export function SystemStatsCards({ stats }: SystemStatsCardsProps) {
 
             {/* Content Overview */}
             <Card>
-                <CardContent className="p-6">
+                <CardContent>
                     <div className="flex items-center gap-4">
                         <div className="rounded-full bg-purple-500/10 p-3">
                             <DocumentTextIcon className="size-6 text-purple-500" />

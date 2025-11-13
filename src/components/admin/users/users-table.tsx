@@ -2,6 +2,7 @@
 
 import { DataTablePagination } from "@/components/table/data-table-pagination"
 import { DataTableViewOptions } from "@/components/table/data-table-view-options"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
     Empty,
@@ -60,14 +61,12 @@ import { useQuery } from "convex/react"
 import { formatDistanceToNow } from "date-fns"
 import { Loader2 } from "lucide-react"
 import { useMemo, useState } from "react"
-
 import { createColumns, type User } from "./columns"
 import { RoleBadge } from "./shared/role-badge"
 import { UserAvatar } from "./shared/user-avatar"
 import { DeactivateUserDialog } from "./user-detail/deactivate-user-dialog"
 import { EditUserDialog } from "./user-detail/edit-user-dialog"
 import { UserStatsCards } from "./user-stats-cards"
-import { Button } from "@/components/ui/button"
 
 export function UsersTable() {
     const navigate = useNavigate()
@@ -491,7 +490,7 @@ export function UsersTable() {
                                             className="cursor-pointer transition-colors hover:bg-accent/50"
                                             onClick={() => handleView(user._id)}
                                         >
-                                            <CardContent className="p-6">
+                                            <CardContent>
                                                 <div className="flex items-start gap-4">
                                                     <UserAvatar name={user.name} image={user.image} size="md" />
                                                     <div className="min-w-0 flex-1">

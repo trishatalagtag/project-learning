@@ -7,6 +7,7 @@ import {
     HomeIcon,
     LifebuoyIcon,
     ListBulletIcon,
+    MegaphoneIcon,
     PlusIcon,
     ShieldCheckIcon,
     UserGroupIcon
@@ -57,6 +58,11 @@ export const facultySidebarConfig: SidebarConfig = {
         {
             label: "Content Management",
             items: [
+                {
+                    label: "Announcements",
+                    href: "/f/announcements",
+                    icon: MegaphoneIcon,
+                },
                 {
                     label: "Pending Approvals",
                     href: "/f/content-approvals",

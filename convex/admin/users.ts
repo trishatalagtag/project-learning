@@ -12,7 +12,7 @@ export const getUserById = adminQuery({
   returns: v.union(
     v.object({
       _id: v.string(),
-      userId: v.string(), 
+      userId: v.string(),
       name: v.string(),
       email: v.string(),
       role: v.optional(v.string()),
@@ -32,7 +32,7 @@ export const getUserById = adminQuery({
       model: "user",
       where: [{ field: "_id", operator: "eq", value: args.authUserId }],
     });
-    
+
     if (!user) return null;
 
     const enrollments = await ctx.db
@@ -174,8 +174,8 @@ export const listAllUsers = adminQuery({
       if (aVal === undefined || aVal === null) return 1;
       if (bVal === undefined || bVal === null) return -1;
 
-      const comparison = typeof aVal === "string" 
-        ? aVal.localeCompare(bVal) 
+      const comparison = typeof aVal === "string"
+        ? aVal.localeCompare(bVal)
         : aVal - bVal;
 
       return sortOrder === "desc" ? -comparison : comparison;
@@ -228,7 +228,7 @@ export const listAllUsers = adminQuery({
         };
       })
     );
-    
+
     return {
       users: enrichedUsers,
       total,
@@ -246,9 +246,10 @@ export const listUsersByRole = adminQuery({
   returns: v.array(
     v.object({
       _id: v.string(),
-      userId: v.string(), // ← ADD THIS
+      userId: v.string(),
       name: v.string(),
       email: v.string(),
+      image: v.optional(v.string()),
     })
   ),
   handler: async (ctx, args) => {
@@ -260,18 +261,24 @@ export const listUsersByRole = adminQuery({
       paginationOpts: { cursor: null, numItems: 100 }
     });
 
-    let users: any[] = [];
-    if (Array.isArray(result)) {
-      users = result;
-    } else if (result && typeof result === "object") {
-      users = result.data ?? result.items ?? [];
-    }
+    // Helper to extract users from adapter response (matching listAllUsers logic)
+    const extractUsers = (result: any): any[] => {
+      if (Array.isArray(result)) return result;
+      return result?.data ?? result?.items ?? result?.page ?? [];
+    };
 
-    return users.map((u: any) => ({
-      _id: String(u._id),
-      userId: String(u._id), // ← ADD THIS (same as _id)
-      name: u.name ?? "",
-      email: u.email ?? "",
-    }));
+    const users = extractUsers(result);
+
+    // Filter to ensure we only return users with the requested role
+    // and map to the expected format
+    return users
+      .filter((u: any) => u.role === args.role)
+      .map((u: any) => ({
+        _id: String(u._id),
+        userId: String(u._id),
+        name: u.name ?? "",
+        email: u.email ?? "",
+        image: u.image ?? undefined,
+      }));
   },
 });

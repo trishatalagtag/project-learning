@@ -324,7 +324,7 @@ function CreateUserPage() {
 
       {/* Note about role assignment */}
       <Card className="border-amber-200 bg-amber-50/50">
-        <CardContent className="pt-6">
+        <CardContent>
           <p className="text-amber-900 text-sm">
             <strong>Note:</strong> The user role may need to be updated after account creation
             depending on your authentication system configuration. The account will be created

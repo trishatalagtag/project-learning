@@ -72,7 +72,7 @@ export function FacultyAnnouncementsTab({ courseId }: FacultyAnnouncementsTabPro
                 <div className="space-y-4">
                     {Array.from({ length: 3 }).map((_, i) => (
                         <Card key={i}>
-                            <CardContent className="p-6">
+                            <CardContent>
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <Skeleton className="h-6 w-48" />

@@ -15,10 +15,17 @@ import { Route as PublicIndexRouteImport } from './pages/_public/index'
 import { Route as PublicFaqRouteImport } from './pages/_public/faq'
 import { Route as PublicContactRouteImport } from './pages/_public/contact'
 import { Route as PublicAboutRouteImport } from './pages/_public/about'
+import { Route as AuthenticatedCRouteImport } from './pages/_authenticated.c'
 import { Route as PublicCoursesIndexRouteImport } from './pages/_public/courses.index'
 import { Route as PublicStaffLoginRouteImport } from './pages/_public/staff.login'
 import { Route as PublicCoursesCourseIdRouteImport } from './pages/_public/courses.$courseId'
+import { Route as AuthenticatedCSubmissionsRouteImport } from './pages/_authenticated.c/submissions'
+import { Route as AuthenticatedCSettingsRouteImport } from './pages/_authenticated.c/settings'
+import { Route as AuthenticatedCSecurityRouteImport } from './pages/_authenticated.c/security'
+import { Route as AuthenticatedCProgressRouteImport } from './pages/_authenticated.c/progress'
+import { Route as AuthenticatedCLogoutRouteImport } from './pages/_authenticated.c/logout'
 import { Route as AuthenticatedCCoursesRouteImport } from './pages/_authenticated.c/courses'
+import { Route as AuthenticatedCContactRouteImport } from './pages/_authenticated.c/contact'
 import { Route as AuthenticatedCCourseIdRouteImport } from './pages/_authenticated.c/$courseId'
 import { Route as AuthenticatedFacultyFRouteImport } from './pages/_authenticated._faculty.f'
 import { Route as AuthenticatedAdminARouteImport } from './pages/_authenticated._admin.a'
@@ -49,6 +56,8 @@ import { Route as AuthenticatedAdminAContentApprovalsIndexRouteImport } from './
 import { Route as AuthenticatedAdminACategoriesIndexRouteImport } from './pages/_authenticated._admin.a/categories/index'
 import { Route as AuthenticatedAdminAAnnouncementsIndexRouteImport } from './pages/_authenticated._admin.a/announcements/index'
 import { Route as AuthenticatedAdminAAnalyticsIndexRouteImport } from './pages/_authenticated._admin.a/analytics/index'
+import { Route as AuthenticatedCCourseIdQuizzesQuizIdRouteImport } from './pages/_authenticated.c/$courseId.quizzes.$quizId'
+import { Route as AuthenticatedCCourseIdAssignmentsAssignmentIdRouteImport } from './pages/_authenticated.c/$courseId.assignments.$assignmentId'
 import { Route as AuthenticatedFacultyFCoursesNewRouteImport } from './pages/_authenticated._faculty.f/courses/new'
 import { Route as AuthenticatedFacultyFCoursesCourseIdRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId'
 import { Route as AuthenticatedFacultyFAnnouncementsNewRouteImport } from './pages/_authenticated._faculty.f/announcements/new'
@@ -67,13 +76,19 @@ import { Route as AuthenticatedAdminAAnalyticsCoursesRouteImport } from './pages
 import { Route as AuthenticatedCCourseIdMModuleIdIndexRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.index'
 import { Route as AuthenticatedAdminAContentContentTypeContentIdRouteImport } from './pages/_authenticated._admin.a/content/$contentType.$contentId'
 import { Route as AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.lessons.$lessonId'
+import { Route as AuthenticatedFacultyFCoursesCourseIdQuizzesNewRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/quizzes/new'
+import { Route as AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/quizzes/$quizId'
 import { Route as AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/learners/$userId'
+import { Route as AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/assignments/new'
+import { Route as AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/assignments/$assignmentId'
 import { Route as AuthenticatedAdminACoursesCourseIdQuizzesNewRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/quizzes/new'
 import { Route as AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/quizzes/$quizId'
 import { Route as AuthenticatedAdminACoursesCourseIdLearnersUserIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/learners/$userId'
 import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsNewRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/new'
 import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/$assignmentId'
+import { Route as AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/assignments/$assignmentId/submissions'
 import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/$assignmentId/submissions'
+import { Route as AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
 import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
 
 const PublicRoute = PublicRouteImport.update({
@@ -104,6 +119,11 @@ const PublicAboutRoute = PublicAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => PublicRoute,
 } as any)
+const AuthenticatedCRoute = AuthenticatedCRouteImport.update({
+  id: '/c',
+  path: '/c',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const PublicCoursesIndexRoute = PublicCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -119,15 +139,46 @@ const PublicCoursesCourseIdRoute = PublicCoursesCourseIdRouteImport.update({
   path: '/courses/$courseId',
   getParentRoute: () => PublicRoute,
 } as any)
+const AuthenticatedCSubmissionsRoute =
+  AuthenticatedCSubmissionsRouteImport.update({
+    id: '/submissions',
+    path: '/submissions',
+    getParentRoute: () => AuthenticatedCRoute,
+  } as any)
+const AuthenticatedCSettingsRoute = AuthenticatedCSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedCRoute,
+} as any)
+const AuthenticatedCSecurityRoute = AuthenticatedCSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AuthenticatedCRoute,
+} as any)
+const AuthenticatedCProgressRoute = AuthenticatedCProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AuthenticatedCRoute,
+} as any)
+const AuthenticatedCLogoutRoute = AuthenticatedCLogoutRouteImport.update({
+  id: '/logout',
+  path: '/logout',
+  getParentRoute: () => AuthenticatedCRoute,
+} as any)
 const AuthenticatedCCoursesRoute = AuthenticatedCCoursesRouteImport.update({
-  id: '/c/courses',
-  path: '/c/courses',
-  getParentRoute: () => AuthenticatedRoute,
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => AuthenticatedCRoute,
+} as any)
+const AuthenticatedCContactRoute = AuthenticatedCContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => AuthenticatedCRoute,
 } as any)
 const AuthenticatedCCourseIdRoute = AuthenticatedCCourseIdRouteImport.update({
-  id: '/c/$courseId',
-  path: '/c/$courseId',
-  getParentRoute: () => AuthenticatedRoute,
+  id: '/$courseId',
+  path: '/$courseId',
+  getParentRoute: () => AuthenticatedCRoute,
 } as any)
 const AuthenticatedFacultyFRoute = AuthenticatedFacultyFRouteImport.update({
   id: '/_faculty/f',
@@ -301,6 +352,18 @@ const AuthenticatedAdminAAnalyticsIndexRoute =
     path: '/analytics/',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
+const AuthenticatedCCourseIdQuizzesQuizIdRoute =
+  AuthenticatedCCourseIdQuizzesQuizIdRouteImport.update({
+    id: '/quizzes/$quizId',
+    path: '/quizzes/$quizId',
+    getParentRoute: () => AuthenticatedCCourseIdRoute,
+  } as any)
+const AuthenticatedCCourseIdAssignmentsAssignmentIdRoute =
+  AuthenticatedCCourseIdAssignmentsAssignmentIdRouteImport.update({
+    id: '/assignments/$assignmentId',
+    path: '/assignments/$assignmentId',
+    getParentRoute: () => AuthenticatedCCourseIdRoute,
+  } as any)
 const AuthenticatedFacultyFCoursesNewRoute =
   AuthenticatedFacultyFCoursesNewRouteImport.update({
     id: '/courses/new',
@@ -409,12 +472,38 @@ const AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute =
     path: '/m/$moduleId/lessons/$lessonId',
     getParentRoute: () => AuthenticatedCCourseIdRoute,
   } as any)
+const AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute =
+  AuthenticatedFacultyFCoursesCourseIdQuizzesNewRouteImport.update({
+    id: '/quizzes/new',
+    path: '/quizzes/new',
+    getParentRoute: () => AuthenticatedFacultyFCoursesCourseIdRoute,
+  } as any)
+const AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute =
+  AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRouteImport.update({
+    id: '/quizzes/$quizId',
+    path: '/quizzes/$quizId',
+    getParentRoute: () => AuthenticatedFacultyFCoursesCourseIdRoute,
+  } as any)
 const AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute =
   AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRouteImport.update({
     id: '/learners/$userId',
     path: '/learners/$userId',
     getParentRoute: () => AuthenticatedFacultyFCoursesCourseIdRoute,
   } as any)
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute =
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRouteImport.update({
+    id: '/assignments/new',
+    path: '/assignments/new',
+    getParentRoute: () => AuthenticatedFacultyFCoursesCourseIdRoute,
+  } as any)
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRoute =
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteImport.update(
+    {
+      id: '/assignments/$assignmentId',
+      path: '/assignments/$assignmentId',
+      getParentRoute: () => AuthenticatedFacultyFCoursesCourseIdRoute,
+    } as any,
+  )
 const AuthenticatedAdminACoursesCourseIdQuizzesNewRoute =
   AuthenticatedAdminACoursesCourseIdQuizzesNewRouteImport.update({
     id: '/quizzes/new',
@@ -445,6 +534,15 @@ const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute =
     path: '/assignments/$assignmentId',
     getParentRoute: () => AuthenticatedAdminACoursesCourseIdRoute,
   } as any)
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute =
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport.update(
+    {
+      id: '/submissions',
+      path: '/submissions',
+      getParentRoute: () =>
+        AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRoute,
+    } as any,
+  )
 const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute =
   AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport.update(
     {
@@ -452,6 +550,15 @@ const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute 
       path: '/submissions',
       getParentRoute: () =>
         AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute,
+    } as any,
+  )
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute =
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRouteImport.update(
+    {
+      id: '/$submissionId',
+      path: '/$submissionId',
+      getParentRoute: () =>
+        AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute,
     } as any,
   )
 const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute =
@@ -465,6 +572,7 @@ const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmis
   )
 
 export interface FileRoutesByFullPath {
+  '/c': typeof AuthenticatedCRouteWithChildren
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
@@ -472,7 +580,13 @@ export interface FileRoutesByFullPath {
   '/a': typeof AuthenticatedAdminARouteWithChildren
   '/f': typeof AuthenticatedFacultyFRouteWithChildren
   '/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
+  '/c/contact': typeof AuthenticatedCContactRoute
   '/c/courses': typeof AuthenticatedCCoursesRoute
+  '/c/logout': typeof AuthenticatedCLogoutRoute
+  '/c/progress': typeof AuthenticatedCProgressRoute
+  '/c/security': typeof AuthenticatedCSecurityRoute
+  '/c/settings': typeof AuthenticatedCSettingsRoute
+  '/c/submissions': typeof AuthenticatedCSubmissionsRoute
   '/courses/$courseId': typeof PublicCoursesCourseIdRoute
   '/staff/login': typeof PublicStaffLoginRoute
   '/courses': typeof PublicCoursesIndexRoute
@@ -508,6 +622,8 @@ export interface FileRoutesByFullPath {
   '/f/announcements/new': typeof AuthenticatedFacultyFAnnouncementsNewRoute
   '/f/courses/$courseId': typeof AuthenticatedFacultyFCoursesCourseIdRouteWithChildren
   '/f/courses/new': typeof AuthenticatedFacultyFCoursesNewRoute
+  '/c/$courseId/assignments/$assignmentId': typeof AuthenticatedCCourseIdAssignmentsAssignmentIdRoute
+  '/c/$courseId/quizzes/$quizId': typeof AuthenticatedCCourseIdQuizzesQuizIdRoute
   '/a/analytics': typeof AuthenticatedAdminAAnalyticsIndexRoute
   '/a/announcements': typeof AuthenticatedAdminAAnnouncementsIndexRoute
   '/a/categories': typeof AuthenticatedAdminACategoriesIndexRoute
@@ -525,17 +641,30 @@ export interface FileRoutesByFullPath {
   '/a/courses/$courseId/learners/$userId': typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute
   '/a/courses/$courseId/quizzes/$quizId': typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute
   '/a/courses/$courseId/quizzes/new': typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRoute
+  '/f/courses/$courseId/assignments/$assignmentId': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  '/f/courses/$courseId/assignments/new': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute
   '/f/courses/$courseId/learners/$userId': typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
+  '/f/courses/$courseId/quizzes/$quizId': typeof AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute
+  '/f/courses/$courseId/quizzes/new': typeof AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
   '/a/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+  '/f/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
   '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
+  '/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
 }
 export interface FileRoutesByTo {
+  '/c': typeof AuthenticatedCRouteWithChildren
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
   '/': typeof PublicIndexRoute
+  '/c/contact': typeof AuthenticatedCContactRoute
   '/c/courses': typeof AuthenticatedCCoursesRoute
+  '/c/logout': typeof AuthenticatedCLogoutRoute
+  '/c/progress': typeof AuthenticatedCProgressRoute
+  '/c/security': typeof AuthenticatedCSecurityRoute
+  '/c/settings': typeof AuthenticatedCSettingsRoute
+  '/c/submissions': typeof AuthenticatedCSubmissionsRoute
   '/courses/$courseId': typeof PublicCoursesCourseIdRoute
   '/staff/login': typeof PublicStaffLoginRoute
   '/courses': typeof PublicCoursesIndexRoute
@@ -567,6 +696,8 @@ export interface FileRoutesByTo {
   '/f/announcements/new': typeof AuthenticatedFacultyFAnnouncementsNewRoute
   '/f/courses/$courseId': typeof AuthenticatedFacultyFCoursesCourseIdRouteWithChildren
   '/f/courses/new': typeof AuthenticatedFacultyFCoursesNewRoute
+  '/c/$courseId/assignments/$assignmentId': typeof AuthenticatedCCourseIdAssignmentsAssignmentIdRoute
+  '/c/$courseId/quizzes/$quizId': typeof AuthenticatedCCourseIdQuizzesQuizIdRoute
   '/a/analytics': typeof AuthenticatedAdminAAnalyticsIndexRoute
   '/a/announcements': typeof AuthenticatedAdminAAnnouncementsIndexRoute
   '/a/categories': typeof AuthenticatedAdminACategoriesIndexRoute
@@ -584,15 +715,22 @@ export interface FileRoutesByTo {
   '/a/courses/$courseId/learners/$userId': typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute
   '/a/courses/$courseId/quizzes/$quizId': typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute
   '/a/courses/$courseId/quizzes/new': typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRoute
+  '/f/courses/$courseId/assignments/$assignmentId': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  '/f/courses/$courseId/assignments/new': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute
   '/f/courses/$courseId/learners/$userId': typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
+  '/f/courses/$courseId/quizzes/$quizId': typeof AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute
+  '/f/courses/$courseId/quizzes/new': typeof AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
   '/a/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+  '/f/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
   '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
+  '/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
+  '/_authenticated/c': typeof AuthenticatedCRouteWithChildren
   '/_public/about': typeof PublicAboutRoute
   '/_public/contact': typeof PublicContactRoute
   '/_public/faq': typeof PublicFaqRoute
@@ -600,7 +738,13 @@ export interface FileRoutesById {
   '/_authenticated/_admin/a': typeof AuthenticatedAdminARouteWithChildren
   '/_authenticated/_faculty/f': typeof AuthenticatedFacultyFRouteWithChildren
   '/_authenticated/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
+  '/_authenticated/c/contact': typeof AuthenticatedCContactRoute
   '/_authenticated/c/courses': typeof AuthenticatedCCoursesRoute
+  '/_authenticated/c/logout': typeof AuthenticatedCLogoutRoute
+  '/_authenticated/c/progress': typeof AuthenticatedCProgressRoute
+  '/_authenticated/c/security': typeof AuthenticatedCSecurityRoute
+  '/_authenticated/c/settings': typeof AuthenticatedCSettingsRoute
+  '/_authenticated/c/submissions': typeof AuthenticatedCSubmissionsRoute
   '/_public/courses/$courseId': typeof PublicCoursesCourseIdRoute
   '/_public/staff/login': typeof PublicStaffLoginRoute
   '/_public/courses/': typeof PublicCoursesIndexRoute
@@ -636,6 +780,8 @@ export interface FileRoutesById {
   '/_authenticated/_faculty/f/announcements/new': typeof AuthenticatedFacultyFAnnouncementsNewRoute
   '/_authenticated/_faculty/f/courses/$courseId': typeof AuthenticatedFacultyFCoursesCourseIdRouteWithChildren
   '/_authenticated/_faculty/f/courses/new': typeof AuthenticatedFacultyFCoursesNewRoute
+  '/_authenticated/c/$courseId/assignments/$assignmentId': typeof AuthenticatedCCourseIdAssignmentsAssignmentIdRoute
+  '/_authenticated/c/$courseId/quizzes/$quizId': typeof AuthenticatedCCourseIdQuizzesQuizIdRoute
   '/_authenticated/_admin/a/analytics/': typeof AuthenticatedAdminAAnalyticsIndexRoute
   '/_authenticated/_admin/a/announcements/': typeof AuthenticatedAdminAAnnouncementsIndexRoute
   '/_authenticated/_admin/a/categories/': typeof AuthenticatedAdminACategoriesIndexRoute
@@ -653,14 +799,21 @@ export interface FileRoutesById {
   '/_authenticated/_admin/a/courses/$courseId/learners/$userId': typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute
   '/_authenticated/_admin/a/courses/$courseId/quizzes/$quizId': typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute
   '/_authenticated/_admin/a/courses/$courseId/quizzes/new': typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRoute
+  '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  '/_authenticated/_faculty/f/courses/$courseId/assignments/new': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute
   '/_authenticated/_faculty/f/courses/$courseId/learners/$userId': typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
+  '/_authenticated/_faculty/f/courses/$courseId/quizzes/$quizId': typeof AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute
+  '/_authenticated/_faculty/f/courses/$courseId/quizzes/new': typeof AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute
   '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
   '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+  '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
   '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
+  '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/c'
     | '/about'
     | '/contact'
     | '/faq'
@@ -668,7 +821,13 @@ export interface FileRouteTypes {
     | '/a'
     | '/f'
     | '/c/$courseId'
+    | '/c/contact'
     | '/c/courses'
+    | '/c/logout'
+    | '/c/progress'
+    | '/c/security'
+    | '/c/settings'
+    | '/c/submissions'
     | '/courses/$courseId'
     | '/staff/login'
     | '/courses'
@@ -704,6 +863,8 @@ export interface FileRouteTypes {
     | '/f/announcements/new'
     | '/f/courses/$courseId'
     | '/f/courses/new'
+    | '/c/$courseId/assignments/$assignmentId'
+    | '/c/$courseId/quizzes/$quizId'
     | '/a/analytics'
     | '/a/announcements'
     | '/a/categories'
@@ -721,17 +882,30 @@ export interface FileRouteTypes {
     | '/a/courses/$courseId/learners/$userId'
     | '/a/courses/$courseId/quizzes/$quizId'
     | '/a/courses/$courseId/quizzes/new'
+    | '/f/courses/$courseId/assignments/$assignmentId'
+    | '/f/courses/$courseId/assignments/new'
     | '/f/courses/$courseId/learners/$userId'
+    | '/f/courses/$courseId/quizzes/$quizId'
+    | '/f/courses/$courseId/quizzes/new'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
     | '/a/courses/$courseId/assignments/$assignmentId/submissions'
+    | '/f/courses/$courseId/assignments/$assignmentId/submissions'
     | '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
+    | '/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/c'
     | '/about'
     | '/contact'
     | '/faq'
     | '/'
+    | '/c/contact'
     | '/c/courses'
+    | '/c/logout'
+    | '/c/progress'
+    | '/c/security'
+    | '/c/settings'
+    | '/c/submissions'
     | '/courses/$courseId'
     | '/staff/login'
     | '/courses'
@@ -763,6 +937,8 @@ export interface FileRouteTypes {
     | '/f/announcements/new'
     | '/f/courses/$courseId'
     | '/f/courses/new'
+    | '/c/$courseId/assignments/$assignmentId'
+    | '/c/$courseId/quizzes/$quizId'
     | '/a/analytics'
     | '/a/announcements'
     | '/a/categories'
@@ -780,14 +956,21 @@ export interface FileRouteTypes {
     | '/a/courses/$courseId/learners/$userId'
     | '/a/courses/$courseId/quizzes/$quizId'
     | '/a/courses/$courseId/quizzes/new'
+    | '/f/courses/$courseId/assignments/$assignmentId'
+    | '/f/courses/$courseId/assignments/new'
     | '/f/courses/$courseId/learners/$userId'
+    | '/f/courses/$courseId/quizzes/$quizId'
+    | '/f/courses/$courseId/quizzes/new'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
     | '/a/courses/$courseId/assignments/$assignmentId/submissions'
+    | '/f/courses/$courseId/assignments/$assignmentId/submissions'
     | '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
+    | '/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
   id:
     | '__root__'
     | '/_authenticated'
     | '/_public'
+    | '/_authenticated/c'
     | '/_public/about'
     | '/_public/contact'
     | '/_public/faq'
@@ -795,7 +978,13 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/a'
     | '/_authenticated/_faculty/f'
     | '/_authenticated/c/$courseId'
+    | '/_authenticated/c/contact'
     | '/_authenticated/c/courses'
+    | '/_authenticated/c/logout'
+    | '/_authenticated/c/progress'
+    | '/_authenticated/c/security'
+    | '/_authenticated/c/settings'
+    | '/_authenticated/c/submissions'
     | '/_public/courses/$courseId'
     | '/_public/staff/login'
     | '/_public/courses/'
@@ -831,6 +1020,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_faculty/f/announcements/new'
     | '/_authenticated/_faculty/f/courses/$courseId'
     | '/_authenticated/_faculty/f/courses/new'
+    | '/_authenticated/c/$courseId/assignments/$assignmentId'
+    | '/_authenticated/c/$courseId/quizzes/$quizId'
     | '/_authenticated/_admin/a/analytics/'
     | '/_authenticated/_admin/a/announcements/'
     | '/_authenticated/_admin/a/categories/'
@@ -848,10 +1039,16 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/a/courses/$courseId/learners/$userId'
     | '/_authenticated/_admin/a/courses/$courseId/quizzes/$quizId'
     | '/_authenticated/_admin/a/courses/$courseId/quizzes/new'
+    | '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId'
+    | '/_authenticated/_faculty/f/courses/$courseId/assignments/new'
     | '/_authenticated/_faculty/f/courses/$courseId/learners/$userId'
+    | '/_authenticated/_faculty/f/courses/$courseId/quizzes/$quizId'
+    | '/_authenticated/_faculty/f/courses/$courseId/quizzes/new'
     | '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId'
     | '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions'
+    | '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions'
     | '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
+    | '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -903,6 +1100,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicAboutRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_authenticated/c': {
+      id: '/_authenticated/c'
+      path: '/c'
+      fullPath: '/c'
+      preLoaderRoute: typeof AuthenticatedCRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_public/courses/': {
       id: '/_public/courses/'
       path: '/courses'
@@ -924,19 +1128,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicCoursesCourseIdRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_authenticated/c/submissions': {
+      id: '/_authenticated/c/submissions'
+      path: '/submissions'
+      fullPath: '/c/submissions'
+      preLoaderRoute: typeof AuthenticatedCSubmissionsRouteImport
+      parentRoute: typeof AuthenticatedCRoute
+    }
+    '/_authenticated/c/settings': {
+      id: '/_authenticated/c/settings'
+      path: '/settings'
+      fullPath: '/c/settings'
+      preLoaderRoute: typeof AuthenticatedCSettingsRouteImport
+      parentRoute: typeof AuthenticatedCRoute
+    }
+    '/_authenticated/c/security': {
+      id: '/_authenticated/c/security'
+      path: '/security'
+      fullPath: '/c/security'
+      preLoaderRoute: typeof AuthenticatedCSecurityRouteImport
+      parentRoute: typeof AuthenticatedCRoute
+    }
+    '/_authenticated/c/progress': {
+      id: '/_authenticated/c/progress'
+      path: '/progress'
+      fullPath: '/c/progress'
+      preLoaderRoute: typeof AuthenticatedCProgressRouteImport
+      parentRoute: typeof AuthenticatedCRoute
+    }
+    '/_authenticated/c/logout': {
+      id: '/_authenticated/c/logout'
+      path: '/logout'
+      fullPath: '/c/logout'
+      preLoaderRoute: typeof AuthenticatedCLogoutRouteImport
+      parentRoute: typeof AuthenticatedCRoute
+    }
     '/_authenticated/c/courses': {
       id: '/_authenticated/c/courses'
-      path: '/c/courses'
+      path: '/courses'
       fullPath: '/c/courses'
       preLoaderRoute: typeof AuthenticatedCCoursesRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedCRoute
+    }
+    '/_authenticated/c/contact': {
+      id: '/_authenticated/c/contact'
+      path: '/contact'
+      fullPath: '/c/contact'
+      preLoaderRoute: typeof AuthenticatedCContactRouteImport
+      parentRoute: typeof AuthenticatedCRoute
     }
     '/_authenticated/c/$courseId': {
       id: '/_authenticated/c/$courseId'
-      path: '/c/$courseId'
+      path: '/$courseId'
       fullPath: '/c/$courseId'
       preLoaderRoute: typeof AuthenticatedCCourseIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedCRoute
     }
     '/_authenticated/_faculty/f': {
       id: '/_authenticated/_faculty/f'
@@ -1141,6 +1387,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAAnalyticsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
+    '/_authenticated/c/$courseId/quizzes/$quizId': {
+      id: '/_authenticated/c/$courseId/quizzes/$quizId'
+      path: '/quizzes/$quizId'
+      fullPath: '/c/$courseId/quizzes/$quizId'
+      preLoaderRoute: typeof AuthenticatedCCourseIdQuizzesQuizIdRouteImport
+      parentRoute: typeof AuthenticatedCCourseIdRoute
+    }
+    '/_authenticated/c/$courseId/assignments/$assignmentId': {
+      id: '/_authenticated/c/$courseId/assignments/$assignmentId'
+      path: '/assignments/$assignmentId'
+      fullPath: '/c/$courseId/assignments/$assignmentId'
+      preLoaderRoute: typeof AuthenticatedCCourseIdAssignmentsAssignmentIdRouteImport
+      parentRoute: typeof AuthenticatedCCourseIdRoute
+    }
     '/_authenticated/_faculty/f/courses/new': {
       id: '/_authenticated/_faculty/f/courses/new'
       path: '/courses/new'
@@ -1267,11 +1527,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport
       parentRoute: typeof AuthenticatedCCourseIdRoute
     }
+    '/_authenticated/_faculty/f/courses/$courseId/quizzes/new': {
+      id: '/_authenticated/_faculty/f/courses/$courseId/quizzes/new'
+      path: '/quizzes/new'
+      fullPath: '/f/courses/$courseId/quizzes/new'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdQuizzesNewRouteImport
+      parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdRoute
+    }
+    '/_authenticated/_faculty/f/courses/$courseId/quizzes/$quizId': {
+      id: '/_authenticated/_faculty/f/courses/$courseId/quizzes/$quizId'
+      path: '/quizzes/$quizId'
+      fullPath: '/f/courses/$courseId/quizzes/$quizId'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRouteImport
+      parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdRoute
+    }
     '/_authenticated/_faculty/f/courses/$courseId/learners/$userId': {
       id: '/_authenticated/_faculty/f/courses/$courseId/learners/$userId'
       path: '/learners/$userId'
       fullPath: '/f/courses/$courseId/learners/$userId'
       preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRouteImport
+      parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdRoute
+    }
+    '/_authenticated/_faculty/f/courses/$courseId/assignments/new': {
+      id: '/_authenticated/_faculty/f/courses/$courseId/assignments/new'
+      path: '/assignments/new'
+      fullPath: '/f/courses/$courseId/assignments/new'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRouteImport
+      parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdRoute
+    }
+    '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId': {
+      id: '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId'
+      path: '/assignments/$assignmentId'
+      fullPath: '/f/courses/$courseId/assignments/$assignmentId'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteImport
       parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdRoute
     }
     '/_authenticated/_admin/a/courses/$courseId/quizzes/new': {
@@ -1309,12 +1597,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteImport
       parentRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
     }
+    '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions': {
+      id: '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions'
+      path: '/submissions'
+      fullPath: '/f/courses/$courseId/assignments/$assignmentId/submissions'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport
+      parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRoute
+    }
     '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions': {
       id: '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions'
       path: '/submissions'
       fullPath: '/a/courses/$courseId/assignments/$assignmentId/submissions'
       preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport
       parentRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute
+    }
+    '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': {
+      id: '/_authenticated/_faculty/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
+      path: '/$submissionId'
+      fullPath: '/f/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRouteImport
+      parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute
     }
     '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': {
       id: '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
@@ -1325,6 +1627,58 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedCCourseIdRouteChildren {
+  AuthenticatedCCourseIdIndexRoute: typeof AuthenticatedCCourseIdIndexRoute
+  AuthenticatedCCourseIdAssignmentsAssignmentIdRoute: typeof AuthenticatedCCourseIdAssignmentsAssignmentIdRoute
+  AuthenticatedCCourseIdQuizzesQuizIdRoute: typeof AuthenticatedCCourseIdQuizzesQuizIdRoute
+  AuthenticatedCCourseIdMModuleIdIndexRoute: typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute: typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
+}
+
+const AuthenticatedCCourseIdRouteChildren: AuthenticatedCCourseIdRouteChildren =
+  {
+    AuthenticatedCCourseIdIndexRoute: AuthenticatedCCourseIdIndexRoute,
+    AuthenticatedCCourseIdAssignmentsAssignmentIdRoute:
+      AuthenticatedCCourseIdAssignmentsAssignmentIdRoute,
+    AuthenticatedCCourseIdQuizzesQuizIdRoute:
+      AuthenticatedCCourseIdQuizzesQuizIdRoute,
+    AuthenticatedCCourseIdMModuleIdIndexRoute:
+      AuthenticatedCCourseIdMModuleIdIndexRoute,
+    AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute:
+      AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute,
+  }
+
+const AuthenticatedCCourseIdRouteWithChildren =
+  AuthenticatedCCourseIdRoute._addFileChildren(
+    AuthenticatedCCourseIdRouteChildren,
+  )
+
+interface AuthenticatedCRouteChildren {
+  AuthenticatedCCourseIdRoute: typeof AuthenticatedCCourseIdRouteWithChildren
+  AuthenticatedCContactRoute: typeof AuthenticatedCContactRoute
+  AuthenticatedCCoursesRoute: typeof AuthenticatedCCoursesRoute
+  AuthenticatedCLogoutRoute: typeof AuthenticatedCLogoutRoute
+  AuthenticatedCProgressRoute: typeof AuthenticatedCProgressRoute
+  AuthenticatedCSecurityRoute: typeof AuthenticatedCSecurityRoute
+  AuthenticatedCSettingsRoute: typeof AuthenticatedCSettingsRoute
+  AuthenticatedCSubmissionsRoute: typeof AuthenticatedCSubmissionsRoute
+}
+
+const AuthenticatedCRouteChildren: AuthenticatedCRouteChildren = {
+  AuthenticatedCCourseIdRoute: AuthenticatedCCourseIdRouteWithChildren,
+  AuthenticatedCContactRoute: AuthenticatedCContactRoute,
+  AuthenticatedCCoursesRoute: AuthenticatedCCoursesRoute,
+  AuthenticatedCLogoutRoute: AuthenticatedCLogoutRoute,
+  AuthenticatedCProgressRoute: AuthenticatedCProgressRoute,
+  AuthenticatedCSecurityRoute: AuthenticatedCSecurityRoute,
+  AuthenticatedCSettingsRoute: AuthenticatedCSettingsRoute,
+  AuthenticatedCSubmissionsRoute: AuthenticatedCSubmissionsRoute,
+}
+
+const AuthenticatedCRouteWithChildren = AuthenticatedCRoute._addFileChildren(
+  AuthenticatedCRouteChildren,
+)
 
 interface AuthenticatedAdminAContentRouteChildren {
   AuthenticatedAdminAContentIndexRoute: typeof AuthenticatedAdminAContentIndexRoute
@@ -1509,14 +1863,56 @@ const AuthenticatedAdminARouteChildren: AuthenticatedAdminARouteChildren = {
 const AuthenticatedAdminARouteWithChildren =
   AuthenticatedAdminARoute._addFileChildren(AuthenticatedAdminARouteChildren)
 
+interface AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren {
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
+}
+
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren: AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren =
+  {
+    AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute:
+      AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute,
+  }
+
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren =
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute._addFileChildren(
+    AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren,
+  )
+
+interface AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteChildren {
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+}
+
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteChildren: AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteChildren =
+  {
+    AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute:
+      AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren,
+  }
+
+const AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteWithChildren =
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRoute._addFileChildren(
+    AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteChildren,
+  )
+
 interface AuthenticatedFacultyFCoursesCourseIdRouteChildren {
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute: typeof AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute
   AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute: typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
+  AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute: typeof AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute
+  AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute: typeof AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute
 }
 
 const AuthenticatedFacultyFCoursesCourseIdRouteChildren: AuthenticatedFacultyFCoursesCourseIdRouteChildren =
   {
+    AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRoute:
+      AuthenticatedFacultyFCoursesCourseIdAssignmentsAssignmentIdRouteWithChildren,
+    AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute:
+      AuthenticatedFacultyFCoursesCourseIdAssignmentsNewRoute,
     AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute:
       AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute,
+    AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute:
+      AuthenticatedFacultyFCoursesCourseIdQuizzesQuizIdRoute,
+    AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute:
+      AuthenticatedFacultyFCoursesCourseIdQuizzesNewRoute,
   }
 
 const AuthenticatedFacultyFCoursesCourseIdRouteWithChildren =
@@ -1570,38 +1966,16 @@ const AuthenticatedFacultyFRouteWithChildren =
     AuthenticatedFacultyFRouteChildren,
   )
 
-interface AuthenticatedCCourseIdRouteChildren {
-  AuthenticatedCCourseIdIndexRoute: typeof AuthenticatedCCourseIdIndexRoute
-  AuthenticatedCCourseIdMModuleIdIndexRoute: typeof AuthenticatedCCourseIdMModuleIdIndexRoute
-  AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute: typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
-}
-
-const AuthenticatedCCourseIdRouteChildren: AuthenticatedCCourseIdRouteChildren =
-  {
-    AuthenticatedCCourseIdIndexRoute: AuthenticatedCCourseIdIndexRoute,
-    AuthenticatedCCourseIdMModuleIdIndexRoute:
-      AuthenticatedCCourseIdMModuleIdIndexRoute,
-    AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute:
-      AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute,
-  }
-
-const AuthenticatedCCourseIdRouteWithChildren =
-  AuthenticatedCCourseIdRoute._addFileChildren(
-    AuthenticatedCCourseIdRouteChildren,
-  )
-
 interface AuthenticatedRouteChildren {
+  AuthenticatedCRoute: typeof AuthenticatedCRouteWithChildren
   AuthenticatedAdminARoute: typeof AuthenticatedAdminARouteWithChildren
   AuthenticatedFacultyFRoute: typeof AuthenticatedFacultyFRouteWithChildren
-  AuthenticatedCCourseIdRoute: typeof AuthenticatedCCourseIdRouteWithChildren
-  AuthenticatedCCoursesRoute: typeof AuthenticatedCCoursesRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCRoute: AuthenticatedCRouteWithChildren,
   AuthenticatedAdminARoute: AuthenticatedAdminARouteWithChildren,
   AuthenticatedFacultyFRoute: AuthenticatedFacultyFRouteWithChildren,
-  AuthenticatedCCourseIdRoute: AuthenticatedCCourseIdRouteWithChildren,
-  AuthenticatedCCoursesRoute: AuthenticatedCCoursesRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

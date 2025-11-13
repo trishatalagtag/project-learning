@@ -9,7 +9,8 @@
     "dev:backend": "convex dev --typecheck-components --live-component-sources",
     "generate": "convex dev --once",
     "logs": "convex logs",
-    "lint": "tsc -p convex && eslint convex"
+    "lint": "tsc -p convex && eslint convex",
+    "build": "vite build"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-beta.4",

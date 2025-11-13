@@ -1,6 +1,5 @@
 "use client"
 
-import { AnnouncementCard } from "@/components/faculty/courses/announcements/announcement-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -133,7 +132,7 @@ function FacultyAnnouncementsPage() {
 
             {/* Filters */}
             <Card>
-                <CardContent className="pt-6">
+                <CardContent>
                     <div className="flex flex-col gap-4 sm:flex-row">
                         <div className="flex-1">
                             <Input
@@ -165,7 +164,7 @@ function FacultyAnnouncementsPage() {
                 <div className="space-y-4">
                     {Array.from({ length: 3 }).map((_, i) => (
                         <Card key={i}>
-                            <CardContent className="p-6">
+                            <CardContent>
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <Skeleton className="h-6 w-48" />

@@ -20,7 +20,7 @@ import {
   Squares2X2Icon,
   UsersIcon,
 } from "@heroicons/react/24/solid"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 
 export const Route = createFileRoute("/_authenticated/_admin/a/")({
@@ -31,16 +31,8 @@ export const Route = createFileRoute("/_authenticated/_admin/a/")({
 })
 
 function DashboardPage() {
+  const { auth } = useRouteContext({ strict: false })
   const userRole = useUserRole()
-
-  // Show faculty dashboard for faculty users
-  if (userRole === ROLE.FACULTY) {
-    return <FacultyCoursesDashboard />
-  }
-
-  // Show admin dashboard for admin users
-  const stats = useQuery(api.admin.analytics.getSystemStats)
-  const counts = useQuery(api.admin.content.getAllContentCounts)
 
   // Get enrollment trends for last 30 days
   const defaultEndDate = Date.now()
@@ -49,6 +41,22 @@ function DashboardPage() {
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   })
+
+  // Show admin dashboard for admin users
+  const stats = useQuery(api.admin.analytics.getSystemStats)
+  const counts = useQuery(api.admin.content.getAllContentCounts)
+
+  // Show loading skeleton while auth is pending or userRole is not yet available
+  if (auth.isPending || userRole === null) {
+    return <DashboardSkeleton />
+  }
+
+  // Show faculty dashboard for faculty users
+  if (userRole === ROLE.FACULTY) {
+    return <FacultyCoursesDashboard />
+  }
+
+
 
   const isLoading = stats === undefined || counts === undefined || enrollmentTrends === undefined
   const statsError = stats === null
@@ -89,7 +97,7 @@ function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6 lg:p-8">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       {/* Header */}
       <div>
         <h1 className="font-bold text-3xl tracking-tight">Admin Dashboard</h1>
@@ -254,7 +262,7 @@ function DashboardPage() {
               <UserDistributionChart stats={stats} />
             ) : (
               <Card>
-                <CardContent className="p-6">
+                <CardContent>
                   <Skeleton className="h-[300px] w-full" />
                 </CardContent>
               </Card>
@@ -289,7 +297,7 @@ function DashboardPage() {
 
 function DashboardSkeleton() {
   return (
-    <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6 lg:p-8">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       {/* Header Skeleton */}
       <div>
         <Skeleton className="mb-2 h-9 w-64" />
@@ -306,7 +314,7 @@ function DashboardSkeleton() {
         </div>
         <div className="lg:col-span-1">
           <Card>
-            <CardContent className="p-6">
+            <CardContent>
               <Skeleton className="h-[300px] w-full" />
             </CardContent>
           </Card>
