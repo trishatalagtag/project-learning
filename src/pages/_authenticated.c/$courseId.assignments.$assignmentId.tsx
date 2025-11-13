@@ -30,9 +30,9 @@ export const Route = createFileRoute(
 })
 
 function AssignmentSubmissionPage() {
-    const { courseId, assignmentId } = Route.useParams()
+    const { assignmentId } = Route.useParams()
     const navigate = useNavigate()
-    const [content, setContent] = useState("")
+    const [textContent, setTextContent] = useState("")
 
     const assignment = useQuery(api.learner.assessments.getAssignmentDetails, {
         assignmentId: assignmentId as Id<"assignments">,
@@ -43,26 +43,28 @@ function AssignmentSubmissionPage() {
     })
 
     const saveDraft = useMutationWithToast(api.learner.assessments.saveAssignmentDraft, {
-        loadingMessage: "Saving draft...",
         successMessage: "Draft saved successfully",
     })
 
-    const submitAssignment = useMutationWithToast(api.learner.assessments.submitAssignment, {
-        loadingMessage: "Submitting assignment...",
+    const submitMutation = useMutationWithToast(api.learner.assessments.submitAssignment, {
         successMessage: "Assignment submitted successfully",
     })
 
     const handleSaveDraft = async () => {
-        await saveDraft({
+        if (!submission) return
+
+        await saveDraft.execute({
             assignmentId: assignmentId as Id<"assignments">,
-            content,
+            submissionType: assignment?.submissionType as "text" | "file" | "url",
+            textContent,
         })
     }
 
     const handleSubmit = async () => {
-        await submitAssignment({
-            assignmentId: assignmentId as Id<"assignments">,
-            content,
+        if (!submission) return
+
+        await submitMutation.execute({
+            submissionId: submission._id,
         })
         navigate({ to: "/c/submissions" })
     }
@@ -80,7 +82,7 @@ function AssignmentSubmissionPage() {
     }
 
     const isSubmitted = submission?.status === "submitted" || submission?.status === "graded"
-    const displayContent = content || submission?.content || ""
+    const displayContent = textContent || submission?.textContent || ""
 
     return (
         <div className="flex-1 overflow-y-auto">
@@ -88,7 +90,6 @@ function AssignmentSubmissionPage() {
                 {/* Header */}
                 <div className="mb-8">
                     <div className="mb-2 flex items-center gap-2">
-                        <Badge variant="outline">{assignment.categoryName}</Badge>
                         {submission?.status && (
                             <Badge
                                 variant={
@@ -141,10 +142,10 @@ function AssignmentSubmissionPage() {
                                     </span>
                                 </div>
                             )}
-                            {assignment.maxScore !== undefined && (
+                            {assignment.totalPoints !== undefined && (
                                 <div>
                                     <span className="text-muted-foreground">Max Points:</span>{" "}
-                                    {assignment.maxScore}
+                                    {assignment.totalPoints}
                                 </div>
                             )}
                         </div>
@@ -159,16 +160,16 @@ function AssignmentSubmissionPage() {
                                 Graded Submission
                             </CardTitle>
                             <CardDescription className="text-green-700 dark:text-green-300">
-                                Score: {submission.score}%
+                                Score: {submission.grade}%
                             </CardDescription>
                         </CardHeader>
-                        {submission.feedback && (
+                        {submission.teacherFeedback && (
                             <CardContent>
                                 <h3 className="mb-2 font-medium text-green-900 dark:text-green-100">
                                     Instructor Feedback
                                 </h3>
                                 <p className="text-green-700 text-sm dark:text-green-300">
-                                    {submission.feedback}
+                                    {submission.teacherFeedback}
                                 </p>
                             </CardContent>
                         )}
@@ -191,7 +192,7 @@ function AssignmentSubmissionPage() {
                             <Textarea
                                 id="content"
                                 value={displayContent}
-                                onChange={(e) => setContent(e.target.value)}
+                                onChange={(e) => setTextContent(e.target.value)}
                                 disabled={isSubmitted}
                                 rows={12}
                                 placeholder="Type your answer here..."

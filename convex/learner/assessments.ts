@@ -549,3 +549,230 @@ export const getAllMySubmissions = learnerQuery({
       .sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0));
   },
 });
+
+/**
+ * Get quiz details for learner
+ */
+export const getQuizDetails = learnerQuery({
+  args: { quizId: v.id("quizzes") },
+  returns: v.union(
+    v.object({
+      _id: v.id("quizzes"),
+      title: v.string(),
+      description: v.optional(v.string()),
+      instructions: v.optional(v.string()),
+      timeLimitMinutes: v.optional(v.number()),
+      passingScore: v.optional(v.number()),
+      allowMultipleAttempts: v.boolean(),
+      maxAttempts: v.optional(v.number()),
+      dueDate: v.optional(v.number()),
+      availableFrom: v.optional(v.number()),
+      availableUntil: v.optional(v.number()),
+      totalQuestions: v.number(),
+      totalPoints: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const quiz = await ctx.db.get(args.quizId);
+    if (!quiz || quiz.status !== "published") return null;
+
+    // Ensure enrollment
+    const enrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("userId", ctx.user.userId).eq("courseId", quiz.courseId)
+      )
+      .first();
+    if (!enrollment || enrollment.status !== "active") return null;
+
+    // Get question count and total points
+    const questions = await ctx.db
+      .query("quizQuestions")
+      .withIndex("by_quiz", (q) => q.eq("quizId", quiz._id))
+      .collect();
+
+    const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
+
+    return {
+      _id: quiz._id,
+      title: quiz.title,
+      description: quiz.description,
+      instructions: quiz.instructions,
+      timeLimitMinutes: quiz.timeLimitMinutes,
+      passingScore: quiz.passingScore,
+      allowMultipleAttempts: quiz.allowMultipleAttempts,
+      maxAttempts: quiz.maxAttempts,
+      dueDate: quiz.dueDate,
+      availableFrom: quiz.availableFrom,
+      availableUntil: quiz.availableUntil,
+      totalQuestions: questions.length,
+      totalPoints,
+    };
+  },
+});
+
+/**
+ * Get quiz questions for active attempt
+ */
+export const getQuizQuestions = learnerQuery({
+  args: { attemptId: v.id("quizAttempts") },
+  returns: v.array(
+    v.object({
+      _id: v.id("quizQuestions"),
+      questionText: v.string(),
+      questionType: v.string(),
+      options: v.array(v.string()),
+      points: v.number(),
+      order: v.number(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    const attempt = await ctx.db.get(args.attemptId);
+    if (!attempt || attempt.userId !== ctx.user.userId) {
+      throw new Error("Attempt not found");
+    }
+
+    const quiz = await ctx.db.get(attempt.quizId);
+    if (!quiz) throw new Error("Quiz not found");
+
+    const questions = await ctx.db
+      .query("quizQuestions")
+      .withIndex("by_quiz", (q) => q.eq("quizId", quiz._id))
+      .collect();
+
+    return questions
+      .sort((a, b) => a.order - b.order)
+      .map((q) => ({
+        _id: q._id,
+        questionText: q.questionText,
+        questionType: q.questionType,
+        options: q.options,
+        points: q.points,
+        order: q.order,
+      }));
+  },
+});
+
+/**
+ * Get assignment details for learner
+ */
+export const getAssignmentDetails = learnerQuery({
+  args: { assignmentId: v.id("assignments") },
+  returns: v.union(
+    v.object({
+      _id: v.id("assignments"),
+      title: v.string(),
+      description: v.optional(v.string()),
+      instructions: v.optional(v.string()),
+      submissionType: v.string(),
+      maxFileSize: v.optional(v.number()),
+      allowedFileTypes: v.optional(v.array(v.string())),
+      allowMultipleAttempts: v.boolean(),
+      maxAttempts: v.optional(v.number()),
+      dueDate: v.optional(v.number()),
+      availableFrom: v.optional(v.number()),
+      availableUntil: v.optional(v.number()),
+      allowLateSubmissions: v.boolean(),
+      totalPoints: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const assignment = await ctx.db.get(args.assignmentId);
+    if (!assignment || assignment.status !== "published") return null;
+
+    // Ensure enrollment
+    const enrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("userId", ctx.user.userId).eq("courseId", assignment.courseId)
+      )
+      .first();
+    if (!enrollment || enrollment.status !== "active") return null;
+
+    return {
+      _id: assignment._id,
+      title: assignment.title,
+      description: assignment.description,
+      instructions: assignment.instructions,
+      submissionType: assignment.submissionType,
+      maxFileSize: assignment.maxFileSize,
+      allowedFileTypes: assignment.allowedFileTypes,
+      allowMultipleAttempts: assignment.allowMultipleAttempts,
+      maxAttempts: assignment.maxAttempts,
+      dueDate: assignment.dueDate,
+      availableFrom: assignment.availableFrom,
+      availableUntil: assignment.availableUntil,
+      allowLateSubmissions: assignment.allowLateSubmissions,
+      totalPoints: assignment.totalPoints,
+    };
+  },
+});
+
+/**
+ * Get learner's submission for an assignment (latest draft or submitted)
+ */
+export const getMyAssignmentSubmission = learnerQuery({
+  args: { assignmentId: v.id("assignments") },
+  returns: v.union(
+    v.object({
+      _id: v.id("assignmentSubmissions"),
+      _creationTime: v.number(),
+      attemptNumber: v.number(),
+      status: v.string(),
+      submissionType: v.string(),
+      fileId: v.optional(v.id("_storage")),
+      url: v.optional(v.string()),
+      textContent: v.optional(v.string()),
+      submittedAt: v.optional(v.number()),
+      isLate: v.boolean(),
+      grade: v.optional(v.number()),
+      teacherFeedback: v.optional(v.string()),
+      gradedAt: v.optional(v.number()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const assignment = await ctx.db.get(args.assignmentId);
+    if (!assignment) return null;
+
+    // Ensure enrollment
+    const enrollment = await ctx.db
+      .query("enrollments")
+      .withIndex("by_user_and_course", (q) =>
+        q.eq("userId", ctx.user.userId).eq("courseId", assignment.courseId)
+      )
+      .first();
+    if (!enrollment || enrollment.status !== "active") return null;
+
+    // Get latest submission (draft or submitted)
+    const submissions = await ctx.db
+      .query("assignmentSubmissions")
+      .withIndex("by_user_and_assignment", (q) =>
+        q.eq("userId", ctx.user.userId).eq("assignmentId", args.assignmentId)
+      )
+      .collect();
+
+    if (submissions.length === 0) return null;
+
+    // Return the most recent submission
+    const latest = submissions.sort((a, b) => b._creationTime - a._creationTime)[0];
+
+    return {
+      _id: latest._id,
+      _creationTime: latest._creationTime,
+      attemptNumber: latest.attemptNumber,
+      status: latest.status,
+      submissionType: latest.submissionType,
+      fileId: latest.fileId,
+      url: latest.url,
+      textContent: latest.textContent,
+      submittedAt: latest.submittedAt,
+      isLate: latest.isLate,
+      grade: latest.grade,
+      teacherFeedback: latest.teacherFeedback,
+      gradedAt: latest.gradedAt,
+    };
+  },
+});

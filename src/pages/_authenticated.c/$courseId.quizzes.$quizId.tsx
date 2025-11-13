@@ -27,8 +27,7 @@ export const Route = createFileRoute("/_authenticated/c/$courseId/quizzes/$quizI
 })
 
 function QuizPage() {
-    const { courseId, quizId } = Route.useParams()
-    const navigate = useNavigate()
+    const { quizId } = Route.useParams()
 
     // Fetch quiz details
     const quiz = useQuery(api.learner.assessments.getQuizDetails, {
@@ -53,7 +52,6 @@ function QuizPage() {
     }
 
     const hasAttempts = attempts.length > 0
-    const latestAttempt = hasAttempts ? attempts[0] : null
     const canTakeQuiz =
         !quiz.maxAttempts || attempts.length < quiz.maxAttempts || quiz.maxAttempts === 0
 
@@ -62,9 +60,6 @@ function QuizPage() {
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="mb-2 flex items-center gap-2">
-                        <Badge variant="outline">{quiz.categoryName}</Badge>
-                    </div>
                     <h1 className="mb-2 font-bold text-3xl">{quiz.title}</h1>
                     {quiz.description && (
                         <p className="text-muted-foreground">{quiz.description}</p>
@@ -83,12 +78,12 @@ function QuizPage() {
                         <div className="grid gap-4 md:grid-cols-2">
                             <div>
                                 <span className="text-muted-foreground text-sm">Questions:</span>{" "}
-                                <span className="font-medium">{quiz.questionCount || 0}</span>
+                                <span className="font-medium">{quiz.totalQuestions || 0}</span>
                             </div>
-                            {quiz.timeLimit && (
+                            {quiz.timeLimitMinutes && (
                                 <div>
                                     <span className="text-muted-foreground text-sm">Time Limit:</span>{" "}
-                                    <span className="font-medium">{quiz.timeLimit} minutes</span>
+                                    <span className="font-medium">{quiz.timeLimitMinutes} minutes</span>
                                 </div>
                             )}
                             {quiz.maxAttempts && quiz.maxAttempts > 0 && (
