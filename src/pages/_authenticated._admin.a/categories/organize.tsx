@@ -13,7 +13,7 @@ import { Sortable, SortableItem, SortableItemHandle } from "@/components/ui/sort
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { type NormalizedCategoryNode, normalizeCategoryTree } from "@/lib/categories"
-import { ArrowLeftIcon, FolderIcon } from "@heroicons/react/24/solid"
+import { ArrowLeftIcon, ExclamationCircleIcon, FolderIcon } from "@heroicons/react/24/solid"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
 import { GripVertical, Loader2 } from "lucide-react"
@@ -154,6 +154,29 @@ function OrganizeCategoriesPage() {
             <EmptyTitle>Loading categories...</EmptyTitle>
             <EmptyDescription>Please wait while we fetch your data.</EmptyDescription>
           </EmptyHeader>
+        </Empty>
+      </div>
+    )
+  }
+
+  if (categories === null) {
+    return (
+      <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
+            </EmptyMedia>
+            <EmptyTitle>Failed to load categories</EmptyTitle>
+            <EmptyDescription>
+              There was an error loading the category data. Please try again.
+            </EmptyDescription>
+          </EmptyHeader>
+          <div className="mt-4">
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
         </Empty>
       </div>
     )

@@ -1,5 +1,6 @@
 "use client"
 
+import { FacultyCourseDetailPage } from "@/components/faculty/courses/faculty-course-detail-page"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -12,6 +13,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
+import { ROLE } from "@/lib/rbac/permissions"
+import { useUserRole } from "@/lib/rbac/use-user-role"
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid"
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
@@ -24,17 +27,19 @@ import { CourseGradingTab } from "./tabs/course-grading-tab"
 import { CourseSettingsTab } from "./tabs/course-settings-tab/index"
 
 export function CourseDetailPage() {
+  const userRole = useUserRole()
   const navigate = useNavigate()
   const { courseId } = useParams({ from: "/_authenticated/_admin/a/courses/$courseId" })
   const search = useSearch({ from: "/_authenticated/_admin/a/courses/$courseId" }) as { tab?: "settings" | "content" | "grading" }
-
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-
-  // Fetch course data
+  // Fetch course data (admin view)
   const course = useQuery(api.admin.courses.getCourseById, {
     courseId: courseId as Id<"courses">,
   })
-
+  // Show faculty view for faculty users
+  if (userRole === ROLE.FACULTY) {
+    return <FacultyCourseDetailPage />
+  }
   if (course === undefined) {
     return <CourseDetailSkeleton />
   }

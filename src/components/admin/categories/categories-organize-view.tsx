@@ -8,11 +8,12 @@ import type { Id } from "@/convex/_generated/dataModel"
 import { useCategoryMutations } from "@/hooks/use-category-mutations"
 import { type NormalizedCategoryNode, normalizeCategoryTree } from "@/lib/categories"
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
-import { FolderIcon, PlusIcon } from "@heroicons/react/24/solid"
+import { FolderIcon, PencilIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid"
 import { useMutation, useQuery } from "convex/react"
 import { GripVertical, Loader2 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import { CategoryDeleteDialog } from "./category-delete-dialog"
 import { CategoryFormDialog } from "./category-form-dialog"
 import { CategoryMoveDialog } from "./category-move-dialog"
 
@@ -43,6 +44,12 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
     const [tree, setTree] = useState<NormalizedCategoryNode[]>([])
     const [isSaving, setIsSaving] = useState(false)
     const [isFormOpen, setIsFormOpen] = useState(false)
+    const [editingCategory, setEditingCategory] = useState<NormalizedCategoryNode | null>(null)
+    const [deletingCategory, setDeletingCategory] = useState<NormalizedCategoryNode | null>(null)
+    const [addSubcategoryTo, setAddSubcategoryTo] = useState<{
+        parentId: Id<"categories">
+        level: number
+    } | null>(null)
     const [moveDialog, setMoveDialog] = useState<{
         category: NormalizedCategoryNode
         newLevel: number
@@ -158,12 +165,39 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
     }
 
     const handleCreate = () => {
+        setEditingCategory(null)
+        setAddSubcategoryTo(null)
         setIsFormOpen(true)
         onCreateCategory?.()
     }
 
+    const handleEdit = (category: NormalizedCategoryNode) => {
+        setEditingCategory(category)
+        setAddSubcategoryTo(null)
+        setIsFormOpen(true)
+    }
+
+    const handleDelete = (category: NormalizedCategoryNode) => {
+        setDeletingCategory(category)
+    }
+
+    const handleAddSubcategory = (parentId: Id<"categories">, parentLevel: number) => {
+        setEditingCategory(null)
+        setAddSubcategoryTo({
+            parentId,
+            level: parentLevel + 1,
+        })
+        setIsFormOpen(true)
+    }
+
     const handleFormSuccess = () => {
         setIsFormOpen(false)
+        setEditingCategory(null)
+        setAddSubcategoryTo(null)
+    }
+
+    const handleDeleteSuccess = () => {
+        setDeletingCategory(null)
     }
 
     const findCategoryInTree = useCallback((categoryId: string): CategoryNode | null => {
@@ -346,9 +380,38 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
                                             {group.name}
                                         </CardTitle>
                                     </div>
-                                    <span className="rounded-full bg-muted px-3 py-1 text-muted-foreground text-xs">
-                                        Level 1 · {formatCourseCount(group.courseCount)}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="rounded-full bg-muted px-3 py-1 text-muted-foreground text-xs">
+                                            Level 1 · {formatCourseCount(group.courseCount)}
+                                        </span>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleEdit(group)}
+                                            className="h-8 gap-1"
+                                        >
+                                            <PencilIcon className="h-3.5 w-3.5" />
+                                            <span className="hidden sm:inline">Edit</span>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleAddSubcategory(group._id as Id<"categories">, 1)}
+                                            className="h-8 gap-1"
+                                        >
+                                            <PlusIcon className="h-3.5 w-3.5" />
+                                            <span className="hidden sm:inline">Add Sub</span>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDelete(group)}
+                                            className="h-8 gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                        >
+                                            <TrashIcon className="h-3.5 w-3.5" />
+                                            <span className="hidden sm:inline">Delete</span>
+                                        </Button>
+                                    </div>
                                 </div>
                             </CardHeader>
 
@@ -383,6 +446,32 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
                                                                 </p>
                                                             </div>
                                                         </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleEdit(child)}
+                                                                className="h-7 gap-1"
+                                                            >
+                                                                <PencilIcon className="h-3 w-3" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleAddSubcategory(child._id as Id<"categories">, 2)}
+                                                                className="h-7 gap-1"
+                                                            >
+                                                                <PlusIcon className="h-3 w-3" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDelete(child)}
+                                                                className="h-7 gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                            >
+                                                                <TrashIcon className="h-3 w-3" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
 
                                                     {child.children.length > 0 && (
@@ -409,10 +498,26 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
                                                                             <SortableItemHandle className="text-muted-foreground transition-colors hover:text-foreground">
                                                                                 <GripVertical className="h-4 w-4" />
                                                                             </SortableItemHandle>
-                                                                            <span className="font-medium">{grandchild.name}</span>
-                                                                            <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
+                                                                            <span className="flex-1 font-medium">{grandchild.name}</span>
+                                                                            <span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs">
                                                                                 Level 3 · {formatCourseCount(grandchild.courseCount)}
                                                                             </span>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="sm"
+                                                                                onClick={() => handleEdit(grandchild)}
+                                                                                className="h-6 w-6 p-0"
+                                                                            >
+                                                                                <PencilIcon className="h-3 w-3" />
+                                                                            </Button>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="sm"
+                                                                                onClick={() => handleDelete(grandchild)}
+                                                                                className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                                            >
+                                                                                <TrashIcon className="h-3 w-3" />
+                                                                            </Button>
                                                                         </div>
                                                                     </SortableItem>
                                                                 ))}
@@ -441,8 +546,40 @@ export function CategoriesOrganizeView({ onCreateCategory }: CategoriesOrganizeV
             <CategoryFormDialog
                 open={isFormOpen}
                 onOpenChange={setIsFormOpen}
+                category={editingCategory ? {
+                    _id: editingCategory._id as Id<"categories">,
+                    name: editingCategory.name,
+                    description: editingCategory.description,
+                    level: editingCategory.level,
+                    parentId: editingCategory.parentId,
+                    order: editingCategory.order,
+                    courseCount: editingCategory.courseCount,
+                    createdAt: editingCategory.createdAt,
+                    updatedAt: editingCategory.updatedAt,
+                } : undefined}
+                level={addSubcategoryTo?.level}
+                parentId={addSubcategoryTo?.parentId}
                 onSuccess={handleFormSuccess}
             />
+
+            {deletingCategory && (
+                <CategoryDeleteDialog
+                    open={!!deletingCategory}
+                    onOpenChange={(open) => !open && setDeletingCategory(null)}
+                    category={{
+                        _id: deletingCategory._id as Id<"categories">,
+                        name: deletingCategory.name,
+                        description: deletingCategory.description,
+                        level: deletingCategory.level,
+                        parentId: deletingCategory.parentId,
+                        order: deletingCategory.order,
+                        courseCount: deletingCategory.courseCount,
+                        createdAt: deletingCategory.createdAt,
+                        updatedAt: deletingCategory.updatedAt,
+                    }}
+                    onSuccess={handleDeleteSuccess}
+                />
+            )}
 
             {moveDialog && (
                 <CategoryMoveDialog

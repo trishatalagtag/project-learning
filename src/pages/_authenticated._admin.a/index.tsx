@@ -3,11 +3,14 @@ import { DashboardAllMetrics, DashboardAllMetricsSkeleton } from "@/components/a
 import { DashboardEnrollmentMiniChart, DashboardEnrollmentMiniChartSkeleton } from "@/components/admin/dashboard/dashboard-enrollment-mini-chart"
 import { DashboardKpiCards, DashboardKpiCardsSkeleton } from "@/components/admin/dashboard/dashboard-kpi-cards"
 import { DashboardPendingWidget, DashboardPendingWidgetSkeleton } from "@/components/admin/dashboard/dashboard-pending-widget"
+import { FacultyCoursesDashboard } from "@/components/faculty/dashboard/faculty-courses-dashboard"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/convex/_generated/api"
+import { ROLE } from "@/lib/rbac/permissions"
+import { useUserRole } from "@/lib/rbac/use-user-role"
 import {
   AcademicCapIcon,
   ChartBarIcon,
@@ -28,6 +31,14 @@ export const Route = createFileRoute("/_authenticated/_admin/a/")({
 })
 
 function DashboardPage() {
+  const userRole = useUserRole()
+
+  // Show faculty dashboard for faculty users
+  if (userRole === ROLE.FACULTY) {
+    return <FacultyCoursesDashboard />
+  }
+
+  // Show admin dashboard for admin users
   const stats = useQuery(api.admin.analytics.getSystemStats)
   const counts = useQuery(api.admin.content.getAllContentCounts)
 

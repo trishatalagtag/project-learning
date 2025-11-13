@@ -28,7 +28,7 @@ import {
     MagnifyingGlassIcon,
     PlusIcon,
     Squares2X2Icon,
-    TableCellsIcon,
+    TableCellsIcon
 } from "@heroicons/react/24/solid"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import {
@@ -208,6 +208,29 @@ export function CategoriesTable() {
                         <EmptyTitle>Loading categories...</EmptyTitle>
                         <EmptyDescription>Please wait while we fetch your data.</EmptyDescription>
                     </EmptyHeader>
+                </Empty>
+            </div>
+        )
+    }
+
+    if (categories === null) {
+        return (
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+                <Empty>
+                    <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                            <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
+                        </EmptyMedia>
+                        <EmptyTitle>Failed to load categories</EmptyTitle>
+                        <EmptyDescription>
+                            There was an error loading the category data. Please try again.
+                        </EmptyDescription>
+                    </EmptyHeader>
+                    <div className="mt-4">
+                        <Button onClick={() => window.location.reload()}>
+                            Retry
+                        </Button>
+                    </div>
                 </Empty>
             </div>
         )

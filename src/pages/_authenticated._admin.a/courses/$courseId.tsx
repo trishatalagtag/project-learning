@@ -5,7 +5,7 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
 
 const courseDetailSearchSchema = z.object({
-  tab: z.enum(["settings", "content", "grading"]).optional(),
+  tab: z.enum(["settings", "content", "grading", "announcements", "progress", "assessments"]).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/_admin/a/courses/$courseId")({

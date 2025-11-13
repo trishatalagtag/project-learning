@@ -69,7 +69,51 @@ function ContentDetailPage() {
         )
     }
 
-    if (!content && !isLoading) {
+    // Error state for content data
+    if (contentData === null) {
+        return (
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+                <Card>
+                    <CardContent className="flex flex-col items-center gap-4 py-12">
+                        <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
+                        <div className="text-center">
+                            <h3 className="font-semibold text-lg">Failed to load content</h3>
+                            <p className="mt-2 text-muted-foreground text-sm">
+                                There was an error loading the content data. Please try again.
+                            </p>
+                        </div>
+                        <Button onClick={() => window.location.reload()}>
+                            Retry
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
+    // Error state for approval history
+    if (approvalHistory === null) {
+        return (
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+                <Card>
+                    <CardContent className="flex flex-col items-center gap-4 py-12">
+                        <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
+                        <div className="text-center">
+                            <h3 className="font-semibold text-lg">Failed to load approval history</h3>
+                            <p className="mt-2 text-muted-foreground text-sm">
+                                There was an error loading the approval history. Please try again.
+                            </p>
+                        </div>
+                        <Button onClick={() => window.location.reload()}>
+                            Retry
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
+    if (!content) {
         return (
             <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
                 <Card>
@@ -197,6 +241,13 @@ function ContentDetailPage() {
                                                             </span>
                                                         </div>
 
+                                                        {/* Status change display */}
+                                                        {log.previousStatus && log.newStatus && (
+                                                            <p className="mt-1 rounded-md bg-muted px-3 py-2 text-sm">
+                                                                Status changed from <strong>{log.previousStatus}</strong> to <strong>{log.newStatus}</strong>
+                                                            </p>
+                                                        )}
+
                                                         {log.notes && (
                                                             <p className="mt-2 rounded-md bg-muted px-3 py-2 text-muted-foreground text-sm">
                                                                 {log.notes}
@@ -211,8 +262,9 @@ function ContentDetailPage() {
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-8 text-center">
                                     <ClockIcon className="mb-3 h-12 w-12 text-muted-foreground" />
-                                    <p className="text-muted-foreground text-sm">
-                                        No approval history available
+                                    <p className="font-medium text-sm">No history found for this item</p>
+                                    <p className="mt-1 text-muted-foreground text-xs">
+                                        Approval history will appear here once actions are taken
                                     </p>
                                 </div>
                             )}

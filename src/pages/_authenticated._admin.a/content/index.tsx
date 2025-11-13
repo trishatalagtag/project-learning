@@ -16,9 +16,11 @@ import { api } from "@/convex/_generated/api"
 import {
     BookOpenIcon,
     ClipboardDocumentListIcon,
-    DocumentTextIcon, EyeIcon,
+    DocumentTextIcon,
+    ExclamationCircleIcon,
+    EyeIcon,
     FolderIcon,
-    MagnifyingGlassIcon
+    MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid"
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
@@ -38,7 +40,7 @@ const CONTENT_TYPE_ICONS = {
 } as const
 
 type ContentTypeFilter = "module" | "lesson" | "quiz" | "assignment"
-type StatusFilter = "pending" | "approved" | "draft"
+type StatusFilter = "all" | "draft" | "pending" | "approved" | "published" | "changes_requested"
 
 function ContentBrowserPage() {
     const navigate = useNavigate()
@@ -46,7 +48,7 @@ function ContentBrowserPage() {
 
     // Get filter values from URL search params or use defaults
     const contentTypeFromUrl = (searchParams?.contentType as ContentTypeFilter) ?? "module"
-    const statusFromUrl = (searchParams?.status as StatusFilter) ?? "pending"
+    const statusFromUrl = (searchParams?.status as StatusFilter) ?? "all"
     const searchFromUrl = (searchParams?.q as string) ?? ""
 
     const [contentType, setContentType] = useState<ContentTypeFilter>(contentTypeFromUrl)
@@ -104,7 +106,7 @@ function ContentBrowserPage() {
             numItems: itemsPerPage,
             cursor: null,
         },
-        status,
+        status: status === "all" ? undefined : status,
         contentType,
     })
 
@@ -120,6 +122,40 @@ function ContentBrowserPage() {
     })
 
     const Icon = CONTENT_TYPE_ICONS[contentType]
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <p className="text-muted-foreground text-sm">Loading content...</p>
+                </div>
+            </div>
+        )
+    }
+
+    // Error state
+    if (contentData === null) {
+        return (
+            <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
+                <Card className="w-full max-w-md">
+                    <CardContent className="flex flex-col items-center gap-4 py-12">
+                        <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
+                        <div className="text-center">
+                            <h3 className="font-semibold text-lg">Failed to load content</h3>
+                            <p className="mt-2 text-muted-foreground text-sm">
+                                There was an error loading the content data. Please try again.
+                            </p>
+                        </div>
+                        <Button onClick={() => window.location.reload()}>
+                            Retry
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     return (
         <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
@@ -181,9 +217,12 @@ function ContentBrowserPage() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="all">All Statuses</SelectItem>
                                     <SelectItem value="draft">Draft</SelectItem>
                                     <SelectItem value="pending">Pending Review</SelectItem>
                                     <SelectItem value="approved">Approved</SelectItem>
+                                    <SelectItem value="published">Published</SelectItem>
+                                    <SelectItem value="changes_requested">Changes Requested</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

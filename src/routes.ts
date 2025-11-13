@@ -20,31 +20,61 @@ import { Route as PublicStaffLoginRouteImport } from './pages/_public/staff.logi
 import { Route as PublicCoursesCourseIdRouteImport } from './pages/_public/courses.$courseId'
 import { Route as AuthenticatedCCoursesRouteImport } from './pages/_authenticated.c/courses'
 import { Route as AuthenticatedCCourseIdRouteImport } from './pages/_authenticated.c/$courseId'
+import { Route as AuthenticatedFacultyFRouteImport } from './pages/_authenticated._faculty.f'
 import { Route as AuthenticatedAdminARouteImport } from './pages/_authenticated._admin.a'
 import { Route as AuthenticatedCCourseIdIndexRouteImport } from './pages/_authenticated.c/$courseId.index'
+import { Route as AuthenticatedFacultyFIndexRouteImport } from './pages/_authenticated._faculty.f/index'
 import { Route as AuthenticatedAdminAIndexRouteImport } from './pages/_authenticated._admin.a/index'
+import { Route as AuthenticatedFacultyFSettingsRouteImport } from './pages/_authenticated._faculty.f/settings'
+import { Route as AuthenticatedFacultyFSecurityRouteImport } from './pages/_authenticated._faculty.f/security'
+import { Route as AuthenticatedFacultyFLogoutRouteImport } from './pages/_authenticated._faculty.f/logout'
+import { Route as AuthenticatedFacultyFContentApprovalsRouteImport } from './pages/_authenticated._faculty.f/content-approvals'
+import { Route as AuthenticatedFacultyFContentRouteImport } from './pages/_authenticated._faculty.f/content'
+import { Route as AuthenticatedFacultyFContactRouteImport } from './pages/_authenticated._faculty.f/contact'
 import { Route as AuthenticatedAdminAUsersRouteImport } from './pages/_authenticated._admin.a/users'
+import { Route as AuthenticatedAdminASettingsRouteImport } from './pages/_authenticated._admin.a/settings'
+import { Route as AuthenticatedAdminASecurityRouteImport } from './pages/_authenticated._admin.a/security'
+import { Route as AuthenticatedAdminALogoutRouteImport } from './pages/_authenticated._admin.a/logout'
 import { Route as AuthenticatedAdminACoursesRouteImport } from './pages/_authenticated._admin.a/courses'
 import { Route as AuthenticatedAdminAContentApprovalsRouteImport } from './pages/_authenticated._admin.a/content-approvals'
 import { Route as AuthenticatedAdminAContentRouteImport } from './pages/_authenticated._admin.a/content'
+import { Route as AuthenticatedAdminAContactRouteImport } from './pages/_authenticated._admin.a/contact'
+import { Route as AuthenticatedFacultyFCoursesIndexRouteImport } from './pages/_authenticated._faculty.f/courses/index'
+import { Route as AuthenticatedFacultyFAnnouncementsIndexRouteImport } from './pages/_authenticated._faculty.f/announcements/index'
+import { Route as AuthenticatedFacultyFAnalyticsIndexRouteImport } from './pages/_authenticated._faculty.f/analytics/index'
 import { Route as AuthenticatedAdminAUsersIndexRouteImport } from './pages/_authenticated._admin.a/users/index'
 import { Route as AuthenticatedAdminACoursesIndexRouteImport } from './pages/_authenticated._admin.a/courses/index'
 import { Route as AuthenticatedAdminAContentIndexRouteImport } from './pages/_authenticated._admin.a/content/index'
 import { Route as AuthenticatedAdminAContentApprovalsIndexRouteImport } from './pages/_authenticated._admin.a/content-approvals/index'
 import { Route as AuthenticatedAdminACategoriesIndexRouteImport } from './pages/_authenticated._admin.a/categories/index'
+import { Route as AuthenticatedAdminAAnnouncementsIndexRouteImport } from './pages/_authenticated._admin.a/announcements/index'
 import { Route as AuthenticatedAdminAAnalyticsIndexRouteImport } from './pages/_authenticated._admin.a/analytics/index'
+import { Route as AuthenticatedFacultyFCoursesNewRouteImport } from './pages/_authenticated._faculty.f/courses/new'
+import { Route as AuthenticatedFacultyFCoursesCourseIdRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId'
+import { Route as AuthenticatedFacultyFAnnouncementsNewRouteImport } from './pages/_authenticated._faculty.f/announcements/new'
+import { Route as AuthenticatedFacultyFAnalyticsProgressRouteImport } from './pages/_authenticated._faculty.f/analytics/progress'
 import { Route as AuthenticatedAdminAUsersCreateRouteImport } from './pages/_authenticated._admin.a/users/create'
 import { Route as AuthenticatedAdminAUsersUserIdRouteImport } from './pages/_authenticated._admin.a/users/$userId'
 import { Route as AuthenticatedAdminACoursesNewRouteImport } from './pages/_authenticated._admin.a/courses/new'
 import { Route as AuthenticatedAdminACoursesCourseIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId'
 import { Route as AuthenticatedAdminACategoriesOrganizeRouteImport } from './pages/_authenticated._admin.a/categories/organize'
 import { Route as AuthenticatedAdminACategoriesNewRouteImport } from './pages/_authenticated._admin.a/categories/new'
+import { Route as AuthenticatedAdminAAnnouncementsNewRouteImport } from './pages/_authenticated._admin.a/announcements/new'
 import { Route as AuthenticatedAdminAAnalyticsReportsRouteImport } from './pages/_authenticated._admin.a/analytics/reports'
+import { Route as AuthenticatedAdminAAnalyticsProgressRouteImport } from './pages/_authenticated._admin.a/analytics/progress'
 import { Route as AuthenticatedAdminAAnalyticsEnrollmentsRouteImport } from './pages/_authenticated._admin.a/analytics/enrollments'
 import { Route as AuthenticatedAdminAAnalyticsCoursesRouteImport } from './pages/_authenticated._admin.a/analytics/courses'
 import { Route as AuthenticatedCCourseIdMModuleIdIndexRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.index'
 import { Route as AuthenticatedAdminAContentContentTypeContentIdRouteImport } from './pages/_authenticated._admin.a/content/$contentType.$contentId'
 import { Route as AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport } from './pages/_authenticated.c/$courseId.m.$moduleId.lessons.$lessonId'
+import { Route as AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRouteImport } from './pages/_authenticated._faculty.f/courses/$courseId/learners/$userId'
+import { Route as AuthenticatedAdminACoursesCourseIdQuizzesNewRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/quizzes/new'
+import { Route as AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/quizzes/$quizId'
+import { Route as AuthenticatedAdminACoursesCourseIdLearnersUserIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/learners/$userId'
+import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsNewRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/new'
+import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/$assignmentId'
+import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/$assignmentId/submissions'
+import { Route as AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRouteImport } from './pages/_authenticated._admin.a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -99,6 +129,11 @@ const AuthenticatedCCourseIdRoute = AuthenticatedCCourseIdRouteImport.update({
   path: '/c/$courseId',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFacultyFRoute = AuthenticatedFacultyFRouteImport.update({
+  id: '/_faculty/f',
+  path: '/f',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminARoute = AuthenticatedAdminARouteImport.update({
   id: '/_admin/a',
   path: '/a',
@@ -110,16 +145,76 @@ const AuthenticatedCCourseIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedCCourseIdRoute,
   } as any)
+const AuthenticatedFacultyFIndexRoute =
+  AuthenticatedFacultyFIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
 const AuthenticatedAdminAIndexRoute =
   AuthenticatedAdminAIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
+const AuthenticatedFacultyFSettingsRoute =
+  AuthenticatedFacultyFSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFSecurityRoute =
+  AuthenticatedFacultyFSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFLogoutRoute =
+  AuthenticatedFacultyFLogoutRouteImport.update({
+    id: '/logout',
+    path: '/logout',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFContentApprovalsRoute =
+  AuthenticatedFacultyFContentApprovalsRouteImport.update({
+    id: '/content-approvals',
+    path: '/content-approvals',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFContentRoute =
+  AuthenticatedFacultyFContentRouteImport.update({
+    id: '/content',
+    path: '/content',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFContactRoute =
+  AuthenticatedFacultyFContactRouteImport.update({
+    id: '/contact',
+    path: '/contact',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
 const AuthenticatedAdminAUsersRoute =
   AuthenticatedAdminAUsersRouteImport.update({
     id: '/users',
     path: '/users',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminASettingsRoute =
+  AuthenticatedAdminASettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminASecurityRoute =
+  AuthenticatedAdminASecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminALogoutRoute =
+  AuthenticatedAdminALogoutRouteImport.update({
+    id: '/logout',
+    path: '/logout',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
 const AuthenticatedAdminACoursesRoute =
@@ -139,6 +234,30 @@ const AuthenticatedAdminAContentRoute =
     id: '/content',
     path: '/content',
     getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminAContactRoute =
+  AuthenticatedAdminAContactRouteImport.update({
+    id: '/contact',
+    path: '/contact',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedFacultyFCoursesIndexRoute =
+  AuthenticatedFacultyFCoursesIndexRouteImport.update({
+    id: '/courses/',
+    path: '/courses/',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFAnnouncementsIndexRoute =
+  AuthenticatedFacultyFAnnouncementsIndexRouteImport.update({
+    id: '/announcements/',
+    path: '/announcements/',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFAnalyticsIndexRoute =
+  AuthenticatedFacultyFAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
   } as any)
 const AuthenticatedAdminAUsersIndexRoute =
   AuthenticatedAdminAUsersIndexRouteImport.update({
@@ -170,11 +289,41 @@ const AuthenticatedAdminACategoriesIndexRoute =
     path: '/categories/',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
+const AuthenticatedAdminAAnnouncementsIndexRoute =
+  AuthenticatedAdminAAnnouncementsIndexRouteImport.update({
+    id: '/announcements/',
+    path: '/announcements/',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
 const AuthenticatedAdminAAnalyticsIndexRoute =
   AuthenticatedAdminAAnalyticsIndexRouteImport.update({
     id: '/analytics/',
     path: '/analytics/',
     getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedFacultyFCoursesNewRoute =
+  AuthenticatedFacultyFCoursesNewRouteImport.update({
+    id: '/courses/new',
+    path: '/courses/new',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFCoursesCourseIdRoute =
+  AuthenticatedFacultyFCoursesCourseIdRouteImport.update({
+    id: '/courses/$courseId',
+    path: '/courses/$courseId',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFAnnouncementsNewRoute =
+  AuthenticatedFacultyFAnnouncementsNewRouteImport.update({
+    id: '/announcements/new',
+    path: '/announcements/new',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
+  } as any)
+const AuthenticatedFacultyFAnalyticsProgressRoute =
+  AuthenticatedFacultyFAnalyticsProgressRouteImport.update({
+    id: '/analytics/progress',
+    path: '/analytics/progress',
+    getParentRoute: () => AuthenticatedFacultyFRoute,
   } as any)
 const AuthenticatedAdminAUsersCreateRoute =
   AuthenticatedAdminAUsersCreateRouteImport.update({
@@ -212,10 +361,22 @@ const AuthenticatedAdminACategoriesNewRoute =
     path: '/categories/new',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
+const AuthenticatedAdminAAnnouncementsNewRoute =
+  AuthenticatedAdminAAnnouncementsNewRouteImport.update({
+    id: '/announcements/new',
+    path: '/announcements/new',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
 const AuthenticatedAdminAAnalyticsReportsRoute =
   AuthenticatedAdminAAnalyticsReportsRouteImport.update({
     id: '/analytics/reports',
     path: '/analytics/reports',
+    getParentRoute: () => AuthenticatedAdminARoute,
+  } as any)
+const AuthenticatedAdminAAnalyticsProgressRoute =
+  AuthenticatedAdminAAnalyticsProgressRouteImport.update({
+    id: '/analytics/progress',
+    path: '/analytics/progress',
     getParentRoute: () => AuthenticatedAdminARoute,
   } as any)
 const AuthenticatedAdminAAnalyticsEnrollmentsRoute =
@@ -248,6 +409,60 @@ const AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute =
     path: '/m/$moduleId/lessons/$lessonId',
     getParentRoute: () => AuthenticatedCCourseIdRoute,
   } as any)
+const AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute =
+  AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRouteImport.update({
+    id: '/learners/$userId',
+    path: '/learners/$userId',
+    getParentRoute: () => AuthenticatedFacultyFCoursesCourseIdRoute,
+  } as any)
+const AuthenticatedAdminACoursesCourseIdQuizzesNewRoute =
+  AuthenticatedAdminACoursesCourseIdQuizzesNewRouteImport.update({
+    id: '/quizzes/new',
+    path: '/quizzes/new',
+    getParentRoute: () => AuthenticatedAdminACoursesCourseIdRoute,
+  } as any)
+const AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute =
+  AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRouteImport.update({
+    id: '/quizzes/$quizId',
+    path: '/quizzes/$quizId',
+    getParentRoute: () => AuthenticatedAdminACoursesCourseIdRoute,
+  } as any)
+const AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute =
+  AuthenticatedAdminACoursesCourseIdLearnersUserIdRouteImport.update({
+    id: '/learners/$userId',
+    path: '/learners/$userId',
+    getParentRoute: () => AuthenticatedAdminACoursesCourseIdRoute,
+  } as any)
+const AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute =
+  AuthenticatedAdminACoursesCourseIdAssignmentsNewRouteImport.update({
+    id: '/assignments/new',
+    path: '/assignments/new',
+    getParentRoute: () => AuthenticatedAdminACoursesCourseIdRoute,
+  } as any)
+const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute =
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteImport.update({
+    id: '/assignments/$assignmentId',
+    path: '/assignments/$assignmentId',
+    getParentRoute: () => AuthenticatedAdminACoursesCourseIdRoute,
+  } as any)
+const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute =
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport.update(
+    {
+      id: '/submissions',
+      path: '/submissions',
+      getParentRoute: () =>
+        AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute,
+    } as any,
+  )
+const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute =
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRouteImport.update(
+    {
+      id: '/$submissionId',
+      path: '/$submissionId',
+      getParentRoute: () =>
+        AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
   '/about': typeof PublicAboutRoute
@@ -255,35 +470,65 @@ export interface FileRoutesByFullPath {
   '/faq': typeof PublicFaqRoute
   '/': typeof PublicIndexRoute
   '/a': typeof AuthenticatedAdminARouteWithChildren
+  '/f': typeof AuthenticatedFacultyFRouteWithChildren
   '/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
   '/c/courses': typeof AuthenticatedCCoursesRoute
   '/courses/$courseId': typeof PublicCoursesCourseIdRoute
   '/staff/login': typeof PublicStaffLoginRoute
   '/courses': typeof PublicCoursesIndexRoute
+  '/a/contact': typeof AuthenticatedAdminAContactRoute
   '/a/content': typeof AuthenticatedAdminAContentRouteWithChildren
   '/a/content-approvals': typeof AuthenticatedAdminAContentApprovalsRouteWithChildren
   '/a/courses': typeof AuthenticatedAdminACoursesRouteWithChildren
+  '/a/logout': typeof AuthenticatedAdminALogoutRoute
+  '/a/security': typeof AuthenticatedAdminASecurityRoute
+  '/a/settings': typeof AuthenticatedAdminASettingsRoute
   '/a/users': typeof AuthenticatedAdminAUsersRouteWithChildren
+  '/f/contact': typeof AuthenticatedFacultyFContactRoute
+  '/f/content': typeof AuthenticatedFacultyFContentRoute
+  '/f/content-approvals': typeof AuthenticatedFacultyFContentApprovalsRoute
+  '/f/logout': typeof AuthenticatedFacultyFLogoutRoute
+  '/f/security': typeof AuthenticatedFacultyFSecurityRoute
+  '/f/settings': typeof AuthenticatedFacultyFSettingsRoute
   '/a/': typeof AuthenticatedAdminAIndexRoute
+  '/f/': typeof AuthenticatedFacultyFIndexRoute
   '/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
   '/a/analytics/courses': typeof AuthenticatedAdminAAnalyticsCoursesRoute
   '/a/analytics/enrollments': typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  '/a/analytics/progress': typeof AuthenticatedAdminAAnalyticsProgressRoute
   '/a/analytics/reports': typeof AuthenticatedAdminAAnalyticsReportsRoute
+  '/a/announcements/new': typeof AuthenticatedAdminAAnnouncementsNewRoute
   '/a/categories/new': typeof AuthenticatedAdminACategoriesNewRoute
   '/a/categories/organize': typeof AuthenticatedAdminACategoriesOrganizeRoute
-  '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
+  '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRouteWithChildren
   '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
   '/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
   '/a/users/create': typeof AuthenticatedAdminAUsersCreateRoute
+  '/f/analytics/progress': typeof AuthenticatedFacultyFAnalyticsProgressRoute
+  '/f/announcements/new': typeof AuthenticatedFacultyFAnnouncementsNewRoute
+  '/f/courses/$courseId': typeof AuthenticatedFacultyFCoursesCourseIdRouteWithChildren
+  '/f/courses/new': typeof AuthenticatedFacultyFCoursesNewRoute
   '/a/analytics': typeof AuthenticatedAdminAAnalyticsIndexRoute
+  '/a/announcements': typeof AuthenticatedAdminAAnnouncementsIndexRoute
   '/a/categories': typeof AuthenticatedAdminACategoriesIndexRoute
   '/a/content-approvals/': typeof AuthenticatedAdminAContentApprovalsIndexRoute
   '/a/content/': typeof AuthenticatedAdminAContentIndexRoute
   '/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
   '/a/users/': typeof AuthenticatedAdminAUsersIndexRoute
+  '/f/analytics': typeof AuthenticatedFacultyFAnalyticsIndexRoute
+  '/f/announcements': typeof AuthenticatedFacultyFAnnouncementsIndexRoute
+  '/f/courses': typeof AuthenticatedFacultyFCoursesIndexRoute
   '/a/content/$contentType/$contentId': typeof AuthenticatedAdminAContentContentTypeContentIdRoute
   '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  '/a/courses/$courseId/assignments/$assignmentId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  '/a/courses/$courseId/assignments/new': typeof AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute
+  '/a/courses/$courseId/learners/$userId': typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute
+  '/a/courses/$courseId/quizzes/$quizId': typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute
+  '/a/courses/$courseId/quizzes/new': typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRoute
+  '/f/courses/$courseId/learners/$userId': typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
+  '/a/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+  '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
 }
 export interface FileRoutesByTo {
   '/about': typeof PublicAboutRoute
@@ -294,26 +539,55 @@ export interface FileRoutesByTo {
   '/courses/$courseId': typeof PublicCoursesCourseIdRoute
   '/staff/login': typeof PublicStaffLoginRoute
   '/courses': typeof PublicCoursesIndexRoute
+  '/a/contact': typeof AuthenticatedAdminAContactRoute
+  '/a/logout': typeof AuthenticatedAdminALogoutRoute
+  '/a/security': typeof AuthenticatedAdminASecurityRoute
+  '/a/settings': typeof AuthenticatedAdminASettingsRoute
+  '/f/contact': typeof AuthenticatedFacultyFContactRoute
+  '/f/content': typeof AuthenticatedFacultyFContentRoute
+  '/f/content-approvals': typeof AuthenticatedFacultyFContentApprovalsRoute
+  '/f/logout': typeof AuthenticatedFacultyFLogoutRoute
+  '/f/security': typeof AuthenticatedFacultyFSecurityRoute
+  '/f/settings': typeof AuthenticatedFacultyFSettingsRoute
   '/a': typeof AuthenticatedAdminAIndexRoute
+  '/f': typeof AuthenticatedFacultyFIndexRoute
   '/c/$courseId': typeof AuthenticatedCCourseIdIndexRoute
   '/a/analytics/courses': typeof AuthenticatedAdminAAnalyticsCoursesRoute
   '/a/analytics/enrollments': typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  '/a/analytics/progress': typeof AuthenticatedAdminAAnalyticsProgressRoute
   '/a/analytics/reports': typeof AuthenticatedAdminAAnalyticsReportsRoute
+  '/a/announcements/new': typeof AuthenticatedAdminAAnnouncementsNewRoute
   '/a/categories/new': typeof AuthenticatedAdminACategoriesNewRoute
   '/a/categories/organize': typeof AuthenticatedAdminACategoriesOrganizeRoute
-  '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
+  '/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRouteWithChildren
   '/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
   '/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
   '/a/users/create': typeof AuthenticatedAdminAUsersCreateRoute
+  '/f/analytics/progress': typeof AuthenticatedFacultyFAnalyticsProgressRoute
+  '/f/announcements/new': typeof AuthenticatedFacultyFAnnouncementsNewRoute
+  '/f/courses/$courseId': typeof AuthenticatedFacultyFCoursesCourseIdRouteWithChildren
+  '/f/courses/new': typeof AuthenticatedFacultyFCoursesNewRoute
   '/a/analytics': typeof AuthenticatedAdminAAnalyticsIndexRoute
+  '/a/announcements': typeof AuthenticatedAdminAAnnouncementsIndexRoute
   '/a/categories': typeof AuthenticatedAdminACategoriesIndexRoute
   '/a/content-approvals': typeof AuthenticatedAdminAContentApprovalsIndexRoute
   '/a/content': typeof AuthenticatedAdminAContentIndexRoute
   '/a/courses': typeof AuthenticatedAdminACoursesIndexRoute
   '/a/users': typeof AuthenticatedAdminAUsersIndexRoute
+  '/f/analytics': typeof AuthenticatedFacultyFAnalyticsIndexRoute
+  '/f/announcements': typeof AuthenticatedFacultyFAnnouncementsIndexRoute
+  '/f/courses': typeof AuthenticatedFacultyFCoursesIndexRoute
   '/a/content/$contentType/$contentId': typeof AuthenticatedAdminAContentContentTypeContentIdRoute
   '/c/$courseId/m/$moduleId': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  '/a/courses/$courseId/assignments/$assignmentId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  '/a/courses/$courseId/assignments/new': typeof AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute
+  '/a/courses/$courseId/learners/$userId': typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute
+  '/a/courses/$courseId/quizzes/$quizId': typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute
+  '/a/courses/$courseId/quizzes/new': typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRoute
+  '/f/courses/$courseId/learners/$userId': typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
   '/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
+  '/a/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+  '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -324,35 +598,65 @@ export interface FileRoutesById {
   '/_public/faq': typeof PublicFaqRoute
   '/_public/': typeof PublicIndexRoute
   '/_authenticated/_admin/a': typeof AuthenticatedAdminARouteWithChildren
+  '/_authenticated/_faculty/f': typeof AuthenticatedFacultyFRouteWithChildren
   '/_authenticated/c/$courseId': typeof AuthenticatedCCourseIdRouteWithChildren
   '/_authenticated/c/courses': typeof AuthenticatedCCoursesRoute
   '/_public/courses/$courseId': typeof PublicCoursesCourseIdRoute
   '/_public/staff/login': typeof PublicStaffLoginRoute
   '/_public/courses/': typeof PublicCoursesIndexRoute
+  '/_authenticated/_admin/a/contact': typeof AuthenticatedAdminAContactRoute
   '/_authenticated/_admin/a/content': typeof AuthenticatedAdminAContentRouteWithChildren
   '/_authenticated/_admin/a/content-approvals': typeof AuthenticatedAdminAContentApprovalsRouteWithChildren
   '/_authenticated/_admin/a/courses': typeof AuthenticatedAdminACoursesRouteWithChildren
+  '/_authenticated/_admin/a/logout': typeof AuthenticatedAdminALogoutRoute
+  '/_authenticated/_admin/a/security': typeof AuthenticatedAdminASecurityRoute
+  '/_authenticated/_admin/a/settings': typeof AuthenticatedAdminASettingsRoute
   '/_authenticated/_admin/a/users': typeof AuthenticatedAdminAUsersRouteWithChildren
+  '/_authenticated/_faculty/f/contact': typeof AuthenticatedFacultyFContactRoute
+  '/_authenticated/_faculty/f/content': typeof AuthenticatedFacultyFContentRoute
+  '/_authenticated/_faculty/f/content-approvals': typeof AuthenticatedFacultyFContentApprovalsRoute
+  '/_authenticated/_faculty/f/logout': typeof AuthenticatedFacultyFLogoutRoute
+  '/_authenticated/_faculty/f/security': typeof AuthenticatedFacultyFSecurityRoute
+  '/_authenticated/_faculty/f/settings': typeof AuthenticatedFacultyFSettingsRoute
   '/_authenticated/_admin/a/': typeof AuthenticatedAdminAIndexRoute
+  '/_authenticated/_faculty/f/': typeof AuthenticatedFacultyFIndexRoute
   '/_authenticated/c/$courseId/': typeof AuthenticatedCCourseIdIndexRoute
   '/_authenticated/_admin/a/analytics/courses': typeof AuthenticatedAdminAAnalyticsCoursesRoute
   '/_authenticated/_admin/a/analytics/enrollments': typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  '/_authenticated/_admin/a/analytics/progress': typeof AuthenticatedAdminAAnalyticsProgressRoute
   '/_authenticated/_admin/a/analytics/reports': typeof AuthenticatedAdminAAnalyticsReportsRoute
+  '/_authenticated/_admin/a/announcements/new': typeof AuthenticatedAdminAAnnouncementsNewRoute
   '/_authenticated/_admin/a/categories/new': typeof AuthenticatedAdminACategoriesNewRoute
   '/_authenticated/_admin/a/categories/organize': typeof AuthenticatedAdminACategoriesOrganizeRoute
-  '/_authenticated/_admin/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRoute
+  '/_authenticated/_admin/a/courses/$courseId': typeof AuthenticatedAdminACoursesCourseIdRouteWithChildren
   '/_authenticated/_admin/a/courses/new': typeof AuthenticatedAdminACoursesNewRoute
   '/_authenticated/_admin/a/users/$userId': typeof AuthenticatedAdminAUsersUserIdRoute
   '/_authenticated/_admin/a/users/create': typeof AuthenticatedAdminAUsersCreateRoute
+  '/_authenticated/_faculty/f/analytics/progress': typeof AuthenticatedFacultyFAnalyticsProgressRoute
+  '/_authenticated/_faculty/f/announcements/new': typeof AuthenticatedFacultyFAnnouncementsNewRoute
+  '/_authenticated/_faculty/f/courses/$courseId': typeof AuthenticatedFacultyFCoursesCourseIdRouteWithChildren
+  '/_authenticated/_faculty/f/courses/new': typeof AuthenticatedFacultyFCoursesNewRoute
   '/_authenticated/_admin/a/analytics/': typeof AuthenticatedAdminAAnalyticsIndexRoute
+  '/_authenticated/_admin/a/announcements/': typeof AuthenticatedAdminAAnnouncementsIndexRoute
   '/_authenticated/_admin/a/categories/': typeof AuthenticatedAdminACategoriesIndexRoute
   '/_authenticated/_admin/a/content-approvals/': typeof AuthenticatedAdminAContentApprovalsIndexRoute
   '/_authenticated/_admin/a/content/': typeof AuthenticatedAdminAContentIndexRoute
   '/_authenticated/_admin/a/courses/': typeof AuthenticatedAdminACoursesIndexRoute
   '/_authenticated/_admin/a/users/': typeof AuthenticatedAdminAUsersIndexRoute
+  '/_authenticated/_faculty/f/analytics/': typeof AuthenticatedFacultyFAnalyticsIndexRoute
+  '/_authenticated/_faculty/f/announcements/': typeof AuthenticatedFacultyFAnnouncementsIndexRoute
+  '/_authenticated/_faculty/f/courses/': typeof AuthenticatedFacultyFCoursesIndexRoute
   '/_authenticated/_admin/a/content/$contentType/$contentId': typeof AuthenticatedAdminAContentContentTypeContentIdRoute
   '/_authenticated/c/$courseId/m/$moduleId/': typeof AuthenticatedCCourseIdMModuleIdIndexRoute
+  '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  '/_authenticated/_admin/a/courses/$courseId/assignments/new': typeof AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute
+  '/_authenticated/_admin/a/courses/$courseId/learners/$userId': typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute
+  '/_authenticated/_admin/a/courses/$courseId/quizzes/$quizId': typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute
+  '/_authenticated/_admin/a/courses/$courseId/quizzes/new': typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRoute
+  '/_authenticated/_faculty/f/courses/$courseId/learners/$userId': typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
   '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId': typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRoute
+  '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+  '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -362,35 +666,65 @@ export interface FileRouteTypes {
     | '/faq'
     | '/'
     | '/a'
+    | '/f'
     | '/c/$courseId'
     | '/c/courses'
     | '/courses/$courseId'
     | '/staff/login'
     | '/courses'
+    | '/a/contact'
     | '/a/content'
     | '/a/content-approvals'
     | '/a/courses'
+    | '/a/logout'
+    | '/a/security'
+    | '/a/settings'
     | '/a/users'
+    | '/f/contact'
+    | '/f/content'
+    | '/f/content-approvals'
+    | '/f/logout'
+    | '/f/security'
+    | '/f/settings'
     | '/a/'
+    | '/f/'
     | '/c/$courseId/'
     | '/a/analytics/courses'
     | '/a/analytics/enrollments'
+    | '/a/analytics/progress'
     | '/a/analytics/reports'
+    | '/a/announcements/new'
     | '/a/categories/new'
     | '/a/categories/organize'
     | '/a/courses/$courseId'
     | '/a/courses/new'
     | '/a/users/$userId'
     | '/a/users/create'
+    | '/f/analytics/progress'
+    | '/f/announcements/new'
+    | '/f/courses/$courseId'
+    | '/f/courses/new'
     | '/a/analytics'
+    | '/a/announcements'
     | '/a/categories'
     | '/a/content-approvals/'
     | '/a/content/'
     | '/a/courses/'
     | '/a/users/'
+    | '/f/analytics'
+    | '/f/announcements'
+    | '/f/courses'
     | '/a/content/$contentType/$contentId'
     | '/c/$courseId/m/$moduleId'
+    | '/a/courses/$courseId/assignments/$assignmentId'
+    | '/a/courses/$courseId/assignments/new'
+    | '/a/courses/$courseId/learners/$userId'
+    | '/a/courses/$courseId/quizzes/$quizId'
+    | '/a/courses/$courseId/quizzes/new'
+    | '/f/courses/$courseId/learners/$userId'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
+    | '/a/courses/$courseId/assignments/$assignmentId/submissions'
+    | '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/about'
@@ -401,26 +735,55 @@ export interface FileRouteTypes {
     | '/courses/$courseId'
     | '/staff/login'
     | '/courses'
+    | '/a/contact'
+    | '/a/logout'
+    | '/a/security'
+    | '/a/settings'
+    | '/f/contact'
+    | '/f/content'
+    | '/f/content-approvals'
+    | '/f/logout'
+    | '/f/security'
+    | '/f/settings'
     | '/a'
+    | '/f'
     | '/c/$courseId'
     | '/a/analytics/courses'
     | '/a/analytics/enrollments'
+    | '/a/analytics/progress'
     | '/a/analytics/reports'
+    | '/a/announcements/new'
     | '/a/categories/new'
     | '/a/categories/organize'
     | '/a/courses/$courseId'
     | '/a/courses/new'
     | '/a/users/$userId'
     | '/a/users/create'
+    | '/f/analytics/progress'
+    | '/f/announcements/new'
+    | '/f/courses/$courseId'
+    | '/f/courses/new'
     | '/a/analytics'
+    | '/a/announcements'
     | '/a/categories'
     | '/a/content-approvals'
     | '/a/content'
     | '/a/courses'
     | '/a/users'
+    | '/f/analytics'
+    | '/f/announcements'
+    | '/f/courses'
     | '/a/content/$contentType/$contentId'
     | '/c/$courseId/m/$moduleId'
+    | '/a/courses/$courseId/assignments/$assignmentId'
+    | '/a/courses/$courseId/assignments/new'
+    | '/a/courses/$courseId/learners/$userId'
+    | '/a/courses/$courseId/quizzes/$quizId'
+    | '/a/courses/$courseId/quizzes/new'
+    | '/f/courses/$courseId/learners/$userId'
     | '/c/$courseId/m/$moduleId/lessons/$lessonId'
+    | '/a/courses/$courseId/assignments/$assignmentId/submissions'
+    | '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -430,35 +793,65 @@ export interface FileRouteTypes {
     | '/_public/faq'
     | '/_public/'
     | '/_authenticated/_admin/a'
+    | '/_authenticated/_faculty/f'
     | '/_authenticated/c/$courseId'
     | '/_authenticated/c/courses'
     | '/_public/courses/$courseId'
     | '/_public/staff/login'
     | '/_public/courses/'
+    | '/_authenticated/_admin/a/contact'
     | '/_authenticated/_admin/a/content'
     | '/_authenticated/_admin/a/content-approvals'
     | '/_authenticated/_admin/a/courses'
+    | '/_authenticated/_admin/a/logout'
+    | '/_authenticated/_admin/a/security'
+    | '/_authenticated/_admin/a/settings'
     | '/_authenticated/_admin/a/users'
+    | '/_authenticated/_faculty/f/contact'
+    | '/_authenticated/_faculty/f/content'
+    | '/_authenticated/_faculty/f/content-approvals'
+    | '/_authenticated/_faculty/f/logout'
+    | '/_authenticated/_faculty/f/security'
+    | '/_authenticated/_faculty/f/settings'
     | '/_authenticated/_admin/a/'
+    | '/_authenticated/_faculty/f/'
     | '/_authenticated/c/$courseId/'
     | '/_authenticated/_admin/a/analytics/courses'
     | '/_authenticated/_admin/a/analytics/enrollments'
+    | '/_authenticated/_admin/a/analytics/progress'
     | '/_authenticated/_admin/a/analytics/reports'
+    | '/_authenticated/_admin/a/announcements/new'
     | '/_authenticated/_admin/a/categories/new'
     | '/_authenticated/_admin/a/categories/organize'
     | '/_authenticated/_admin/a/courses/$courseId'
     | '/_authenticated/_admin/a/courses/new'
     | '/_authenticated/_admin/a/users/$userId'
     | '/_authenticated/_admin/a/users/create'
+    | '/_authenticated/_faculty/f/analytics/progress'
+    | '/_authenticated/_faculty/f/announcements/new'
+    | '/_authenticated/_faculty/f/courses/$courseId'
+    | '/_authenticated/_faculty/f/courses/new'
     | '/_authenticated/_admin/a/analytics/'
+    | '/_authenticated/_admin/a/announcements/'
     | '/_authenticated/_admin/a/categories/'
     | '/_authenticated/_admin/a/content-approvals/'
     | '/_authenticated/_admin/a/content/'
     | '/_authenticated/_admin/a/courses/'
     | '/_authenticated/_admin/a/users/'
+    | '/_authenticated/_faculty/f/analytics/'
+    | '/_authenticated/_faculty/f/announcements/'
+    | '/_authenticated/_faculty/f/courses/'
     | '/_authenticated/_admin/a/content/$contentType/$contentId'
     | '/_authenticated/c/$courseId/m/$moduleId/'
+    | '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId'
+    | '/_authenticated/_admin/a/courses/$courseId/assignments/new'
+    | '/_authenticated/_admin/a/courses/$courseId/learners/$userId'
+    | '/_authenticated/_admin/a/courses/$courseId/quizzes/$quizId'
+    | '/_authenticated/_admin/a/courses/$courseId/quizzes/new'
+    | '/_authenticated/_faculty/f/courses/$courseId/learners/$userId'
     | '/_authenticated/c/$courseId/m/$moduleId/lessons/$lessonId'
+    | '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions'
+    | '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -545,6 +938,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCCourseIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/_faculty/f': {
+      id: '/_authenticated/_faculty/f'
+      path: '/f'
+      fullPath: '/f'
+      preLoaderRoute: typeof AuthenticatedFacultyFRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/_admin/a': {
       id: '/_authenticated/_admin/a'
       path: '/a'
@@ -559,6 +959,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCCourseIdIndexRouteImport
       parentRoute: typeof AuthenticatedCCourseIdRoute
     }
+    '/_authenticated/_faculty/f/': {
+      id: '/_authenticated/_faculty/f/'
+      path: '/'
+      fullPath: '/f/'
+      preLoaderRoute: typeof AuthenticatedFacultyFIndexRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
     '/_authenticated/_admin/a/': {
       id: '/_authenticated/_admin/a/'
       path: '/'
@@ -566,11 +973,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAIndexRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
+    '/_authenticated/_faculty/f/settings': {
+      id: '/_authenticated/_faculty/f/settings'
+      path: '/settings'
+      fullPath: '/f/settings'
+      preLoaderRoute: typeof AuthenticatedFacultyFSettingsRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/security': {
+      id: '/_authenticated/_faculty/f/security'
+      path: '/security'
+      fullPath: '/f/security'
+      preLoaderRoute: typeof AuthenticatedFacultyFSecurityRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/logout': {
+      id: '/_authenticated/_faculty/f/logout'
+      path: '/logout'
+      fullPath: '/f/logout'
+      preLoaderRoute: typeof AuthenticatedFacultyFLogoutRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/content-approvals': {
+      id: '/_authenticated/_faculty/f/content-approvals'
+      path: '/content-approvals'
+      fullPath: '/f/content-approvals'
+      preLoaderRoute: typeof AuthenticatedFacultyFContentApprovalsRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/content': {
+      id: '/_authenticated/_faculty/f/content'
+      path: '/content'
+      fullPath: '/f/content'
+      preLoaderRoute: typeof AuthenticatedFacultyFContentRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/contact': {
+      id: '/_authenticated/_faculty/f/contact'
+      path: '/contact'
+      fullPath: '/f/contact'
+      preLoaderRoute: typeof AuthenticatedFacultyFContactRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
     '/_authenticated/_admin/a/users': {
       id: '/_authenticated/_admin/a/users'
       path: '/users'
       fullPath: '/a/users'
       preLoaderRoute: typeof AuthenticatedAdminAUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/settings': {
+      id: '/_authenticated/_admin/a/settings'
+      path: '/settings'
+      fullPath: '/a/settings'
+      preLoaderRoute: typeof AuthenticatedAdminASettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/security': {
+      id: '/_authenticated/_admin/a/security'
+      path: '/security'
+      fullPath: '/a/security'
+      preLoaderRoute: typeof AuthenticatedAdminASecurityRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/logout': {
+      id: '/_authenticated/_admin/a/logout'
+      path: '/logout'
+      fullPath: '/a/logout'
+      preLoaderRoute: typeof AuthenticatedAdminALogoutRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
     '/_authenticated/_admin/a/courses': {
@@ -593,6 +1063,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/a/content'
       preLoaderRoute: typeof AuthenticatedAdminAContentRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/contact': {
+      id: '/_authenticated/_admin/a/contact'
+      path: '/contact'
+      fullPath: '/a/contact'
+      preLoaderRoute: typeof AuthenticatedAdminAContactRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_faculty/f/courses/': {
+      id: '/_authenticated/_faculty/f/courses/'
+      path: '/courses'
+      fullPath: '/f/courses'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesIndexRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/announcements/': {
+      id: '/_authenticated/_faculty/f/announcements/'
+      path: '/announcements'
+      fullPath: '/f/announcements'
+      preLoaderRoute: typeof AuthenticatedFacultyFAnnouncementsIndexRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/analytics/': {
+      id: '/_authenticated/_faculty/f/analytics/'
+      path: '/analytics'
+      fullPath: '/f/analytics'
+      preLoaderRoute: typeof AuthenticatedFacultyFAnalyticsIndexRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
     }
     '/_authenticated/_admin/a/users/': {
       id: '/_authenticated/_admin/a/users/'
@@ -629,12 +1127,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminACategoriesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
+    '/_authenticated/_admin/a/announcements/': {
+      id: '/_authenticated/_admin/a/announcements/'
+      path: '/announcements'
+      fullPath: '/a/announcements'
+      preLoaderRoute: typeof AuthenticatedAdminAAnnouncementsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
     '/_authenticated/_admin/a/analytics/': {
       id: '/_authenticated/_admin/a/analytics/'
       path: '/analytics'
       fullPath: '/a/analytics'
       preLoaderRoute: typeof AuthenticatedAdminAAnalyticsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_faculty/f/courses/new': {
+      id: '/_authenticated/_faculty/f/courses/new'
+      path: '/courses/new'
+      fullPath: '/f/courses/new'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesNewRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/courses/$courseId': {
+      id: '/_authenticated/_faculty/f/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/f/courses/$courseId'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/announcements/new': {
+      id: '/_authenticated/_faculty/f/announcements/new'
+      path: '/announcements/new'
+      fullPath: '/f/announcements/new'
+      preLoaderRoute: typeof AuthenticatedFacultyFAnnouncementsNewRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
+    }
+    '/_authenticated/_faculty/f/analytics/progress': {
+      id: '/_authenticated/_faculty/f/analytics/progress'
+      path: '/analytics/progress'
+      fullPath: '/f/analytics/progress'
+      preLoaderRoute: typeof AuthenticatedFacultyFAnalyticsProgressRouteImport
+      parentRoute: typeof AuthenticatedFacultyFRoute
     }
     '/_authenticated/_admin/a/users/create': {
       id: '/_authenticated/_admin/a/users/create'
@@ -678,11 +1211,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminACategoriesNewRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
+    '/_authenticated/_admin/a/announcements/new': {
+      id: '/_authenticated/_admin/a/announcements/new'
+      path: '/announcements/new'
+      fullPath: '/a/announcements/new'
+      preLoaderRoute: typeof AuthenticatedAdminAAnnouncementsNewRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
     '/_authenticated/_admin/a/analytics/reports': {
       id: '/_authenticated/_admin/a/analytics/reports'
       path: '/analytics/reports'
       fullPath: '/a/analytics/reports'
       preLoaderRoute: typeof AuthenticatedAdminAAnalyticsReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminARoute
+    }
+    '/_authenticated/_admin/a/analytics/progress': {
+      id: '/_authenticated/_admin/a/analytics/progress'
+      path: '/analytics/progress'
+      fullPath: '/a/analytics/progress'
+      preLoaderRoute: typeof AuthenticatedAdminAAnalyticsProgressRouteImport
       parentRoute: typeof AuthenticatedAdminARoute
     }
     '/_authenticated/_admin/a/analytics/enrollments': {
@@ -720,6 +1267,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCCourseIdMModuleIdLessonsLessonIdRouteImport
       parentRoute: typeof AuthenticatedCCourseIdRoute
     }
+    '/_authenticated/_faculty/f/courses/$courseId/learners/$userId': {
+      id: '/_authenticated/_faculty/f/courses/$courseId/learners/$userId'
+      path: '/learners/$userId'
+      fullPath: '/f/courses/$courseId/learners/$userId'
+      preLoaderRoute: typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRouteImport
+      parentRoute: typeof AuthenticatedFacultyFCoursesCourseIdRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId/quizzes/new': {
+      id: '/_authenticated/_admin/a/courses/$courseId/quizzes/new'
+      path: '/quizzes/new'
+      fullPath: '/a/courses/$courseId/quizzes/new'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId/quizzes/$quizId': {
+      id: '/_authenticated/_admin/a/courses/$courseId/quizzes/$quizId'
+      path: '/quizzes/$quizId'
+      fullPath: '/a/courses/$courseId/quizzes/$quizId'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId/learners/$userId': {
+      id: '/_authenticated/_admin/a/courses/$courseId/learners/$userId'
+      path: '/learners/$userId'
+      fullPath: '/a/courses/$courseId/learners/$userId'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId/assignments/new': {
+      id: '/_authenticated/_admin/a/courses/$courseId/assignments/new'
+      path: '/assignments/new'
+      fullPath: '/a/courses/$courseId/assignments/new'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsNewRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId': {
+      id: '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId'
+      path: '/assignments/$assignmentId'
+      fullPath: '/a/courses/$courseId/assignments/$assignmentId'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions': {
+      id: '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions'
+      path: '/submissions'
+      fullPath: '/a/courses/$courseId/assignments/$assignmentId/submissions'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute
+    }
+    '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId': {
+      id: '/_authenticated/_admin/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
+      path: '/$submissionId'
+      fullPath: '/a/courses/$courseId/assignments/$assignmentId/submissions/$submissionId'
+      preLoaderRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRouteImport
+      parentRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute
+    }
   }
 }
 
@@ -755,8 +1358,65 @@ const AuthenticatedAdminAContentApprovalsRouteWithChildren =
     AuthenticatedAdminAContentApprovalsRouteChildren,
   )
 
+interface AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren {
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute
+}
+
+const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren: AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren =
+  {
+    AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute:
+      AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsSubmissionIdRoute,
+  }
+
+const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren =
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute._addFileChildren(
+    AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteChildren,
+  )
+
+interface AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteChildren {
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren
+}
+
+const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteChildren: AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteChildren =
+  {
+    AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRoute:
+      AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdSubmissionsRouteWithChildren,
+  }
+
+const AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteWithChildren =
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute._addFileChildren(
+    AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteChildren,
+  )
+
+interface AuthenticatedAdminACoursesCourseIdRouteChildren {
+  AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteWithChildren
+  AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute: typeof AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute
+  AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute: typeof AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute
+  AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute: typeof AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute
+  AuthenticatedAdminACoursesCourseIdQuizzesNewRoute: typeof AuthenticatedAdminACoursesCourseIdQuizzesNewRoute
+}
+
+const AuthenticatedAdminACoursesCourseIdRouteChildren: AuthenticatedAdminACoursesCourseIdRouteChildren =
+  {
+    AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRoute:
+      AuthenticatedAdminACoursesCourseIdAssignmentsAssignmentIdRouteWithChildren,
+    AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute:
+      AuthenticatedAdminACoursesCourseIdAssignmentsNewRoute,
+    AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute:
+      AuthenticatedAdminACoursesCourseIdLearnersUserIdRoute,
+    AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute:
+      AuthenticatedAdminACoursesCourseIdQuizzesQuizIdRoute,
+    AuthenticatedAdminACoursesCourseIdQuizzesNewRoute:
+      AuthenticatedAdminACoursesCourseIdQuizzesNewRoute,
+  }
+
+const AuthenticatedAdminACoursesCourseIdRouteWithChildren =
+  AuthenticatedAdminACoursesCourseIdRoute._addFileChildren(
+    AuthenticatedAdminACoursesCourseIdRouteChildren,
+  )
+
 interface AuthenticatedAdminACoursesRouteChildren {
-  AuthenticatedAdminACoursesCourseIdRoute: typeof AuthenticatedAdminACoursesCourseIdRoute
+  AuthenticatedAdminACoursesCourseIdRoute: typeof AuthenticatedAdminACoursesCourseIdRouteWithChildren
   AuthenticatedAdminACoursesNewRoute: typeof AuthenticatedAdminACoursesNewRoute
   AuthenticatedAdminACoursesIndexRoute: typeof AuthenticatedAdminACoursesIndexRoute
 }
@@ -764,7 +1424,7 @@ interface AuthenticatedAdminACoursesRouteChildren {
 const AuthenticatedAdminACoursesRouteChildren: AuthenticatedAdminACoursesRouteChildren =
   {
     AuthenticatedAdminACoursesCourseIdRoute:
-      AuthenticatedAdminACoursesCourseIdRoute,
+      AuthenticatedAdminACoursesCourseIdRouteWithChildren,
     AuthenticatedAdminACoursesNewRoute: AuthenticatedAdminACoursesNewRoute,
     AuthenticatedAdminACoursesIndexRoute: AuthenticatedAdminACoursesIndexRoute,
   }
@@ -793,44 +1453,122 @@ const AuthenticatedAdminAUsersRouteWithChildren =
   )
 
 interface AuthenticatedAdminARouteChildren {
+  AuthenticatedAdminAContactRoute: typeof AuthenticatedAdminAContactRoute
   AuthenticatedAdminAContentRoute: typeof AuthenticatedAdminAContentRouteWithChildren
   AuthenticatedAdminAContentApprovalsRoute: typeof AuthenticatedAdminAContentApprovalsRouteWithChildren
   AuthenticatedAdminACoursesRoute: typeof AuthenticatedAdminACoursesRouteWithChildren
+  AuthenticatedAdminALogoutRoute: typeof AuthenticatedAdminALogoutRoute
+  AuthenticatedAdminASecurityRoute: typeof AuthenticatedAdminASecurityRoute
+  AuthenticatedAdminASettingsRoute: typeof AuthenticatedAdminASettingsRoute
   AuthenticatedAdminAUsersRoute: typeof AuthenticatedAdminAUsersRouteWithChildren
   AuthenticatedAdminAIndexRoute: typeof AuthenticatedAdminAIndexRoute
   AuthenticatedAdminAAnalyticsCoursesRoute: typeof AuthenticatedAdminAAnalyticsCoursesRoute
   AuthenticatedAdminAAnalyticsEnrollmentsRoute: typeof AuthenticatedAdminAAnalyticsEnrollmentsRoute
+  AuthenticatedAdminAAnalyticsProgressRoute: typeof AuthenticatedAdminAAnalyticsProgressRoute
   AuthenticatedAdminAAnalyticsReportsRoute: typeof AuthenticatedAdminAAnalyticsReportsRoute
+  AuthenticatedAdminAAnnouncementsNewRoute: typeof AuthenticatedAdminAAnnouncementsNewRoute
   AuthenticatedAdminACategoriesNewRoute: typeof AuthenticatedAdminACategoriesNewRoute
   AuthenticatedAdminACategoriesOrganizeRoute: typeof AuthenticatedAdminACategoriesOrganizeRoute
   AuthenticatedAdminAAnalyticsIndexRoute: typeof AuthenticatedAdminAAnalyticsIndexRoute
+  AuthenticatedAdminAAnnouncementsIndexRoute: typeof AuthenticatedAdminAAnnouncementsIndexRoute
   AuthenticatedAdminACategoriesIndexRoute: typeof AuthenticatedAdminACategoriesIndexRoute
 }
 
 const AuthenticatedAdminARouteChildren: AuthenticatedAdminARouteChildren = {
+  AuthenticatedAdminAContactRoute: AuthenticatedAdminAContactRoute,
   AuthenticatedAdminAContentRoute: AuthenticatedAdminAContentRouteWithChildren,
   AuthenticatedAdminAContentApprovalsRoute:
     AuthenticatedAdminAContentApprovalsRouteWithChildren,
   AuthenticatedAdminACoursesRoute: AuthenticatedAdminACoursesRouteWithChildren,
+  AuthenticatedAdminALogoutRoute: AuthenticatedAdminALogoutRoute,
+  AuthenticatedAdminASecurityRoute: AuthenticatedAdminASecurityRoute,
+  AuthenticatedAdminASettingsRoute: AuthenticatedAdminASettingsRoute,
   AuthenticatedAdminAUsersRoute: AuthenticatedAdminAUsersRouteWithChildren,
   AuthenticatedAdminAIndexRoute: AuthenticatedAdminAIndexRoute,
   AuthenticatedAdminAAnalyticsCoursesRoute:
     AuthenticatedAdminAAnalyticsCoursesRoute,
   AuthenticatedAdminAAnalyticsEnrollmentsRoute:
     AuthenticatedAdminAAnalyticsEnrollmentsRoute,
+  AuthenticatedAdminAAnalyticsProgressRoute:
+    AuthenticatedAdminAAnalyticsProgressRoute,
   AuthenticatedAdminAAnalyticsReportsRoute:
     AuthenticatedAdminAAnalyticsReportsRoute,
+  AuthenticatedAdminAAnnouncementsNewRoute:
+    AuthenticatedAdminAAnnouncementsNewRoute,
   AuthenticatedAdminACategoriesNewRoute: AuthenticatedAdminACategoriesNewRoute,
   AuthenticatedAdminACategoriesOrganizeRoute:
     AuthenticatedAdminACategoriesOrganizeRoute,
   AuthenticatedAdminAAnalyticsIndexRoute:
     AuthenticatedAdminAAnalyticsIndexRoute,
+  AuthenticatedAdminAAnnouncementsIndexRoute:
+    AuthenticatedAdminAAnnouncementsIndexRoute,
   AuthenticatedAdminACategoriesIndexRoute:
     AuthenticatedAdminACategoriesIndexRoute,
 }
 
 const AuthenticatedAdminARouteWithChildren =
   AuthenticatedAdminARoute._addFileChildren(AuthenticatedAdminARouteChildren)
+
+interface AuthenticatedFacultyFCoursesCourseIdRouteChildren {
+  AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute: typeof AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute
+}
+
+const AuthenticatedFacultyFCoursesCourseIdRouteChildren: AuthenticatedFacultyFCoursesCourseIdRouteChildren =
+  {
+    AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute:
+      AuthenticatedFacultyFCoursesCourseIdLearnersUserIdRoute,
+  }
+
+const AuthenticatedFacultyFCoursesCourseIdRouteWithChildren =
+  AuthenticatedFacultyFCoursesCourseIdRoute._addFileChildren(
+    AuthenticatedFacultyFCoursesCourseIdRouteChildren,
+  )
+
+interface AuthenticatedFacultyFRouteChildren {
+  AuthenticatedFacultyFContactRoute: typeof AuthenticatedFacultyFContactRoute
+  AuthenticatedFacultyFContentRoute: typeof AuthenticatedFacultyFContentRoute
+  AuthenticatedFacultyFContentApprovalsRoute: typeof AuthenticatedFacultyFContentApprovalsRoute
+  AuthenticatedFacultyFLogoutRoute: typeof AuthenticatedFacultyFLogoutRoute
+  AuthenticatedFacultyFSecurityRoute: typeof AuthenticatedFacultyFSecurityRoute
+  AuthenticatedFacultyFSettingsRoute: typeof AuthenticatedFacultyFSettingsRoute
+  AuthenticatedFacultyFIndexRoute: typeof AuthenticatedFacultyFIndexRoute
+  AuthenticatedFacultyFAnalyticsProgressRoute: typeof AuthenticatedFacultyFAnalyticsProgressRoute
+  AuthenticatedFacultyFAnnouncementsNewRoute: typeof AuthenticatedFacultyFAnnouncementsNewRoute
+  AuthenticatedFacultyFCoursesCourseIdRoute: typeof AuthenticatedFacultyFCoursesCourseIdRouteWithChildren
+  AuthenticatedFacultyFCoursesNewRoute: typeof AuthenticatedFacultyFCoursesNewRoute
+  AuthenticatedFacultyFAnalyticsIndexRoute: typeof AuthenticatedFacultyFAnalyticsIndexRoute
+  AuthenticatedFacultyFAnnouncementsIndexRoute: typeof AuthenticatedFacultyFAnnouncementsIndexRoute
+  AuthenticatedFacultyFCoursesIndexRoute: typeof AuthenticatedFacultyFCoursesIndexRoute
+}
+
+const AuthenticatedFacultyFRouteChildren: AuthenticatedFacultyFRouteChildren = {
+  AuthenticatedFacultyFContactRoute: AuthenticatedFacultyFContactRoute,
+  AuthenticatedFacultyFContentRoute: AuthenticatedFacultyFContentRoute,
+  AuthenticatedFacultyFContentApprovalsRoute:
+    AuthenticatedFacultyFContentApprovalsRoute,
+  AuthenticatedFacultyFLogoutRoute: AuthenticatedFacultyFLogoutRoute,
+  AuthenticatedFacultyFSecurityRoute: AuthenticatedFacultyFSecurityRoute,
+  AuthenticatedFacultyFSettingsRoute: AuthenticatedFacultyFSettingsRoute,
+  AuthenticatedFacultyFIndexRoute: AuthenticatedFacultyFIndexRoute,
+  AuthenticatedFacultyFAnalyticsProgressRoute:
+    AuthenticatedFacultyFAnalyticsProgressRoute,
+  AuthenticatedFacultyFAnnouncementsNewRoute:
+    AuthenticatedFacultyFAnnouncementsNewRoute,
+  AuthenticatedFacultyFCoursesCourseIdRoute:
+    AuthenticatedFacultyFCoursesCourseIdRouteWithChildren,
+  AuthenticatedFacultyFCoursesNewRoute: AuthenticatedFacultyFCoursesNewRoute,
+  AuthenticatedFacultyFAnalyticsIndexRoute:
+    AuthenticatedFacultyFAnalyticsIndexRoute,
+  AuthenticatedFacultyFAnnouncementsIndexRoute:
+    AuthenticatedFacultyFAnnouncementsIndexRoute,
+  AuthenticatedFacultyFCoursesIndexRoute:
+    AuthenticatedFacultyFCoursesIndexRoute,
+}
+
+const AuthenticatedFacultyFRouteWithChildren =
+  AuthenticatedFacultyFRoute._addFileChildren(
+    AuthenticatedFacultyFRouteChildren,
+  )
 
 interface AuthenticatedCCourseIdRouteChildren {
   AuthenticatedCCourseIdIndexRoute: typeof AuthenticatedCCourseIdIndexRoute
@@ -854,12 +1592,14 @@ const AuthenticatedCCourseIdRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminARoute: typeof AuthenticatedAdminARouteWithChildren
+  AuthenticatedFacultyFRoute: typeof AuthenticatedFacultyFRouteWithChildren
   AuthenticatedCCourseIdRoute: typeof AuthenticatedCCourseIdRouteWithChildren
   AuthenticatedCCoursesRoute: typeof AuthenticatedCCoursesRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminARoute: AuthenticatedAdminARouteWithChildren,
+  AuthenticatedFacultyFRoute: AuthenticatedFacultyFRouteWithChildren,
   AuthenticatedCCourseIdRoute: AuthenticatedCCourseIdRouteWithChildren,
   AuthenticatedCCoursesRoute: AuthenticatedCCoursesRoute,
 }

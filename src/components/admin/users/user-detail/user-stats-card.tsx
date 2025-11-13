@@ -12,6 +12,7 @@ import {
     ClockIcon,
     DocumentTextIcon,
 } from "@heroicons/react/24/solid"
+import { Link } from "@tanstack/react-router"
 import { formatDistanceToNow } from "date-fns"
 
 import type { User } from "../columns"
@@ -37,7 +38,13 @@ export function UserStatsCard({ user }: UserStatsCardProps) {
                                 Enrollments
                             </ItemTitle>
                             <ItemDescription className="mt-1">
-                                <span className="font-bold text-2xl">{user.enrolledCoursesCount}</span>
+                                <Link
+                                    to="/a/courses"
+                                    search={{ enrolledUserId: user._id }}
+                                    className="inline-block transition-colors hover:underline"
+                                >
+                                    <span className="font-bold text-2xl hover:text-primary">{user.enrolledCoursesCount}</span>
+                                </Link>
                             </ItemDescription>
                         </ItemContent>
                     </Item>
@@ -50,7 +57,13 @@ export function UserStatsCard({ user }: UserStatsCardProps) {
                                     Created Courses
                                 </ItemTitle>
                                 <ItemDescription className="mt-1">
-                                    <span className="font-bold text-2xl">{user.createdCoursesCount || 0}</span>
+                                    <Link
+                                        to="/a/courses"
+                                        search={{ teacherId: user._id }}
+                                        className="inline-block transition-colors hover:underline"
+                                    >
+                                        <span className="font-bold text-2xl hover:text-primary">{user.createdCoursesCount || 0}</span>
+                                    </Link>
                                 </ItemDescription>
                             </ItemContent>
                         </Item>

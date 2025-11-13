@@ -8,7 +8,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router"
 export const Route = createFileRoute("/_authenticated/_admin/a")({
   beforeLoad: ({ context: { auth } }) => {
     const { isPending } = auth
-    requireRole(auth.session, ROLE.ADMIN, isPending)
+    requireRole(auth.session, [ROLE.ADMIN], isPending)
     return {
       breadcrumb: "Admin",
     }

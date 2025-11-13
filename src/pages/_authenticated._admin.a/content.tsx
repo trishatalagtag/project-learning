@@ -10,7 +10,7 @@ const contentSearchSchema = z.object({
     pageSize: z.number().optional().default(20),
     q: z.string().optional().default(""),
     contentType: z.enum(["module", "lesson", "quiz", "assignment"]).optional().default("module"),
-    status: z.enum(["draft", "pending", "approved"]).optional().default("pending"),
+    status: z.enum(["draft", "pending", "approved", "published"]).optional().default("pending"),
     sortBy: z.string().optional().default("createdAt"),
     sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });

@@ -144,6 +144,21 @@ export const createColumns = ({
             ),
         },
         {
+            accessorKey: "createdCoursesCount",
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Created Courses" />,
+            cell: ({ row }) => {
+                const role = row.getValue("role") as string
+                const isFacultyOrAdmin = role === "FACULTY" || role === "ADMIN"
+                const count = row.getValue("createdCoursesCount") as number | undefined
+
+                return (
+                    <div className="text-right font-medium tabular-nums">
+                        {isFacultyOrAdmin ? (count ?? 0) : <span className="text-muted-foreground">N/A</span>}
+                    </div>
+                )
+            },
+        },
+        {
             accessorKey: "createdAt",
             header: ({ column }) => <DataTableColumnHeader column={column} title="Joined" />,
             cell: ({ row }) => {

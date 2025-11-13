@@ -160,6 +160,7 @@ function ContentApprovalsPage() {
   const pendingContent = useQuery(api.admin.content.getAllPendingContent, {})
 
   const isLoading = counts === undefined || pendingContent === undefined
+  const hasError = counts === null || pendingContent === null
 
   const filteredContent = useMemo((): EnrichedContentItem[] => {
     if (!pendingContent) {
@@ -304,7 +305,40 @@ function ContentApprovalsPage() {
     }
   }
 
-  if (isLoading || !counts || !pendingContent) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="text-muted-foreground text-sm">Loading approvals...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (hasError) {
+    return (
+      <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center gap-4 py-12">
+            <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
+            <div className="text-center">
+              <h3 className="font-semibold text-lg">Failed to load content approvals</h3>
+              <p className="mt-2 text-muted-foreground text-sm">
+                There was an error loading the approval data. Please try again.
+              </p>
+            </div>
+            <Button onClick={() => window.location.reload()} className="gap-2">
+              <ArrowPathIcon className="h-4 w-4" />
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!counts || !pendingContent) {
     return (
       <div className="container mx-auto flex min-h-[400px] max-w-7xl items-center justify-center p-4 md:p-6 lg:p-8">
         <div className="flex flex-col items-center gap-3">
@@ -325,7 +359,10 @@ function ContentApprovalsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card
+          className="cursor-pointer transition-all hover:bg-accent/50 hover:shadow-md"
+          onClick={() => navigate({ to: "/a/content", search: { status: "pending" } })}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-sm">Pending Review</CardTitle>
             <ClockIcon className="h-4 w-4 text-yellow-600" />
@@ -339,7 +376,10 @@ function ContentApprovalsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className="cursor-pointer transition-all hover:bg-accent/50 hover:shadow-md"
+          onClick={() => navigate({ to: "/a/content", search: { status: "approved" } })}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-sm">Approved</CardTitle>
             <CheckCircleIcon className="h-4 w-4 text-green-600" />
@@ -350,18 +390,21 @@ function ContentApprovalsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className="cursor-pointer transition-all hover:bg-accent/50 hover:shadow-md"
+          onClick={() => navigate({ to: "/a/content", search: { status: "published" } })}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-sm">Rejected</CardTitle>
-            <XCircleIcon className="h-4 w-4 text-red-600" />
+            <CardTitle className="font-medium text-sm">Published</CardTitle>
+            <GlobeAltIcon className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">0</div>
-            <p className="text-muted-foreground text-xs">Needs revision</p>
+            <div className="font-bold text-2xl">{counts.published.total}</div>
+            <p className="text-muted-foreground text-xs">Live content</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-default">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-sm">Total Items</CardTitle>
             <AcademicCapIcon className="h-4 w-4 text-muted-foreground" />

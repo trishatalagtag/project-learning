@@ -42,6 +42,7 @@ import {
     ExclamationCircleIcon,
     ExclamationTriangleIcon,
     MagnifyingGlassIcon,
+    PlusIcon,
     Squares2X2Icon,
     TableCellsIcon,
     UserIcon,
@@ -66,6 +67,7 @@ import { UserAvatar } from "./shared/user-avatar"
 import { DeactivateUserDialog } from "./user-detail/deactivate-user-dialog"
 import { EditUserDialog } from "./user-detail/edit-user-dialog"
 import { UserStatsCards } from "./user-stats-cards"
+import { Button } from "@/components/ui/button"
 
 export function UsersTable() {
     const navigate = useNavigate()
@@ -237,6 +239,30 @@ export function UsersTable() {
         )
     }
 
+    // Error state
+    if (usersData === null) {
+        return (
+            <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+                <Empty>
+                    <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                            <ExclamationCircleIcon className="h-12 w-12 text-destructive" />
+                        </EmptyMedia>
+                        <EmptyTitle>Failed to load users</EmptyTitle>
+                        <EmptyDescription>
+                            There was an error loading the user data. Please try again.
+                        </EmptyDescription>
+                    </EmptyHeader>
+                    <div className="mt-4">
+                        <Button onClick={() => window.location.reload()}>
+                            Retry
+                        </Button>
+                    </div>
+                </Empty>
+            </div>
+        )
+    }
+
     // Empty state (no users at all)
     if (totalUsers === 0 && !q && role === "all" && status === "all") {
         return (
@@ -265,6 +291,10 @@ export function UsersTable() {
                         <h1 className="font-bold text-3xl tracking-tight">Users</h1>
                         <p className="text-muted-foreground">Manage user accounts and permissions</p>
                     </div>
+                    <Button onClick={() => navigate({ to: "/a/users/create" })}>
+                        <PlusIcon className="mr-2 h-4 w-4" />
+                        Create User
+                    </Button>
                 </div>
 
                 {/* Stats Cards */}

@@ -24,9 +24,10 @@ import {
 } from "@/components/ui/sidebar"
 import { adminSidebarConfig } from "@/config/sidebar/admin"
 import type { MenuItem, SidebarItem as SidebarItemType, ValidRoute } from "@/config/sidebar/config"
+import { getAvatarUrl } from "@/lib/avatar"
 import { api } from "@/convex/_generated/api"
 import { ChevronUpDownIcon } from "@heroicons/react/24/solid"
-import { Link } from "@tanstack/react-router"
+import { Link, useRouteContext } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import * as React from "react"
 
@@ -37,6 +38,8 @@ type MenuItemWithExtras = {
 
 export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>): React.ReactNode {
   const config = adminSidebarConfig
+  const { auth } = useRouteContext({ strict: false })
+  const user = auth?.session?.user
   const contentCounts = useQuery(api.admin.content.getAllContentCounts, {})
 
   const getBadgeForHref = (href?: string) => {
@@ -47,6 +50,10 @@ export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>
     }
     return undefined
   }
+
+  const userAvatar = user ? getAvatarUrl({ image: user.image, name: user.name, email: user.email }) : config.footer.user.avatar
+  const userName = user?.name || config.footer.user.name
+  const userEmail = user?.email || config.footer.user.email
 
   const enhanceMenuItem = (item: SidebarItemType): SidebarItemType => {
     if (item.children && item.children.length > 0) {
@@ -162,12 +169,12 @@ export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>
                 <SidebarMenuButton size="lg" className="w-full">
                   <div className="flex items-center gap-2">
                     <Avatar className="size-8 group-data-[collapsible=icon]:size-6">
-                      <AvatarImage src={config.footer.user.avatar} alt={config.footer.user.name} />
+                      <AvatarImage src={userAvatar} alt={userName} />
                     </Avatar>
                     <div className="flex flex-col gap-0.5 text-left group-data-[collapsible=icon]:hidden">
-                      <span className="font-medium text-sm">{config.footer.user.name}</span>
+                      <span className="font-medium text-sm">{userName}</span>
                       <span className="text-muted-foreground text-xs">
-                        {config.footer.user.email}
+                        {userEmail}
                       </span>
                     </div>
                   </div>
@@ -183,10 +190,10 @@ export default function AdminSidebar(props: React.ComponentProps<typeof Sidebar>
                 <DropdownMenuLabel className="p-0">
                   <div className="flex items-center gap-2 px-2 py-1.5">
                     <div className="flex flex-col">
-                      <span className="font-medium text-sm">{config.footer.user.name}</span>
-                      {config.footer.user.username && (
+                      <span className="font-medium text-sm">{userName}</span>
+                      {userEmail && (
                         <span className="text-muted-foreground text-xs">
-                          {config.footer.user.username}
+                          {userEmail}
                         </span>
                       )}
                     </div>

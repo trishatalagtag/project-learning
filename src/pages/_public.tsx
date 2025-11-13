@@ -110,7 +110,7 @@ function PublicLayout() {
                       )}
                       {session.user.role === "FACULTY" && (
                         <DropdownMenuItem asChild>
-                          <Link to="/a">Faculty Dashboard</Link>
+                          <Link to="/f">Faculty Dashboard</Link>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
