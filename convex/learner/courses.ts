@@ -17,7 +17,7 @@ import { learnerMutation, publicQuery } from "../lib/functions";
 import { getPaginationDefaults, getSortDefaults, listArgs } from "../lib/validators";
 
 // Existing listPublicCourses - ENHANCED with instructor name
-export const listPublicCourses = query({
+export const listPublicCourses = publicQuery({
   args: {
     limit: v.optional(v.number()),
     offset: v.optional(v.number()),
@@ -117,7 +117,7 @@ export const listPublicCourses = query({
 });
 
 // NEW: Get recently added courses (for Featured section)
-export const getRecentlyAddedCourses = query({
+export const getRecentlyAddedCourses = publicQuery({
   args: {
     limit: v.optional(v.number()),
   },
@@ -190,7 +190,7 @@ export const getRecentlyAddedCourses = query({
 });
 
 // NEW: Get public course detail
-export const getPublicCourseDetail = query({
+export const getPublicCourseDetail = publicQuery({
   args: {
     courseId: v.id("courses"),
   },
@@ -253,7 +253,7 @@ export const getPublicCourseDetail = query({
 });
 
 // NEW: Get public course modules with lesson count
-export const getPublicCourseModules = query({
+export const getPublicCourseModules = publicQuery({
   args: {
     courseId: v.id("courses"),
   },
@@ -288,7 +288,7 @@ export const getPublicCourseModules = query({
 });
 
 // NEW: Get public stats for homepage
-export const getPublicStats = query({
+export const getPublicStats = publicQuery({
   args: {},
   returns: v.object({
     totalCourses: v.number(),

@@ -181,7 +181,20 @@ function ContentApprovalsPage() {
         search.trim().length === 0 ||
         item.title.toLowerCase().includes(search.toLowerCase())
 
-      return matchesType && matchesSearch
+      // Filter by course (modules, quizzes, assignments have courseId; lessons don't)
+      // If a specific course is selected, exclude lessons since we can't determine their course
+      const matchesCourse = courseFilter === "all" ||
+        (hasCourseId(item) && item.courseId === courseFilter)
+
+      // Filter by faculty (all content types have createdBy)
+      const matchesFaculty = facultyFilter === "all" || item.createdBy === facultyFilter
+
+      // Filter by date range
+      const matchesDateRange =
+        (!dateRange.start || item.createdAt >= dateRange.start) &&
+        (!dateRange.end || item.createdAt <= dateRange.end)
+
+      return matchesType && matchesSearch && matchesCourse && matchesFaculty && matchesDateRange
     })
 
     // Sort to prioritize overdue items (3+ days) at the top
@@ -208,7 +221,7 @@ function ContentApprovalsPage() {
 
       return 0
     })
-  }, [pendingContent, contentType, search, sortBy])
+  }, [pendingContent, contentType, search, sortBy, courseFilter, facultyFilter, dateRange])
 
   const handleSelectItem = (item: { type: "module" | "lesson" | "quiz" | "assignment"; _id: Id<"modules"> | Id<"lessons"> | Id<"quizzes"> | Id<"assignments">; title: string }) => {
     const exists = selectedItems.find((i) => i.contentId === item._id)

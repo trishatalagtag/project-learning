@@ -646,7 +646,7 @@ export const getQuizQuestions = learnerQuery({
       .map((q) => ({
         _id: q._id,
         questionText: q.questionText,
-        questionType: q.questionType,
+        questionType: q.type,
         options: q.options,
         points: q.points,
         order: q.order,
@@ -674,7 +674,7 @@ export const getAssignmentDetails = learnerQuery({
       availableFrom: v.optional(v.number()),
       availableUntil: v.optional(v.number()),
       allowLateSubmissions: v.boolean(),
-      totalPoints: v.number(),
+      maxPoints: v.number(),
     }),
     v.null()
   ),
@@ -705,7 +705,7 @@ export const getAssignmentDetails = learnerQuery({
       availableFrom: assignment.availableFrom,
       availableUntil: assignment.availableUntil,
       allowLateSubmissions: assignment.allowLateSubmissions,
-      totalPoints: assignment.totalPoints,
+      maxPoints: assignment.maxPoints,
     };
   },
 });
