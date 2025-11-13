@@ -225,7 +225,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
                 >
                   <div
                     className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-all",
+                      "flex h-10 w-10 items-center justify-center rounded-full font-medium text-sm transition-all",
                       currentStep === step.id &&
                       "bg-primary text-primary-foreground ring-4 ring-primary/20",
                       currentStep > step.id && "bg-primary/20 text-primary hover:bg-primary/30",
@@ -237,7 +237,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
                   <div className="hidden text-center md:block">
                     <div
                       className={cn(
-                        "text-xs font-medium",
+                        "font-medium text-xs",
                         currentStep >= step.id ? "text-foreground" : "text-muted-foreground"
                       )}
                     >
@@ -266,7 +266,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
           <div className="min-h-[400px]">
             {/* Step 1: Basic Info */}
             {currentStep === 1 && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="fade-in-50 animate-in space-y-6 duration-300">
                 <div>
                   <h2 className="font-semibold text-xl">Basic Information</h2>
                   <p className="text-muted-foreground">
@@ -328,7 +328,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
 
             {/* Step 2: Content */}
             {currentStep === 2 && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="fade-in-50 animate-in space-y-6 duration-300">
                 <div>
                   <h2 className="font-semibold text-xl">Course Content</h2>
                   <p className="text-muted-foreground">
@@ -376,7 +376,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
 
             {/* Step 3: Teacher */}
             {currentStep === 3 && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="fade-in-50 animate-in space-y-6 duration-300">
                 <div>
                   <h2 className="font-semibold text-xl">Assign Teacher</h2>
                   <p className="text-muted-foreground">
@@ -415,7 +415,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
 
             {/* Step 4: Settings */}
             {currentStep === 4 && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="fade-in-50 animate-in space-y-6 duration-300">
                 <div>
                   <h2 className="font-semibold text-xl">Course Settings</h2>
                   <p className="text-muted-foreground">
@@ -464,7 +464,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
 
             {/* Step 5: Preview */}
             {currentStep === 5 && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="fade-in-50 animate-in space-y-6 duration-300">
                 <div>
                   <h2 className="font-semibold text-xl">Review & Submit</h2>
                   <p className="text-muted-foreground">
@@ -560,7 +560,7 @@ export function CourseForm({ onOpenChange, mode, course, onSuccess }: CourseForm
         </div>
 
         {/* Footer Navigation */}
-        <div className="sticky bottom-0 border-t bg-card shadow-lg">
+        <div className="sticky bottom-0 border-t bg-card">
           <div className="container mx-auto max-w-3xl px-4 py-4">
             <div className="flex items-center justify-between">
               <Button
@@ -690,7 +690,7 @@ function TeacherSelectionDialog({
 
         <div className="space-y-4">
           <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by name or email..."
               value={search}
