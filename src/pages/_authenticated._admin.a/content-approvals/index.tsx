@@ -674,9 +674,11 @@ function ContentApprovalsPage() {
                 <p className="text-muted-foreground text-sm">
                   {search
                     ? `No results found for "${search}"`
-                    : selectedItems.length > 0
-                      ? "Clear filters or selection to see all pending items"
-                      : "All content has been reviewed or filters hide remaining items"}
+                    : courseFilter !== "all" || facultyFilter !== "all" || dateRange.start || dateRange.end
+                      ? "No pending content matches the active filters. Try adjusting your filters."
+                      : selectedItems.length > 0
+                        ? "Clear selection to see all pending items"
+                        : "All content has been reviewed"}
                 </p>
               </div>
             </CardContent>
@@ -791,7 +793,9 @@ function ContentApprovalsPage() {
                         <p className="text-sm">
                           {search
                             ? `No results found for "${search}"`
-                            : "All content has been reviewed or filters hide remaining items"}
+                            : courseFilter !== "all" || facultyFilter !== "all" || dateRange.start || dateRange.end
+                              ? "No pending content matches the active filters. Try adjusting your filters."
+                              : "All content has been reviewed"}
                         </p>
                       </div>
                     </TableCell>
