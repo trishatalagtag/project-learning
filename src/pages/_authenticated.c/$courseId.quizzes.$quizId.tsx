@@ -1,5 +1,4 @@
 import { LoadingPage } from "@/components/shared/loading/loading-page"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -141,7 +140,7 @@ function QuizPage() {
                                 <AttemptCard
                                     key={attempt._id}
                                     attempt={attempt}
-                                    attemptNumber={attempts.length - index}
+                                    attemptNumber={index + 1}
                                 />
                             ))}
                         </div>
@@ -154,50 +153,50 @@ function QuizPage() {
 
 function QuizTaker({
     quizId,
-    quiz,
 }: {
     quizId: Id<"quizzes">
-    quiz: { questionCount: number }
 }) {
-    const navigate = useNavigate()
-    const [isStarted, setIsStarted] = useState(false)
-    const [answers, setAnswers] = useState<Record<string, string>>({})
+    const [currentAttemptId, setCurrentAttemptId] = useState<Id<"quizAttempts"> | null>(null)
+    const [answers, setAnswers] = useState<Record<string, number>>({})
 
     const questions = useQuery(
         api.learner.assessments.getQuizQuestions,
-        isStarted ? { quizId } : "skip"
+        currentAttemptId ? { attemptId: currentAttemptId } : "skip"
     )
 
     const startAttempt = useMutationWithToast(api.learner.assessments.startQuizAttempt, {
-        loadingMessage: "Starting quiz...",
         successMessage: "Quiz started",
     })
 
     const submitAttempt = useMutationWithToast(api.learner.assessments.submitQuizAttempt, {
-        loadingMessage: "Submitting quiz...",
         successMessage: "Quiz submitted successfully",
     })
 
     const handleStart = async () => {
-        await startAttempt({ quizId })
-        setIsStarted(true)
+        const result = await startAttempt.execute({ quizId })
+        if (result.data?.attemptId) {
+            setCurrentAttemptId(result.data.attemptId)
+        }
     }
 
     const handleSubmit = async () => {
-        const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
+        if (!currentAttemptId) return
+
+        const formattedAnswers = Object.entries(answers).map(([questionId, selectedIndex]) => ({
             questionId: questionId as Id<"quizQuestions">,
-            answer,
+            selectedIndex,
         }))
 
-        await submitAttempt({
-            quizId,
+        await submitAttempt.execute({
+            attemptId: currentAttemptId,
             answers: formattedAnswers,
         })
-
-        navigate({ to: "/c/$courseId/quizzes/$quizId", params: { courseId: "", quizId } })
+        
+        // Refresh the page to show new attempt
+        window.location.reload()
     }
 
-    if (!isStarted) {
+    if (!currentAttemptId) {
         return (
             <Button onClick={handleStart} size="lg">
                 Start Quiz
@@ -209,30 +208,30 @@ function QuizTaker({
         return <LoadingPage message="Loading questions..." />
     }
 
-    const allAnswered = questions.every((q) => answers[q._id])
+    const allAnswered = questions.every((q: any) => answers[q._id] !== undefined)
 
     return (
         <div className="space-y-6">
-            {questions.map((question, index) => (
+            {questions.map((question: any, index: number) => (
                 <Card key={question._id}>
                     <CardHeader>
                         <CardTitle className="text-base">
                             Question {index + 1} of {questions.length}
                         </CardTitle>
                         <CardDescription className="text-base font-medium text-foreground">
-                            {question.question}
+                            {question.questionText}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <RadioGroup
-                            value={answers[question._id] || ""}
+                            value={answers[question._id]?.toString() || ""}
                             onValueChange={(value) =>
-                                setAnswers((prev) => ({ ...prev, [question._id]: value }))
+                                setAnswers((prev) => ({ ...prev, [question._id]: parseInt(value) }))
                             }
                         >
-                            {question.options.map((option, optIndex) => (
+                            {question.options.map((option: string, optIndex: number) => (ex: number) => (
                                 <div key={optIndex} className="flex items-center space-x-2">
-                                    <RadioGroupItem value={option} id={`${question._id}-${optIndex}`} />
+                                    <RadioGroupItem value={optIndex.toString()} id={`${question._id}-${optIndex}`} />
                                     <Label
                                         htmlFor={`${question._id}-${optIndex}`}
                                         className="cursor-pointer"
@@ -263,10 +262,14 @@ function AttemptCard({
         _id: Id<"quizAttempts">
         score: number
         submittedAt: number
-        isPassed: boolean
+        passed?: boolean
+        percentage: number
     }
     attemptNumber: number
 }) {
+    const isPassed = attempt.passed ?? false
+    const displayScore = Math.round(attempt.percentage)
+    
     return (
         <Card>
             <CardHeader>
@@ -279,15 +282,15 @@ function AttemptCard({
                     </div>
                     <div className="text-right">
                         <div className="flex items-center gap-2">
-                            {attempt.isPassed ? (
+                            {isPassed ? (
                                 <CheckCircleIcon className="size-6 text-green-600" />
                             ) : (
                                 <XCircleIcon className="size-6 text-red-600" />
                             )}
                             <div>
-                                <div className="font-bold text-2xl">{attempt.score}%</div>
+                                <div className="font-bold text-2xl">{displayScore}%</div>
                                 <div className="text-muted-foreground text-xs">
-                                    {attempt.isPassed ? "Passed" : "Failed"}
+                                    {isPassed ? "Passed" : "Failed"}
                                 </div>
                             </div>
                         </div>
