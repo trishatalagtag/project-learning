@@ -44,8 +44,6 @@ import type * as lib_status_validation from "../lib/status_validation.js";
 import type * as lib_types from "../lib/types.js";
 import type * as lib_users from "../lib/users.js";
 import type * as lib_validators from "../lib/validators.js";
-import type * as migrations_index from "../migrations/index.js";
-import type * as migrations_trigger from "../migrations/trigger.js";
 import type * as mock from "../mock.js";
 import type * as reset from "../reset.js";
 import type * as shared_announcements from "../shared/announcements.js";
@@ -103,8 +101,6 @@ declare const fullApi: ApiFromModules<{
   "lib/types": typeof lib_types;
   "lib/users": typeof lib_users;
   "lib/validators": typeof lib_validators;
-  "migrations/index": typeof migrations_index;
-  "migrations/trigger": typeof migrations_trigger;
   mock: typeof mock;
   reset: typeof reset;
   "shared/announcements": typeof shared_announcements;

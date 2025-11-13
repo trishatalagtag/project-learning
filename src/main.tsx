@@ -30,7 +30,6 @@ function InnerApp() {
     <StrictMode>
       <NuqsAdapter>
         <ConvexBetterAuthProvider client={convex} authClient={authClient}>
-          <MigrationsTrigger />
           <RouterProvider router={router} context={{ auth: { session, error, isPending } }} />
         </ConvexBetterAuthProvider>
       </NuqsAdapter>
