@@ -1,11 +1,14 @@
+import { LoadingPage } from "@/components/shared/loading/loading-page"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 import { requireRole } from "@/lib/auth/client"
 import { ROLE } from "@/lib/auth/guards"
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/solid"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useQuery } from "convex/react"
 
 export const Route = createFileRoute("/_authenticated/c/submissions")({
     beforeLoad: ({ context: { auth } }) => {
@@ -47,7 +50,9 @@ function MySubmissionsPage() {
         >
     )
 
-    const courseGroups = Object.values(submissionsByCourse)    return (
+    const courseGroups = Object.values(submissionsByCourse)
+
+    return (
         <div className="flex-1 overflow-y-auto">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
@@ -61,7 +66,7 @@ function MySubmissionsPage() {
                 {/* Submissions by Course */}
                 {courseGroups.length > 0 ? (
                     <div className="space-y-8">
-                        {courseGroups.map((group) => (
+                        {courseGroups.map((group: any) => (
                             <div key={group.courseId}>
                                 <h2 className="mb-4 font-semibold text-xl">{group.courseTitle}</h2>
                                 <div className="space-y-4">

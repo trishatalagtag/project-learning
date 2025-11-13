@@ -144,9 +144,9 @@ export const adminSidebarConfig: SidebarConfig = {
   ],
   footer: {
     user: {
-      name: "Kurt Cobain",
-      email: "kurt@domain.com",
-      avatar: "https://intentui.com/images/avatar/cobain.jpg",
+      name: "DISOA Admin",
+      email: "admin@disao.org",
+      avatar: "/disoa.png",
       username: "@cobain",
     },
     menuItems: [

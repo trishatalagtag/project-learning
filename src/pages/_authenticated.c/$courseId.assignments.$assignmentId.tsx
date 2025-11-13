@@ -34,12 +34,10 @@ function AssignmentSubmissionPage() {
     const navigate = useNavigate()
     const [content, setContent] = useState("")
 
-    // Fetch assignment details
     const assignment = useQuery(api.learner.assessments.getAssignmentDetails, {
         assignmentId: assignmentId as Id<"assignments">,
     })
 
-    // Fetch existing submission
     const submission = useQuery(api.learner.assessments.getMyAssignmentSubmission, {
         assignmentId: assignmentId as Id<"assignments">,
     })
