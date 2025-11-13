@@ -9,8 +9,14 @@
     "dev:backend": "convex dev --typecheck-components --live-component-sources",
     "generate": "convex dev --once",
     "logs": "convex logs",
-    "lint": "tsc -p convex && eslint convex",
-    "build": "vite build"
+    "lint:ts": "tsc -p convex && eslint convex",
+    "build": "vite build",
+    "format": "biome format --write",
+    "lint": "biome lint --write",
+    "lint:fix": "biome lint --write",
+    "lint:check": "biome lint",
+    "lint:fix:check": "biome lint --write --check",
+    "lint:check:fix": "biome lint --write --check"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-beta.4",

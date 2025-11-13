@@ -1,11 +1,11 @@
-import { type VariantProps } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import { Menu } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
 import LaunchUI from "../../logos/launch-ui";
-import { Button, buttonVariants } from "../../ui/button";
+import { Button, type buttonVariants } from "../../ui/button";
 import {
   Navbar as NavbarComponent,
   NavbarLeft,
@@ -62,14 +62,14 @@ export default function Navbar({
   className,
 }: NavbarProps) {
   return (
-    <header className={cn("sticky top-0 z-50 -mb-4 px-4 pb-4", className)}>
-      <div className="fade-bottom bg-background/15 absolute left-0 h-24 w-full backdrop-blur-lg"></div>
-      <div className="max-w-container relative mx-auto">
+    <header className={cn("-mb-4 sticky top-0 z-50 px-4 pb-4", className)}>
+      <div className="fade-bottom absolute left-0 h-24 w-full bg-background/15 backdrop-blur-lg"></div>
+      <div className="relative mx-auto max-w-container">
         <NavbarComponent>
           <NavbarLeft>
             <a
               href={homeUrl}
-              className="flex items-center gap-2 text-xl font-bold"
+              className="flex items-center gap-2 font-bold text-xl"
             >
               {logo}
               {name}
@@ -112,10 +112,10 @@ export default function Navbar({
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">
-                <nav className="grid gap-6 text-lg font-medium">
+                <nav className="grid gap-6 font-medium text-lg">
                   <a
                     href={homeUrl}
-                    className="flex items-center gap-2 text-xl font-bold"
+                    className="flex items-center gap-2 font-bold text-xl"
                   >
                     <span>{name}</span>
                   </a>

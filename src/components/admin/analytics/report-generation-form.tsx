@@ -149,7 +149,7 @@ export function ReportGenerationForm() {
                                 endDate={dateRange.end}
                                 onDateRangeChange={setDateRange}
                             />
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                                 Leave empty to include all available data
                             </p>
                         </div>

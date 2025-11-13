@@ -218,7 +218,7 @@ function QuizTaker({
                         <CardTitle className="text-base">
                             Question {index + 1} of {questions.length}
                         </CardTitle>
-                        <CardDescription className="text-base font-medium text-foreground">
+                        <CardDescription className="font-medium text-base text-foreground">
                             {question.questionText}
                         </CardDescription>
                     </CardHeader>

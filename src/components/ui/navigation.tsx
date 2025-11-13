@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
-import * as React from "react";
+import type * as React from "react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -141,11 +141,11 @@ export default function Navigation({
                       <li className="row-span-3">
                         <NavigationMenuLink asChild>
                           <a
-                            className="flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-6 no-underline outline-hidden select-none focus:shadow-md from-muted/30 to-muted/10"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/30 to-muted/10 p-6 no-underline outline-hidden focus:shadow-md"
                             href={logoHref}
                           >
                             {logo}
-                            <div className="mb-2 mt-4 text-lg font-medium">
+                            <div className="mt-4 mb-2 font-medium text-lg">
                               {logoTitle}
                             </div>
                             <p className="text-muted-foreground text-sm leading-tight">
@@ -197,13 +197,13 @@ function ListItem({
         <a
           data-slot="list-item"
           className={cn(
-            "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground block space-y-1 rounded-md p-3 leading-none no-underline outline-hidden transition-colors select-none",
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-hidden transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className,
           )}
           {...props}
         >
-          <div className="text-sm leading-none font-medium">{title}</div>
-          <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
+          <div className="font-medium text-sm leading-none">{title}</div>
+          <p className="line-clamp-2 text-muted-foreground text-sm leading-snug">
             {children}
           </p>
         </a>

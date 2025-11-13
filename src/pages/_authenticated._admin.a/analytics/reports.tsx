@@ -15,7 +15,7 @@ function ReportsPage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Generate Reports</h1>
+        <h1 className="font-bold text-3xl tracking-tight">Generate Reports</h1>
         <p className="mt-2 text-muted-foreground">
           Create and export custom analytics reports
         </p>

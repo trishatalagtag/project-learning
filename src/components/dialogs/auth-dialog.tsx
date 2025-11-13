@@ -58,7 +58,7 @@ export function AuthDialog() {
     return (
       <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
         <DialogContent className="flex max-h-[90vh] w-full max-w-md flex-col gap-0 p-0">
-          <DialogHeader className="shrink-0 space-y-1.5 border-b border-border px-6 pb-4 pt-6">
+          <DialogHeader className="shrink-0 space-y-1.5 border-border border-b px-6 pt-6 pb-4">
             <DialogTitle>{getTitle(mode, snapshotRole)}</DialogTitle>
             <DialogDescription>{getDescription(mode)}</DialogDescription>
           </DialogHeader>
@@ -93,15 +93,15 @@ export function AuthDialog() {
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-        <Drawer.Content className="fixed bottom-0 left-0 right-0 mt-24 flex max-h-[96vh] flex-col rounded-t-[10px] bg-background">
+        <Drawer.Content className="fixed right-0 bottom-0 left-0 mt-24 flex max-h-[96vh] flex-col rounded-t-[10px] bg-background">
           <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
 
           <div className="flex max-h-[96vh] flex-col">
-            <div className="shrink-0 border-b border-border px-4 pb-4 pt-3">
-              <Drawer.Title className="text-lg font-semibold">
+            <div className="shrink-0 border-border border-b px-4 pt-3 pb-4">
+              <Drawer.Title className="font-semibold text-lg">
                 {getTitle(mode, snapshotRole)}
               </Drawer.Title>
-              <Drawer.Description className="text-sm text-muted-foreground">
+              <Drawer.Description className="text-muted-foreground text-sm">
                 {getDescription(mode)}
               </Drawer.Description>
             </div>

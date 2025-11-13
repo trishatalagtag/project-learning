@@ -76,7 +76,7 @@ export function DeleteDialog({ open, onOpenChange, course, onSuccess }: DeleteDi
               </span>
             )}
             <div className="mt-4 space-y-2">
-              <p className="text-sm font-medium">
+              <p className="font-medium text-sm">
                 Type <strong>"{course?.title}"</strong> to confirm deletion:
               </p>
               <Input
