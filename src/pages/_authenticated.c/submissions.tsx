@@ -16,30 +16,11 @@ export const Route = createFileRoute("/_authenticated/c/submissions")({
 })
 
 function MySubmissionsPage() {
-    // TODO: Backend needs to add api.learner.assessments.getAllMySubmissions
-    // Current getMySubmissions requires assignmentId parameter
-    // For now, we'll show a placeholder, but keep the structure ready
-
-    // Uncomment when backend is ready:
-    // const submissions = useQuery(api.learner.assessments.getAllMySubmissions)
-
-    const submissions = undefined // Placeholder until backend is updated
+    // Fetch all submissions across all assignments
+    const submissions = useQuery(api.learner.assessments.getAllMySubmissions)
 
     if (submissions === undefined) {
-        // Show empty state for now
-        return (
-            <div className="flex-1 overflow-y-auto">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="mb-8">
-                        <h1 className="mb-2 font-bold text-3xl">My Submissions</h1>
-                        <p className="text-muted-foreground">
-                            View all your assignment submissions and quiz attempts
-                        </p>
-                    </div>
-                    <EmptyState />
-                </div>
-            </div>
-        )
+        return <LoadingPage message="Loading your submissions..." />
     }
 
     // Group submissions by course
@@ -66,9 +47,7 @@ function MySubmissionsPage() {
         >
     )
 
-    const courseGroups = Object.values(submissionsByCourse)
-
-    return (
+    const courseGroups = Object.values(submissionsByCourse)    return (
         <div className="flex-1 overflow-y-auto">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
